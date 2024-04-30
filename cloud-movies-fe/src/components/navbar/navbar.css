@@ -1,0 +1,54 @@
+.navbar-left, .navbar-right {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.navbar-left > *, .navbar-right > * {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  margin-left: 16px;
+  margin-right: 16px;
+}
+
+.navbar-right {
+  justify-content: right;
+}
+
+.navbar {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  background-color: black;
+  padding: 16px;
+  position: fixed;
+  top: 0;
+  width: 100vw;
+  z-index: 999;
+  background: transparent;
+}
+
+.navbar > div {
+  flex: 1;
+}
+
+.navbar-center > img {
+  width: 30%;
+}
+
+.navbar-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.white-icon > * {
+  color: white;
+  height: 30px;
+  width: 30px;
+}
+
+a {
+  font-size: 18px;
+  font-weight: 600;
+}
