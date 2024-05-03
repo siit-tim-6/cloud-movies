@@ -3,7 +3,7 @@ import React from "react";
 import Navbar from "@/components/navbar/navbar";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, EffectCoverflow, Navigation, Autoplay } from "swiper/modules";
-import HomeMovie from "@/components/home-movie/home-movie";
+import HomeMovie from "@/components/home/home-movie/home-movie";
 
 import "swiper/css";
 import "swiper/css/effect-coverflow";
