@@ -1,0 +1,25 @@
+.movie-card {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition-duration: 500ms;
+}
+
+.movie-card:hover {
+  opacity: 0.6;
+}
+
+.movie-image {
+  width: 270px;
+  height: 150px;
+  background-size: cover;
+  padding: 8px;
+  border-radius: 0.8rem;
+}
+
+.movie-title {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}

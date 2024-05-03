@@ -1,0 +1,13 @@
+.all-movies {
+  background-color: black;
+  min-height: 100vh;
+}
+
+.all-movies-grid {
+  padding: 16px;
+  padding-top: 136px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 270px);
+  justify-content: space-around;
+  row-gap: 32px;
+}
