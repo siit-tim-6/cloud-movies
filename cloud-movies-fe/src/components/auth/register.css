@@ -1,0 +1,76 @@
+.register {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding-left: 33vw;
+  padding-right: 33vw;
+  padding-top: 15vh;
+  background-image: url("../../assets/movie-collage.webp");
+}
+
+.register::before {
+  content: "";
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.register-wrapper {
+  display: flex;
+  flex-direction: column;
+  border: 0 solid #e5e7eb;
+  padding: 3rem;
+  border-radius: 1rem;
+  background-color: rgba(0, 0, 0, 0.85);
+  z-index: 998;
+}
+
+.register-wrapper input, .register-wrapper button {
+  margin-bottom: 16px;
+}
+
+.register-wrapper input, #birthdate {
+  background-color: rgb(39 39 42);
+}
+
+.register-wrapper label {
+  margin-bottom: 8px;
+  color: white;
+}
+
+.register-wrapper > h1 {
+  color: white
+}
+
+#submit-button {
+  margin-bottom: 0px;
+}
+
+#birthdate:hover {
+  color: white;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  gap: 16px;
+}
+
+.row > * {
+  flex: 1;
+}
+
+.register-wrapper > p {
+  margin-top: 32px;
+  color: white;
+  text-align: center;
+}
