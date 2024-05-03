@@ -32,7 +32,15 @@
   flex: 1;
 }
 
-.navbar-center > img {
+.navbar-center > a {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar-center img {
   width: 30%;
 }
 
