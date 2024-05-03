@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -35,7 +36,9 @@ function Login() {
         >
           Log In
         </Button>
-        <p>Don't have an account? Register.</p>
+        <p>
+          Don't have an account? <Link to="/register">Register.</Link>
+        </p>
       </div>
     </div>
   );

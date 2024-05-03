@@ -11,6 +11,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
+import { Link } from "react-router-dom";
 
 function Register() {
   const [givenName, setGivenName] = useState("");
@@ -141,7 +142,9 @@ function Register() {
         >
           Register
         </Button>
-        <p>Already have an account? Log In.</p>
+        <p>
+          Already have an account? <Link to="/login">Log In.</Link>
+        </p>
       </div>
     </div>
   );
