@@ -11,7 +11,6 @@ export class CognitoStack extends cdk.Stack {
 
     const userPool = new cognito.UserPool(this, "movieUserPool", {
       signInAliases: {
-        preferredUsername: true,
         username: true,
       },
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
@@ -35,9 +34,6 @@ export class CognitoStack extends cdk.Stack {
         birthdate: {
           required: true,
         },
-        preferredUsername: {
-          required: true,
-        },
         email: {
           required: true,
         },
@@ -45,7 +41,7 @@ export class CognitoStack extends cdk.Stack {
       email: cognito.UserPoolEmail.withCognito(),
     });
 
-    userPool.addClient("briefCinemaFe", {
+    const userPoolClient = userPool.addClient("briefCinemaFe", {
       preventUserExistenceErrors: true,
     });
 
