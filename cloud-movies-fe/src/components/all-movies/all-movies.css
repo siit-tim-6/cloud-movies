@@ -3,9 +3,19 @@
   min-height: 100vh;
 }
 
-.all-movies-grid {
-  padding: 16px;
+.all-movies-content {
   padding-top: 136px;
+}
+
+.all-movies-content > .movie-search {
+  position: fixed;
+  left: 0;
+  width: 20vw;
+}
+
+.all-movies-grid {
+  margin-left: 20vw;
+  padding: 16px;
   display: grid;
   grid-template-columns: repeat(auto-fill, 270px);
   justify-content: space-around;
