@@ -1,6 +1,8 @@
 import * as cdk from "aws-cdk-lib";
 import * as cognito from "aws-cdk-lib/aws-cognito";
+import * as lambda from "aws-cdk-lib/aws-lambda";
 import { Construct } from "constructs";
+import path = require("path");
 
 export class CognitoStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -51,5 +53,23 @@ export class CognitoStack extends cdk.Stack {
         domainPrefix: "briefcinemausers",
       },
     });
+
+    const regularUserGroup = new cognito.CfnUserPoolGroup(this, "regularUserGroup", {
+      userPoolId: userPool.userPoolId,
+      groupName: "RegularUsers",
+    });
+
+    const adminUserGroup = new cognito.CfnUserPoolGroup(this, "adminUserGroup", {
+      userPoolId: userPool.userPoolId,
+      groupName: "Admins",
+    });
+
+    const addToDefaultUserGroupFn = new lambda.Function(this, "addToDefaultUserGroupFn", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: "index.addToUserGroup",
+      code: lambda.Code.fromAsset(path.join(__dirname, "./src")),
+    });
+
+    userPool.addTrigger(cognito.UserPoolOperation.POST_CONFIRMATION, addToDefaultUserGroupFn);
   }
 }
