@@ -25,7 +25,7 @@
   padding: 3rem;
   border-radius: 1rem;
   background-color: rgba(0, 0, 0, 0.85);
-  z-index: 998;
+  z-index: 997;
 }
 
 .register-wrapper input, .register-wrapper button {
@@ -49,8 +49,12 @@
   margin-bottom: 0px;
 }
 
-#birthdate:hover {
+#birthdate {
   color: white;
+}
+
+#birthdate:hover {
+  color: slategrey;
 }
 
 .col {
