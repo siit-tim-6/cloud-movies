@@ -1,5 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as cognito from "aws-cdk-lib/aws-cognito";
+import { Effect, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { Construct } from "constructs";
 import path = require("path");
@@ -69,6 +70,14 @@ export class CognitoStack extends cdk.Stack {
       handler: "index.addToUserGroup",
       code: lambda.Code.fromAsset(path.join(__dirname, "./src")),
     });
+
+    addToDefaultUserGroupFn.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: ["cognito-identity:*", "cognito-sync:*", "cognito-idp:*"],
+        resources: ["*"],
+      })
+    );
 
     userPool.addTrigger(cognito.UserPoolOperation.POST_CONFIRMATION, addToDefaultUserGroupFn);
   }
