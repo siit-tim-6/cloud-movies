@@ -2,11 +2,10 @@ import "./register.css";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { CognitoUser, AuthenticationDetails } from "amazon-cognito-identity-js";
-import UserPool from "@/aws/UserPool";
 import { useToast } from "@/components/ui/use-toast";
+import { AccountContext } from "./accountContext";
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -14,30 +13,26 @@ function Login() {
 
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { authenticate, getSession } = useContext(AccountContext);
 
   const login = () => {
-    const user = new CognitoUser({
-      Username: username,
-      Pool: UserPool,
-    });
-
-    const authDetails = new AuthenticationDetails({
-      Username: username,
-      Password: password,
-    });
-
-    user.authenticateUser(authDetails, {
-      onSuccess: (data) => {
-        navigate("/");
-      },
-      onFailure: (err) => {
+    authenticate(username, password)
+      .then((data) => navigate("/"))
+      .catch((err) => {
         toast({
           title: "Unsuccessful login",
           description: "Wrong credentials or user not confirmed.",
         });
-      },
-    });
+      });
   };
+
+  useEffect(() => {
+    getSession()
+      .then((session) => {
+        navigate("/");
+      })
+      .catch();
+  }, []);
 
   return (
     <div className="register">
