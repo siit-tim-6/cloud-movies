@@ -56,15 +56,25 @@
     margin-bottom: 8px;
 }
 
+.movie-genre-rating {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
 .movie-genre {
     font-size: 1.25rem;
     background-color: #444;
     padding: 4px 12px;
     border-radius: 12px;
     display: inline-block;
-    margin-bottom: 16px;
     color: white;
     font-weight: bold;
+}
+
+.rating {
+    display: flex;
+    align-items: center;
 }
 
 .movie-description {
@@ -154,6 +164,8 @@
 .swiper-pagination {
     bottom: 10px !important;
 }
+
+
 
 
 
