@@ -9,6 +9,7 @@ import AllMovies from "@/components/all-movies/all-movies";
 import { Toaster } from "@/components/ui/toaster";
 import { AccountProvider } from "@/components/auth/accountContext";
 import ProtectedRoutes from "./routes/protectedRoutes";
+import MovieDetails from "@/components/movie-details/movie-details.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -16,8 +17,9 @@ const router = createBrowserRouter(
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route element={<ProtectedRoutes />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/movies" element={<AllMovies />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/movies" element={<AllMovies />} />
+          <Route path="/movies/:id" element={<MovieDetails />} />
       </Route>
     </>
   )
