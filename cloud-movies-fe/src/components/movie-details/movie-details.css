@@ -2,7 +2,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 32px;
+    padding: 32px 32px 64px;
     gap: 16px;
     color: white;
     width: 100vw;
@@ -99,18 +99,6 @@
     font-weight: bold;
 }
 
-.recommendations {
-    width: 70%;
-    margin-top: 32px;
-    text-align: left;
-    padding: 0;
-}
-
-.recommendations h2 {
-    font-size: 2rem;
-    margin-bottom: 16px;
-}
-
 .movie-card {
     display: flex;
     flex-direction: column;
@@ -140,29 +128,6 @@
 
 .movie-title h3 {
     margin: 0;
-}
-
-.swiper-container {
-    width: 100%;
-    height: auto;
-}
-
-.swiper-wrapper {
-    display: flex;
-}
-
-.swiper-slide {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.swiper-button-next, .swiper-button-prev {
-    display: none !important;
-}
-
-.swiper-pagination {
-    bottom: 10px !important;
 }
 
 

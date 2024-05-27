@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="828380ba-b4c3-4a3f-90fc-329f94342ded" name="Changes" comment="" />
+    <list default="true" id="828380ba-b4c3-4a3f-90fc-329f94342ded" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -30,7 +32,7 @@
     "Node.js.index.js.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "feat/login-register-flow",
+    "git-widget-placeholder": "feat/movie-details",
     "last_opened_file_path": "C:/Users/teodo/Desktop/Accommodiq/fe/accommodiq-fe",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -40,7 +42,7 @@
     "npm.build.executor": "Run",
     "npm.cdk.executor": "Run",
     "npm.watch.executor": "Run",
-    "ts.external.directory.path": "C:\\Users\\teodo\\AppData\\Local\\Programs\\WebStorm\\plugins\\javascript-impl\\jsLanguageServicesImpl\\external",
+    "ts.external.directory.path": "C:\\Users\\teodo\\Desktop\\Cloud projekat\\cloud-movies\\cloud-movies-be\\node_modules\\typescript\\lib",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -96,7 +98,8 @@
       <workItem from="1715771529678" duration="628000" />
       <workItem from="1716646044824" duration="1774000" />
       <workItem from="1716651723270" duration="9000" />
-      <workItem from="1716730882527" duration="597000" />
+      <workItem from="1716730882527" duration="598000" />
+      <workItem from="1716799775541" duration="231000" />
     </task>
     <servers />
   </component>

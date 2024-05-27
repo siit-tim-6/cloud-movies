@@ -59,51 +59,6 @@ function MovieDetails() {
                         </div>
                     </div>
                 </div>
-                <div className="recommendations">
-                    <h2>You could also watch:</h2>
-                    <Swiper
-                        modules={[Navigation, Autoplay]}
-                        spaceBetween={30}
-                        slidesPerView={3}
-                        navigation
-                        pagination={{ clickable: true }}
-                        autoplay={{
-                            delay: 4500,
-                            disableOnInteraction: false,
-                        }}
-                        breakpoints={{
-                            640: {
-                                slidesPerView: 1,
-                                spaceBetween: 20,
-                            },
-                            768: {
-                                slidesPerView: 2,
-                                spaceBetween: 40,
-                            },
-                            1024: {
-                                slidesPerView: 3,
-                                spaceBetween: 50,
-                            },
-                        }}
-                        className="swiper-container"
-                    >
-                        <SwiperSlide className="swiper-slide">
-                            <MovieCard />
-                        </SwiperSlide>
-                        <SwiperSlide className="swiper-slide">
-                            <MovieCard />
-                        </SwiperSlide>
-                        <SwiperSlide className="swiper-slide">
-                            <MovieCard />
-                        </SwiperSlide>
-                        <SwiperSlide className="swiper-slide">
-                            <MovieCard />
-                        </SwiperSlide>
-                        <SwiperSlide className="swiper-slide">
-                            <MovieCard />
-                        </SwiperSlide>
-                    </Swiper>
-                </div>
             </div>
         </>
     );
