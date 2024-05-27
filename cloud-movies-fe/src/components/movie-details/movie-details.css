@@ -50,10 +50,26 @@
     width: 70%;
 }
 
-.movie-info > h1 {
+.movie-title-favorite {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.movie-title-favorite h1 {
     font-size: 3rem;
     font-weight: bold;
     margin-bottom: 8px;
+}
+
+.favorite-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 2rem;
+    color: white;
+    padding-left: 16px;
+    transition: color 0.5s;
 }
 
 .movie-genre-rating {
@@ -129,12 +145,3 @@
 .movie-title h3 {
     margin: 0;
 }
-
-
-
-
-
-
-
-
-

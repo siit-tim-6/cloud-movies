@@ -5,19 +5,21 @@ import {Badge} from "@/components/ui/badge.jsx";
 import MovieCover from "@/assets/movie-placeholder.webp";
 import "./movie-details.css";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faPlay} from "@fortawesome/free-solid-svg-icons";
-import {Swiper, SwiperSlide} from "swiper/react";
-import MovieCard from "@/components/all-movies/movie-card/movie-card.jsx";
+import {faHeart, faPlay} from "@fortawesome/free-solid-svg-icons";
 import Rating from "react-rating-stars-component";
-import {Autoplay, Navigation} from "swiper/modules";
 
 function MovieDetails() {
     const { id } = useParams();
 
     const [rating, setRating] = useState(4);
+    const [liked, setLiked] = useState(false);
 
     const ratingChanged = (newRating) => {
         setRating(newRating);
+    };
+
+    const toggleLike = () => {
+        setLiked(!liked);
     };
 
     return (
@@ -30,7 +32,12 @@ function MovieDetails() {
                     </div>
                 </div>
                 <div className="movie-info">
-                    <h1>Star Wars</h1>
+                    <div className="movie-title-favorite">
+                        <h1>Star Wars</h1>
+                        <button className="favorite-button" onClick={toggleLike}>
+                            <FontAwesomeIcon icon={faHeart} color={liked ? "red" : "white"}/>
+                        </button>
+                    </div>
                     <div className="movie-genre-rating">
                         <Badge className="movie-genre">Sci-Fi</Badge>
                         <div className="rating">
