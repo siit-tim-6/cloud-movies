@@ -50,7 +50,7 @@ textarea {
 }
 
 textarea {
-    height: 100px; 
+    height: 100px;
 }
 
 .custom-file-input {
@@ -85,13 +85,12 @@ textarea {
 
 .cover-preview, .video-preview {
     margin-top: 16px;
-    max-width: 100%;
-    border-radius: 8px;
-}
-
-.video-preview {
     width: 100%;
+    max-width: 300px; /* Fixed max width */
     height: auto;
+    max-height: 300px; /* Fixed max height */
+    border-radius: 8px;
+    object-fit: cover; /* Maintain aspect ratio */
 }
 
 .submit-button {
