@@ -77,5 +77,4 @@ Users receive notifications when new content they are subscribed to is uploaded.
 
 - Popov Vladimir SV29/2021
 - Bulatovic Balsa SV37/2021
-- Milutinovic Momir SV39/2021
 - Vidakovic Teodor SV33/2021
