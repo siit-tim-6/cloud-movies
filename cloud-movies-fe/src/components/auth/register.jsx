@@ -120,8 +120,8 @@ function Register() {
               {birthdate ? format(birthdate, "PPP") : <span>Pick a date</span>}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar mode="single" selected={birthdate} onSelect={setBirthdate} captionLayout="dropdown-buttons" fromYear={1930} toYear={2015} />
+          <PopoverContent className="w-auto p-0 popover-content-custom" align="start">
+            <Calendar mode="single" selected={birthdate} onSelect={setBirthdate} captionLayout="dropdown-buttons" fromYear={1930} toYear={2015} className="calendar-custom" />
           </PopoverContent>
         </Popover>
         <Label htmlFor="email">Email</Label>
