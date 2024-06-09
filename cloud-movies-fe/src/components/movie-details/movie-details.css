@@ -1,0 +1,147 @@
+.movie-details-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 32px 64px;
+    gap: 16px;
+    color: white;
+    width: 100vw;
+    background-color: black;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+.movie-cover {
+    position: relative;
+    width: 70%;
+    height: 50vh;
+    background-size: cover;
+    background-position: center;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.movie-cover::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+}
+
+.play-button {
+    position: relative;
+    z-index: 1;
+    color: white;
+    font-size: 3rem;
+    cursor: pointer;
+}
+
+.movie-info {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 70%;
+}
+
+.movie-title-favorite {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.movie-title-favorite h1 {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.favorite-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 2rem;
+    color: white;
+    padding-left: 16px;
+    transition: color 0.5s;
+}
+
+.movie-genre-rating {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.movie-genre {
+    font-size: 1.25rem;
+    background-color: #444;
+    padding: 4px 12px;
+    border-radius: 12px;
+    display: inline-block;
+    color: white;
+    font-weight: bold;
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+}
+
+.movie-description {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 16px;
+    text-align: justify;
+}
+
+.movie-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 1rem;
+}
+
+.meta-item {
+    font-size: 1rem;
+}
+
+.meta-item strong {
+    font-weight: bold;
+}
+
+.movie-card {
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition-duration: 500ms;
+}
+
+.movie-card:hover {
+    opacity: 0.6;
+}
+
+.movie-image {
+    width: 270px;
+    height: 150px;
+    background-size: cover;
+    padding: 8px;
+    border-radius: 0.8rem;
+}
+
+.movie-title {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+}
+
+.movie-title h3 {
+    margin: 0;
+}

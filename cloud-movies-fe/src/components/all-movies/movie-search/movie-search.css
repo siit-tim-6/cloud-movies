@@ -1,0 +1,27 @@
+.movie-search {
+  display: flex;
+  flex-direction: column;
+  padding: 32px;
+  gap: 8px;
+}
+
+.movie-search > label {
+  color: white;
+}
+
+.movie-search > h3 {
+  color: white;
+  margin-bottom: 16px;
+}
+
+.movie-search > input {
+  margin-bottom: 16px;
+}
+
+.movie-search > button {
+  margin-top: 22px;
+}
+
+.movie-search input {
+  background-color: rgb(39 39 42);
+}
