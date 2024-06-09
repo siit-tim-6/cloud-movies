@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="114.9669mm"
+   height="15.085635mm"
+   viewBox="0 0 114.9669 15.085635"
+   version="1.1"
+   id="svg1"
+   inkscape:export-filename="brief-cinema-logo.svg"
+   inkscape:export-xdpi="126"
+   inkscape:export-ydpi="126"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-27.258202,-91.221273)">
+    <text
+       xml:space="preserve"
+       style="font-size:19.3536px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#ffffff;fill-opacity:1;stroke-width:0.337563"
+       x="26.034857"
+       y="106.10072"
+       id="text2"><tspan
+         sodipodi:role="line"
+         id="tspan2"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:Inter;-inkscape-font-specification:'Inter Bold';fill:#ffffff;fill-opacity:1;stroke-width:0.337563"
+         x="26.034857"
+         y="106.10072">BriefCinema</tspan></text>
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke-width:0.561033;paint-order:markers fill stroke"
+       id="rect2"
+       width="2.3316026"
+       height="1.8383067"
+       x="53.315712"
+       y="99.744621" />
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke-width:0.705383;paint-order:markers fill stroke"
+       id="rect2-7"
+       width="2.9844584"
+       height="2.2702837"
+       x="65.347977"
+       y="95.521568" />
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke-width:0.563308;paint-order:markers fill stroke"
+       id="rect2-1"
+       width="2.3413773"
+       height="1.8455006"
+       x="104.19524"
+       y="99.730705" />
+  </g>
+</svg>

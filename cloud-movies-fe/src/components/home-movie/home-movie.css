@@ -1,0 +1,49 @@
+.home-movie {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  padding: 64px;
+  padding-bottom: 86px;
+}
+
+.home-movie::before {
+  content: "";
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.movie-details > h1, .movie-details > p {
+  color: white;
+}
+
+.movie-details > h1 {
+  font-size: 5rem;
+  font-weight: bold;
+}
+
+.movie-details > p {
+  font-size: 20px;
+  text-align: justify;
+}
+
+.movie-details {
+  max-width: 700px;
+  z-index: 998;
+}
+
+.details-buttons {
+  display: flex;
+  flex-direction: row;
+  margin-top: 32px;
+}
+
+.details-buttons > * {
+  margin-right: 16px;
+}
