@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Navbar from "@/components/navbar/navbar.jsx";
 import "./upload-movie.css";
+import axios from "axios";
 
 function UploadMovie() {
     const [title, setTitle] = useState("");
@@ -19,9 +20,43 @@ function UploadMovie() {
         setVideo(URL.createObjectURL(event.target.files[0]));
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
-        console.log("Upload not implemented yet");
+
+        try {
+            const metadataResponse = await axios.post("https://plxwp3s4s2.execute-api.eu-central-1.amazonaws.com/prod/upload-movie", {
+                title,
+                description,
+                genre,
+                actors,
+                directors,
+                coverFileName: cover.name,
+                coverFileType: cover.type,
+                videoFileName: video.name,
+                videoFileType: video.type,
+            });
+
+            const { coverUploadURL, videoUploadURL } = metadataResponse.data;
+
+            // Upload the cover image to S3
+            await axios.put(coverUploadURL, cover, {
+                headers: {
+                    "Content-Type": cover.type,
+                },
+            });
+
+            // Upload the video to S3
+            await axios.put(videoUploadURL, video, {
+                headers: {
+                    "Content-Type": video.type,
+                },
+            });
+
+            alert("Movie uploaded successfully!");
+        } catch (error) {
+            console.error("Error uploading movie:", error);
+            alert("Failed to upload movie.");
+        }
     };
 
     return (
