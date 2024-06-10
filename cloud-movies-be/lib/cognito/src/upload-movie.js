@@ -7,6 +7,8 @@ exports.handler = async (event) => {
     const bucketName = process.env.S3_BUCKET;
     const tableName = process.env.DYNAMODB_TABLE;
 
+    console.log(bucketName);
+    console.log(tableName);
     const { title, description, genre, actors, directors, coverFileName, coverFileType, videoFileName, videoFileType } = JSON.parse(event.body);
     const movieId = uuidv4();
 
@@ -16,13 +18,14 @@ exports.handler = async (event) => {
         Expires: 60,
         ContentType: coverFileType,
     };
-
+    console.log(coverS3Params);
     const videoS3Params = {
         Bucket: bucketName,
         Key: `${movieId}/video/${videoFileName}`,
         Expires: 60,
         ContentType: videoFileType,
     };
+    console.log(videoS3Params);
 
     const coverUploadURL = s3.getSignedUrl('putObject', coverS3Params);
     const videoUploadURL = s3.getSignedUrl('putObject', videoS3Params);
@@ -47,8 +50,9 @@ exports.handler = async (event) => {
     return {
         statusCode: 200,
         headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Credentials": true,
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST,OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
         },
         body: JSON.stringify({
             coverUploadURL: coverUploadURL,

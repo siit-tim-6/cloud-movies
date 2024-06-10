@@ -164,13 +164,34 @@ export class CognitoStack extends cdk.Stack {
 
     const api = new apigateway.RestApi(this, "MoviesApi", {
       restApiName: "Movies Service",
-      description: "This service handles movie uploads, downloads, and data management.",
-      defaultCorsPreflightOptions: {
-        allowOrigins: apigateway.Cors.ALL_ORIGINS,
-        allowMethods: apigateway.Cors.ALL_METHODS,
-        allowHeaders: ['Content-Type', 'X-Amz-Date', 'Authorization', 'X-Api-Key', 'X-Amz-Security-Token'],
-      },
+      description: "This service serves movies.",
     });
+
+    const addCorsOptions = (apiResource: apigateway.IResource) => {
+      apiResource.addMethod('OPTIONS', new apigateway.MockIntegration({
+        integrationResponses: [{
+          statusCode: '200',
+          responseParameters: {
+            'method.response.header.Access-Control-Allow-Origin': "'*'",
+            'method.response.header.Access-Control-Allow-Methods': "'GET,POST,PUT,DELETE,OPTIONS'",
+            'method.response.header.Access-Control-Allow-Headers': "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+          },
+        }],
+        passthroughBehavior: apigateway.PassthroughBehavior.NEVER,
+        requestTemplates: {
+          'application/json': '{"statusCode": 200}'
+        },
+      }), {
+        methodResponses: [{
+          statusCode: '200',
+          responseParameters: {
+            'method.response.header.Access-Control-Allow-Origin': true,
+            'method.response.header.Access-Control-Allow-Methods': true,
+            'method.response.header.Access-Control-Allow-Headers': true,
+          },
+        }],
+      });
+    };
 
     const uploadMovieIntegration = new apigateway.LambdaIntegration(uploadMovieFn);
     const downloadMovieIntegration = new apigateway.LambdaIntegration(downloadMovieFn);
@@ -197,6 +218,8 @@ export class CognitoStack extends cdk.Stack {
         },
       }],
     });
+
+    addCorsOptions(uploadMovie);
 
     const downloadMovieResource = api.root.addResource("download-movie");
     downloadMovieResource.addMethod("GET", downloadMovieIntegration);
