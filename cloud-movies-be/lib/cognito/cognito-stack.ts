@@ -89,6 +89,18 @@ export class CognitoStack extends cdk.Stack {
     const moviesBucket = new s3.Bucket(this, "MoviesBucket", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
+      cors: [
+        {
+          allowedOrigins: ['*'],
+          allowedMethods: [
+            s3.HttpMethods.GET,
+            s3.HttpMethods.PUT,
+            s3.HttpMethods.POST,
+            s3.HttpMethods.DELETE,
+          ],
+          allowedHeaders: ['*'],
+        },
+      ],
     });
 
     const uploadMovieFn = new lambda.Function(this, "uploadMovieFn", {
