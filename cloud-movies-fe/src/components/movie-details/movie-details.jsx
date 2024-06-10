@@ -5,7 +5,7 @@ import {Badge} from "@/components/ui/badge.jsx";
 import MovieCover from "@/assets/movie-placeholder.webp";
 import "./movie-details.css";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faHeart, faPlay} from "@fortawesome/free-solid-svg-icons";
+import {faDownload, faHeart, faPlay} from "@fortawesome/free-solid-svg-icons";
 import Rating from "react-rating-stars-component";
 
 function MovieDetails() {
@@ -22,6 +22,11 @@ function MovieDetails() {
         setLiked(!liked);
     };
 
+    const handleDownload = () => {
+        console.log("Download button clicked. Implement download functionality here.");
+        alert("Mocked download function triggered.");
+    };
+
     return (
         <>
             <Navbar />
@@ -36,6 +41,9 @@ function MovieDetails() {
                         <h1>Star Wars</h1>
                         <button className="favorite-button" onClick={toggleLike}>
                             <FontAwesomeIcon icon={faHeart} color={liked ? "red" : "white"}/>
+                        </button>
+                        <button className="download-button" onClick={handleDownload}>
+                            <FontAwesomeIcon icon={faDownload}/>
                         </button>
                     </div>
                     <div className="movie-genre-rating">

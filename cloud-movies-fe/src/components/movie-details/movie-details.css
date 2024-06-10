@@ -62,7 +62,7 @@
     margin-bottom: 8px;
 }
 
-.favorite-button {
+.favorite-button, .download-button {
     background: none;
     border: none;
     cursor: pointer;
@@ -70,6 +70,10 @@
     color: white;
     padding-left: 16px;
     transition: color 0.5s;
+}
+
+.favorite-button:hover, .download-button:hover {
+    color: #ffd700;
 }
 
 .movie-genre-rating {
