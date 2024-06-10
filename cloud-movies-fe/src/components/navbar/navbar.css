@@ -19,13 +19,17 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  background-color: black;
   padding: 16px;
   position: fixed;
   top: 0;
   width: 100vw;
   z-index: 999;
-  background: transparent;
+  background: rgba(0, 0, 0, 0.0);
+  transition: background-color 0.3s ease;
+}
+
+.navbar-scrolled {
+  background: rgba(0, 0, 0, 0.5);
 }
 
 .navbar > div {

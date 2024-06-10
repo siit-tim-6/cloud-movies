@@ -4,15 +4,31 @@ import { Link, useNavigate } from "react-router-dom";
 import Logo from "@/assets/brief-cinema-logo.svg";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useContext } from "react";
+import {useContext, useEffect, useState} from "react";
 import { AccountContext } from "@/components/auth/accountContext";
 
 function Navbar() {
   const navigate = useNavigate();
   const { logout } = useContext(AccountContext);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   return (
-    <div className="navbar">
+    <div className={`navbar ${scrolled ? "navbar-scrolled" : ""}`}>
       <div className="navbar-left">
         <div className="white-icon">
           <HamburgerMenuIcon />
