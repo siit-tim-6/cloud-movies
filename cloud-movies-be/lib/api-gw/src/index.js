@@ -3,6 +3,7 @@
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { PutCommand, DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
 const { PutObjectCommand, S3Client } = require("@aws-sdk/client-s3");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
 const { v4: uuidv4 } = require("uuid");
 const dynamoClient = new DynamoDBClient({});
@@ -14,9 +15,6 @@ exports.handler = async (event) => {
   const tableName = process.env.DYNAMODB_TABLE;
   const { title, description, genre, actors, directors, coverFileName, coverFileType, videoFileName, videoFileType } = event;
 
-  console.log(bucketName);
-  console.log(tableName);
-
   const movieId = uuidv4();
 
   // upload to S3
@@ -24,19 +22,17 @@ exports.handler = async (event) => {
   const putCoverCommand = new PutObjectCommand({
     Bucket: bucketName,
     Key: `${movieId}/cover/${coverFileName}`,
-    Body: "testCover",
+    ContentType: coverFileType,
   });
 
   const putVideoCommand = new PutObjectCommand({
     Bucket: bucketName,
     Key: `${movieId}/video/${videoFileName}`,
-    Body: "testVideo",
+    ContentType: videoFileType,
   });
 
-  const s3CoverResponse = await s3Client.send(putCoverCommand);
-  console.log(s3CoverResponse);
-  const s3VideoResponse = await s3Client.send(putVideoCommand);
-  console.log(s3VideoResponse);
+  const s3CoverSignedUrl = await getSignedUrl(s3Client, putCoverCommand, { expiresIn: 3600 });
+  const s3VideoSignedUrl = await getSignedUrl(s3Client, putVideoCommand, { expiresIn: 3600 });
 
   // put item to DynamoDB
 
@@ -59,16 +55,8 @@ exports.handler = async (event) => {
   console.log(dynamoResponse);
 
   return {
-    statusCode: 200,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST,OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
-    },
-    body: {
-      coverUploadURL: s3CoverResponse,
-      videoUploadURL: s3VideoResponse,
-      movieId: movieId,
-    },
+    coverUploadURL: s3CoverSignedUrl,
+    videoUploadURL: s3VideoSignedUrl,
+    movieId: movieId,
   };
 };
