@@ -23,20 +23,34 @@ exports.handler = async (event) => {
     },
   });
 
-  const dynamoResponse = await dynamoDocClient.send(dynamoGetCommand);
+  const movie = await dynamoDocClient.send(dynamoGetCommand);
+  console.log(movie);
+
+  if (!movie.Item) {
+    return {
+      statusCode: 404,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET,OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
+      },
+      body: JSON.stringify({ message: "Movie not found" }),
+    };
+  }
+
+  const videoS3Url = movie.Item.VideoS3Url;
+  const s3Key = videoS3Url.split(`https://${bucketName}.s3.amazonaws.com/`)[1];
 
   // get from S3
 
-  // const getVideoCommand = new GetObjectCommand({
-  //   Bucket: bucketName,
-  //   Key: `${movieId}/video/${videoFileName}`,
-  // });
+  const getVideoCommand = new GetObjectCommand({
+    Bucket: bucketName,
+    Key: s3Key,
+  });
 
-  // const s3VideoSignedUrl = await getSignedUrl(s3Client, getVideoCommand, { expiresIn: 3600 });
+  const s3VideoSignedUrl = await getSignedUrl(s3Client, getVideoCommand, { expiresIn: 3600 });
 
   return {
-    videoDownloadURL: "test",
-    movieId: movieId,
-    // dynamoResponse: dynamoResponse,
+    downloadUrl: s3VideoSignedUrl,
   };
 };
