@@ -93,7 +93,6 @@ export class ApiGwStack extends cdk.Stack {
     };
 
     const uploadMovieIntegration = new apigateway.LambdaIntegration(uploadMovieFn);
-    const downloadMovieIntegration = new apigateway.LambdaIntegration(downloadMovieFn);
 
     const uploadMovie = api.root.addResource("upload-movie");
     uploadMovie.addMethod(
