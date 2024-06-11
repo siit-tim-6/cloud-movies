@@ -46,6 +46,7 @@ exports.handler = async (event) => {
   const getVideoCommand = new GetObjectCommand({
     Bucket: bucketName,
     Key: s3Key,
+    ResponseContentDisposition: "attachment",
   });
 
   const s3VideoSignedUrl = await getSignedUrl(s3Client, getVideoCommand, { expiresIn: 3600 });
