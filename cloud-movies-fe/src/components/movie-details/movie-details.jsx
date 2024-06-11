@@ -22,9 +22,28 @@ function MovieDetails() {
         setLiked(!liked);
     };
 
-    const handleDownload = () => {
-        console.log("Download button clicked. Implement download functionality here.");
-        alert("Mocked download function triggered.");
+    const handleDownload = async () => {
+        try {
+            const response = await fetch(`https://djly6eg8b2.execute-api.eu-central-1.amazonaws.com/prod/download-movie?movieId=${id}`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const downloadUrl = data.downloadUrl;
+
+
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = 'movie';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error("Error downloading the movie:", error);
+            alert("Failed to download the movie.");
+        }
     };
 
     return (

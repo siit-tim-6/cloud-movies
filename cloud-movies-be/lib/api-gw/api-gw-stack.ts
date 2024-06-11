@@ -5,6 +5,7 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import path = require("path");
+import * as iam from "aws-cdk-lib/aws-iam";
 
 export class ApiGwStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -38,8 +39,30 @@ export class ApiGwStack extends cdk.Stack {
       },
     });
 
+    const downloadMovieFn = new lambda.Function(this, "downloadMovieFn", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: "download-movie.handler",
+      code: lambda.Code.fromAsset(path.join(__dirname, "./src")),
+      environment: {
+        S3_BUCKET: moviesBucket.bucketName,
+        DYNAMODB_TABLE: moviesDataTable.tableName,
+      },
+    });
+
     moviesBucket.grantReadWrite(uploadMovieFn);
     moviesDataTable.grantReadWriteData(uploadMovieFn);
+    moviesBucket.grantRead(downloadMovieFn);
+    moviesDataTable.grantReadData(downloadMovieFn);
+
+    downloadMovieFn.addToRolePolicy(new iam.PolicyStatement({
+      actions: ["dynamodb:GetItem"],
+      resources: [moviesDataTable.tableArn],
+    }));
+
+    downloadMovieFn.addToRolePolicy(new iam.PolicyStatement({
+      actions: ["dynamodb:GetItem"],
+      resources: [moviesDataTable.tableArn],
+    }));
 
     const api = new apigateway.RestApi(this, "MoviesApi", {
       restApiName: "Movies Service",
@@ -112,6 +135,38 @@ export class ApiGwStack extends cdk.Stack {
       }
     );
 
+    const downloadMovie = api.root.addResource("download-movie");
+    downloadMovie.addMethod(
+        "GET",
+        new apigateway.LambdaIntegration(downloadMovieFn, {
+          proxy: false,
+          integrationResponses: [
+            {
+              statusCode: "200",
+              responseParameters: {
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                "method.response.header.Access-Control-Allow-Methods": "'GET'",
+                "method.response.header.Access-Control-Allow-Headers":
+                    "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+              },
+            },
+          ],
+        }),
+        {
+          methodResponses: [
+            {
+              statusCode: "200",
+              responseParameters: {
+                "method.response.header.Access-Control-Allow-Origin": true,
+                "method.response.header.Access-Control-Allow-Methods": true,
+                "method.response.header.Access-Control-Allow-Headers": true,
+              },
+            },
+          ],
+        }
+    );
+
     addCorsOptions(uploadMovie);
+    addCorsOptions(downloadMovie);
   }
 }
