@@ -33,6 +33,10 @@ function MovieDetails() {
       const data = await response.json();
       const downloadUrl = data.downloadUrl;
 
+      if (!downloadUrl) {
+        throw new Error("Download URL is undefined");
+      }
+
       const link = document.createElement("a");
       link.href = downloadUrl;
       link.download = "movie";
