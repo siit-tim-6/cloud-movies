@@ -24,7 +24,7 @@ function MovieDetails() {
 
   const handleDownload = async () => {
     try {
-      const response = await fetch(`https://7ak3fpt2ob.execute-api.eu-central-1.amazonaws.com/prod/download-movie?movieId=${id}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/download-movie?movieId=${id}`);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
