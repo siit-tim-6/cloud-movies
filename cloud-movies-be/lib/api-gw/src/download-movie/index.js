@@ -23,10 +23,10 @@ exports.handler = async (event) => {
     },
   });
 
-  const movie = await dynamoDocClient.send(dynamoGetCommand);
-  console.log(movie);
+  const movieResponse = await dynamoDocClient.send(dynamoGetCommand);
+  console.log(movieResponse);
 
-  if (!movie.Item) {
+  if (!movieResponse.Item) {
     return {
       statusCode: 404,
       headers: {
@@ -38,7 +38,7 @@ exports.handler = async (event) => {
     };
   }
 
-  const videoS3Url = movie.Item.VideoS3Url;
+  const videoS3Url = movieResponse.Item.VideoS3Url;
   const s3Key = videoS3Url.split(`https://${bucketName}.s3.amazonaws.com/`)[1];
 
   // get from S3
