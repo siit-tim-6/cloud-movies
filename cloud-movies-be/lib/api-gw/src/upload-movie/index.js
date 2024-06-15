@@ -55,8 +55,11 @@ exports.handler = async (event) => {
   console.log(dynamoResponse);
 
   return {
-    coverUploadURL: s3CoverSignedUrl,
-    videoUploadURL: s3VideoSignedUrl,
-    movieId: movieId,
+    statusCode: 200,
+    body: JSON.stringify({
+      coverUploadURL: s3CoverSignedUrl,
+      videoUploadURL: s3VideoSignedUrl,
+      movieId: movieId,
+    }),
   };
 };
