@@ -13,7 +13,7 @@ const s3Client = new S3Client({});
 exports.handler = async (event) => {
   const bucketName = process.env.S3_BUCKET;
   const tableName = process.env.DYNAMODB_TABLE;
-  const { title, description, genre, actors, directors, coverFileName, coverFileType, videoFileName, videoFileType } = event;
+  const { title, description, genre, actors, directors, coverFileName, coverFileType, videoFileName, videoFileType } = JSON.parse(event.body);
 
   const movieId = uuidv4();
 
