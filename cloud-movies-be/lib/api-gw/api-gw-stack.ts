@@ -48,10 +48,20 @@ export class ApiGwStack extends cdk.Stack {
       },
     });
 
+    const getAllMoviesFn = new lambda.Function(this, "getAllMoviesFn", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: "index.handler",
+      code: lambda.Code.fromAsset(path.join(__dirname, "./src/get-all-movies")),
+      environment: {
+        DYNAMODB_TABLE: moviesDataTable.tableName,
+      },
+    });
+
     moviesBucket.grantRead(uploadMovieFn);
     moviesBucket.grantRead(downloadMovieFn);
     moviesDataTable.grantWriteData(uploadMovieFn);
     moviesDataTable.grantReadData(downloadMovieFn);
+    moviesDataTable.grantReadData(getAllMoviesFn);
 
     const api = new apigateway.RestApi(this, "MoviesApi", {
       restApiName: "Movies Service",
@@ -100,5 +110,9 @@ export class ApiGwStack extends cdk.Stack {
         validateRequestParameters: true,
       },
     });
+
+    const moviesResource = api.root.addResource("movies");
+    const getAllMoviesLambdaIntegration = new apigateway.LambdaIntegration(getAllMoviesFn);
+    moviesResource.addMethod("GET", getAllMoviesLambdaIntegration);
   }
 }
