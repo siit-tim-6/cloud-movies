@@ -30,6 +30,7 @@ exports.handler = async (event) => {
     return {
       statusCode: 404,
       headers: {
+        "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET,OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
@@ -53,6 +54,12 @@ exports.handler = async (event) => {
 
   return {
     statusCode: 200,
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Headers": "Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
+      "Access-Control-Allow-Methods": "GET,OPTIONS",
+      "Access-Control-Allow-Origin": "*",
+    },
     body: JSON.stringify({
       downloadUrl: s3VideoSignedUrl,
     }),
