@@ -48,124 +48,57 @@ export class ApiGwStack extends cdk.Stack {
       },
     });
 
-    moviesBucket.grantReadWrite(uploadMovieFn);
-    moviesBucket.grantReadWrite(downloadMovieFn);
-    moviesDataTable.grantReadWriteData(uploadMovieFn);
-    moviesDataTable.grantReadWriteData(downloadMovieFn);
+    moviesBucket.grantRead(uploadMovieFn);
+    moviesBucket.grantRead(downloadMovieFn);
+    moviesDataTable.grantWriteData(uploadMovieFn);
+    moviesDataTable.grantReadData(downloadMovieFn);
 
     const api = new apigateway.RestApi(this, "MoviesApi", {
       restApiName: "Movies Service",
       description: "This service serves movies.",
+      cloudWatchRole: true,
     });
 
-    const addCorsOptions = (apiResource: apigateway.IResource) => {
-      apiResource.addMethod(
-        "OPTIONS",
-        new apigateway.MockIntegration({
-          integrationResponses: [
-            {
-              statusCode: "200",
-              responseParameters: {
-                "method.response.header.Access-Control-Allow-Origin": "'*'",
-                "method.response.header.Access-Control-Allow-Methods": "'GET,POST,PUT,DELETE,OPTIONS'",
-                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
-              },
-            },
-          ],
-          passthroughBehavior: apigateway.PassthroughBehavior.NEVER,
-          requestTemplates: {
-            "application/json": '{"statusCode": 200}',
-          },
-        }),
-        {
-          methodResponses: [
-            {
-              statusCode: "200",
-              responseParameters: {
-                "method.response.header.Access-Control-Allow-Origin": true,
-                "method.response.header.Access-Control-Allow-Methods": true,
-                "method.response.header.Access-Control-Allow-Headers": true,
-              },
-            },
-          ],
-        }
-      );
-    };
-
-    const uploadMovieIntegration = new apigateway.LambdaIntegration(uploadMovieFn);
-    const downloadMovieIntegration = new apigateway.LambdaIntegration(downloadMovieFn);
-
-    const uploadMovie = api.root.addResource("upload-movie");
-    uploadMovie.addMethod(
-      "POST",
-      new apigateway.LambdaIntegration(uploadMovieFn, {
-        proxy: false,
-        integrationResponses: [
-          {
-            statusCode: "200",
-            responseParameters: {
-              "method.response.header.Access-Control-Allow-Origin": "'*'",
-              "method.response.header.Access-Control-Allow-Methods": "'POST,OPTIONS'",
-              "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
-            },
-          },
-        ],
-      }),
-      {
-        methodResponses: [
-          {
-            statusCode: "200",
-            responseParameters: {
-              "method.response.header.Access-Control-Allow-Origin": true,
-              "method.response.header.Access-Control-Allow-Methods": true,
-              "method.response.header.Access-Control-Allow-Headers": true,
-            },
-          },
-        ],
-      }
-    );
-
-    const downloadMovie = api.root.addResource("download-movie");
-    downloadMovie.addMethod(
-      "GET",
-      new apigateway.LambdaIntegration(downloadMovieFn, {
-        proxy: false,
-        integrationResponses: [
-          {
-            statusCode: "200",
-            responseParameters: {
-              "method.response.header.Access-Control-Allow-Origin": "'*'",
-              "method.response.header.Access-Control-Allow-Methods": "'GET,OPTIONS'",
-              "method.response.header.Access-Control-Allow-Headers": "'*'",
-            },
-          },
-        ],
-        requestTemplates: {
-          "application/json": `{
-          "queryStringParameters": {
-            "movieId": "$input.params('movieId')"
-          }
-        }`,
+    const uploadMovieRequestBodySchema = new apigateway.Model(this, "uploadMovieRequestBodySchema", {
+      restApi: api,
+      contentType: "application/json",
+      schema: {
+        type: apigateway.JsonSchemaType.OBJECT,
+        properties: {
+          title: { type: apigateway.JsonSchemaType.STRING },
+          description: { type: apigateway.JsonSchemaType.STRING },
+          genre: { type: apigateway.JsonSchemaType.STRING },
+          actors: { type: apigateway.JsonSchemaType.STRING },
+          directors: { type: apigateway.JsonSchemaType.STRING },
+          coverFileName: { type: apigateway.JsonSchemaType.STRING },
+          coverFileType: { type: apigateway.JsonSchemaType.STRING },
+          videoFileName: { type: apigateway.JsonSchemaType.STRING },
+          videoFileType: { type: apigateway.JsonSchemaType.STRING },
         },
-      }),
-      {
-        methodResponses: [
-          {
-            statusCode: "200",
-            responseParameters: {
-              "method.response.header.Access-Control-Allow-Origin": true,
-              "method.response.header.Access-Control-Allow-Methods": true,
-              "method.response.header.Access-Control-Allow-Headers": true,
-            },
-          },
-        ],
-        requestParameters: {
-          "method.request.querystring.movieId": true,
-        },
-      }
-    );
+        required: ["title", "description", "genre", "actors", "directors", "coverFileName", "coverFileType", "videoFileName", "videoFileType"],
+      },
+    });
 
-    addCorsOptions(uploadMovie);
-    addCorsOptions(downloadMovie);
+    const uploadMovieLambdaIntegration = new apigateway.LambdaIntegration(uploadMovieFn);
+    const uploadMovieResource = api.root.addResource("upload-movie");
+    uploadMovieResource.addMethod("POST", uploadMovieLambdaIntegration, {
+      requestModels: {
+        "application/json": uploadMovieRequestBodySchema,
+      },
+      requestValidatorOptions: {
+        validateRequestBody: true,
+      },
+    });
+
+    const downloadMovieLambdaIntegration = new apigateway.LambdaIntegration(downloadMovieFn);
+    const downloadMovieResource = api.root.addResource("download-movie");
+    downloadMovieResource.addMethod("GET", downloadMovieLambdaIntegration, {
+      requestParameters: {
+        "method.request.querystring.movieId": true,
+      },
+      requestValidatorOptions: {
+        validateRequestParameters: true,
+      },
+    });
   }
 }

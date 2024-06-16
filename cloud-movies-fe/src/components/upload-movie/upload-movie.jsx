@@ -18,7 +18,7 @@ function UploadMovie() {
     event.preventDefault();
 
     try {
-      const metadataResponse = await axios.post("https://7ak3fpt2ob.execute-api.eu-central-1.amazonaws.com/prod/upload-movie", {
+      const metadataResponse = await axios.post(`${import.meta.env.VITE_API_URL}/upload-movie`, {
         title,
         description,
         genre,

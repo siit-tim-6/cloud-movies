@@ -52,6 +52,9 @@ exports.handler = async (event) => {
   const s3VideoSignedUrl = await getSignedUrl(s3Client, getVideoCommand, { expiresIn: 3600 });
 
   return {
-    downloadUrl: s3VideoSignedUrl,
+    statusCode: 200,
+    body: JSON.stringify({
+      downloadUrl: s3VideoSignedUrl,
+    }),
   };
 };
