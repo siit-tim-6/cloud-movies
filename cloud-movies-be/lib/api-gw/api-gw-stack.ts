@@ -48,10 +48,30 @@ export class ApiGwStack extends cdk.Stack {
       },
     });
 
+    const getAllMoviesFn = new lambda.Function(this, "getAllMoviesFn", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: "index.handler",
+      code: lambda.Code.fromAsset(path.join(__dirname, "./src/get-all-movies")),
+      environment: {
+        DYNAMODB_TABLE: moviesDataTable.tableName,
+      },
+    });
+
+    const getSingleMovieFn = new lambda.Function(this, "getSingleMovieFn", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: "index.handler",
+      code: lambda.Code.fromAsset(path.join(__dirname, "./src/get-single-movie")),
+      environment: {
+        DYNAMODB_TABLE: moviesDataTable.tableName,
+      },
+    });
+
     moviesBucket.grantRead(uploadMovieFn);
     moviesBucket.grantRead(downloadMovieFn);
     moviesDataTable.grantWriteData(uploadMovieFn);
     moviesDataTable.grantReadData(downloadMovieFn);
+    moviesDataTable.grantReadData(getAllMoviesFn);
+    moviesDataTable.grantReadData(getSingleMovieFn);
 
     const api = new apigateway.RestApi(this, "MoviesApi", {
       restApiName: "Movies Service",
@@ -95,6 +115,21 @@ export class ApiGwStack extends cdk.Stack {
     downloadMovieResource.addMethod("GET", downloadMovieLambdaIntegration, {
       requestParameters: {
         "method.request.querystring.movieId": true,
+      },
+      requestValidatorOptions: {
+        validateRequestParameters: true,
+      },
+    });
+
+    const moviesResource = api.root.addResource("movies");
+    const getAllMoviesLambdaIntegration = new apigateway.LambdaIntegration(getAllMoviesFn);
+    moviesResource.addMethod("GET", getAllMoviesLambdaIntegration);
+
+    const movieResource = moviesResource.addResource("{id}");
+    const getSingleMovieLambdaIntegration = new apigateway.LambdaIntegration(getSingleMovieFn);
+    movieResource.addMethod("GET", getSingleMovieLambdaIntegration, {
+      requestParameters: {
+        "method.request.path.id": true,
       },
       requestValidatorOptions: {
         validateRequestParameters: true,
