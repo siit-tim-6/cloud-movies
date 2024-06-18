@@ -4,12 +4,35 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 
-function MovieSearch() {
+function MovieSearch({setMovies}) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [actors, setActors] = useState("");
   const [directors, setDirectors] = useState("");
   const [genres, setGenres] = useState("");
+
+    const handleSearch = async () => {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/search-movies`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                title,
+                description,
+                actors,
+                directors,
+                genres,
+            }),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            setMovies(data);
+        } else {
+            console.error("Failed to fetch movies");
+        }
+    };
 
   return (
     <div className="movie-search">
@@ -49,13 +72,14 @@ function MovieSearch() {
         value={genres}
         onChange={(event) => setGenres(event.target.value)}
       />
-      <Button
-        id="submit-button"
-        variant="secondary"
-        className="text-lg py-6 px-10 rounded-medium font-bold text-white bg-gradient-to-br from-zinc-900 dark:from-zinc-900 dark:to-zinc-900 to-neutral-600 dark:bg-zinc-800"
-      >
-        Search
-      </Button>
+        <Button
+            id="submit-button"
+            variant="secondary"
+            className="text-lg py-6 px-10 rounded-medium font-bold text-white bg-gradient-to-br from-zinc-900 dark:from-zinc-900 dark:to-zinc-900 to-neutral-600 dark:bg-zinc-800"
+            onClick={handleSearch}
+        >
+            Search
+        </Button>
     </div>
   );
 }
