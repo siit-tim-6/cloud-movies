@@ -1,5 +1,5 @@
 import "./navbar.css";
-import { HamburgerMenuIcon, MagnifyingGlassIcon, BellIcon, ExitIcon } from "@radix-ui/react-icons";
+import {HamburgerMenuIcon, MagnifyingGlassIcon, BellIcon, ExitIcon, UploadIcon} from "@radix-ui/react-icons";
 import { Link, useNavigate } from "react-router-dom";
 import Logo from "@/assets/brief-cinema-logo.svg";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -43,10 +43,13 @@ function Navbar() {
       </div>
       <div className="navbar-right">
         <div className="white-icon">
-          <MagnifyingGlassIcon />
+          <MagnifyingGlassIcon/>
         </div>
         <div className="white-icon">
-          <BellIcon />
+          <BellIcon/>
+        </div>
+        <div className="white-icon" onClick={() => navigate("/upload-movie")}>
+          <UploadIcon/>
         </div>
 
         <DropdownMenu>
@@ -57,13 +60,13 @@ function Navbar() {
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem
-              onClick={() => {
-                logout();
-                navigate("/login");
-              }}
+                onClick={() => {
+                  logout();
+                  navigate("/login");
+                }}
             >
               <div className="flex flex-row items-center">
-                <ExitIcon className="mr-3" /> Log Out
+                <ExitIcon className="mr-3"/> Log Out
               </div>
             </DropdownMenuItem>
           </DropdownMenuContent>
