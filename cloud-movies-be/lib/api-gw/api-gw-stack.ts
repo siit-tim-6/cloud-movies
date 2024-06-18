@@ -66,12 +66,23 @@ export class ApiGwStack extends cdk.Stack {
       },
     });
 
+    const searchMoviesFn = new lambda.Function(this, "searchMoviesFn", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: "index.handler",
+      code: lambda.Code.fromAsset(path.join(__dirname, "./src/search-movies")),
+      environment: {
+        DYNAMODB_TABLE: moviesDataTable.tableName,
+      },
+    });
+
     moviesBucket.grantRead(uploadMovieFn);
     moviesBucket.grantRead(downloadMovieFn);
     moviesDataTable.grantWriteData(uploadMovieFn);
     moviesDataTable.grantReadData(downloadMovieFn);
     moviesDataTable.grantReadData(getAllMoviesFn);
     moviesDataTable.grantReadData(getSingleMovieFn);
+    moviesDataTable.grantReadData(searchMoviesFn);
+    moviesDataTable.grantReadWriteData(uploadMovieFn);
 
     const api = new apigateway.RestApi(this, "MoviesApi", {
       restApiName: "Movies Service",
@@ -133,6 +144,14 @@ export class ApiGwStack extends cdk.Stack {
       },
       requestValidatorOptions: {
         validateRequestParameters: true,
+      },
+    });
+
+    const searchMoviesLambdaIntegration = new apigateway.LambdaIntegration(searchMoviesFn);
+    const searchMoviesResource = api.root.addResource("search-movies");
+    searchMoviesResource.addMethod("POST", searchMoviesLambdaIntegration, {
+      requestValidatorOptions: {
+        validateRequestBody: true,
       },
     });
   }
