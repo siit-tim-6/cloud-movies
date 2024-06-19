@@ -5,6 +5,7 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import path = require("path");
+import * as iam from "aws-cdk-lib/aws-iam";
 
 export class ApiGwStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -37,6 +38,18 @@ export class ApiGwStack extends cdk.Stack {
         DYNAMODB_TABLE: moviesDataTable.tableName,
       },
     });
+
+    uploadMovieFn.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['s3:PutObject', 's3:GetObject'],
+      resources: [`${moviesBucket.bucketArn}/*`],
+    }));
+
+    moviesBucket.addToResourcePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      principals: [new iam.ArnPrincipal(uploadMovieFn.role!.roleArn)],
+      actions: ['s3:PutObject'],
+      resources: [`${moviesBucket.bucketArn}/*`],
+    }));
 
     const downloadMovieFn = new lambda.Function(this, "downloadMovieFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
