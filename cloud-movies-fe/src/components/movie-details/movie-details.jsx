@@ -8,6 +8,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {faDownload, faHeart, faPlay, faTrash} from "@fortawesome/free-solid-svg-icons";
 import Rating from "react-rating-stars-component";
 import axios from "axios";
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css';
 
 function MovieDetails() {
   const { id } = useParams();
@@ -82,6 +84,23 @@ function MovieDetails() {
     }
   };
 
+  const confirmDelete = () => {
+    confirmAlert({
+      title: 'Confirm to delete',
+      message: 'Are you sure you want to delete this movie?',
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: handleDelete
+        },
+        {
+          label: 'No',
+          onClick: () => {}
+        }
+      ]
+    });
+  };
+
   return (
     <>
       <Navbar />
@@ -100,7 +119,7 @@ function MovieDetails() {
             <button className="download-button" onClick={handleDownload}>
               <FontAwesomeIcon icon={faDownload}/>
             </button>
-            <button className="delete-button" onClick={handleDelete}>
+            <button className="delete-button" onClick={confirmDelete}>
               <FontAwesomeIcon icon={faTrash}/>
             </button>
           </div>
