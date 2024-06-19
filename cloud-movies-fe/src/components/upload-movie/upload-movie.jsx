@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Navbar from "@/components/navbar/navbar.jsx";
 import "./upload-movie.css";
 import axios from "axios";
+import {useNavigate} from "react-router-dom";
 
 function UploadMovie() {
   const [title, setTitle] = useState("");
@@ -11,6 +12,7 @@ function UploadMovie() {
   const [directors, setDirectors] = useState("");
   const [cover, setCover] = useState(null);
   const [video, setVideo] = useState(null);
+  const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     console.log(cover);
@@ -48,6 +50,7 @@ function UploadMovie() {
       });
 
       alert("Movie uploaded successfully!");
+      navigate('/movies');
     } catch (error) {
       console.error("Error uploading movie:", error);
       alert("Failed to upload movie.");
