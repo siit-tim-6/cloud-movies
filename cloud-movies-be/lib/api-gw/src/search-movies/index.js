@@ -15,39 +15,46 @@ exports.handler = async (event) => {
     const expressionAttributeValues = {};
 
     if (title) {
-        filterExpressions.push("contains(#title, :title)");
-        expressionAttributeNames["#title"] = "Title";
-        expressionAttributeValues[":title"] = title;
+        filterExpressions.push("contains(#lowerTitle, :lowerTitle)");
+        expressionAttributeNames["#lowerTitle"] = "LowerTitle";
+        expressionAttributeValues[":lowerTitle"] = title.toLowerCase();
     }
     if (description) {
-        filterExpressions.push("contains(#description, :description)");
-        expressionAttributeNames["#description"] = "Description";
-        expressionAttributeValues[":description"] = description;
+        filterExpressions.push("contains(#lowerDescription, :lowerDescription)");
+        expressionAttributeNames["#lowerDescription"] = "LowerDescription";
+        expressionAttributeValues[":lowerDescription"] = description.toLowerCase();
     }
     if (actors) {
-        filterExpressions.push("contains(#actors, :actors)");
-        expressionAttributeNames["#actors"] = "Actors";
-        expressionAttributeValues[":actors"] = actors;
+        filterExpressions.push("contains(#lowerActors, :lowerActors)");
+        expressionAttributeNames["#lowerActors"] = "LowerActors";
+        expressionAttributeValues[":lowerActors"] = actors.toLowerCase();
     }
     if (directors) {
-        filterExpressions.push("contains(#directors, :directors)");
-        expressionAttributeNames["#directors"] = "Directors";
-        expressionAttributeValues[":directors"] = directors;
+        filterExpressions.push("contains(#lowerDirectors, :lowerDirectors)");
+        expressionAttributeNames["#lowerDirectors"] = "LowerDirectors";
+        expressionAttributeValues[":lowerDirectors"] = directors.toLowerCase();
     }
     if (genres) {
-        filterExpressions.push("contains(#genres, :genres)");
-        expressionAttributeNames["#genres"] = "Genres";
-        expressionAttributeValues[":genres"] = genres;
+        filterExpressions.push("contains(#lowerGenre, :lowerGenre)");
+        expressionAttributeNames["#lowerGenre"] = "LowerGenre";
+        expressionAttributeValues[":lowerGenre"] = genres.toLowerCase();
     }
 
-    const filterExpression = filterExpressions.join(" AND ");
+    let dynamoScanCommand;
+    if (filterExpressions.length > 0) {
+        const filterExpression = filterExpressions.join(" AND ");
 
-    const dynamoScanCommand = new ScanCommand({
-        TableName: tableName,
-        FilterExpression: filterExpression,
-        ExpressionAttributeNames: expressionAttributeNames,
-        ExpressionAttributeValues: expressionAttributeValues,
-    });
+        dynamoScanCommand = new ScanCommand({
+            TableName: tableName,
+            FilterExpression: filterExpression,
+            ExpressionAttributeNames: expressionAttributeNames,
+            ExpressionAttributeValues: expressionAttributeValues,
+        });
+    } else {
+        dynamoScanCommand = new ScanCommand({
+            TableName: tableName,
+        });
+    }
 
     const moviesResponse = await dynamoDocClient.send(dynamoScanCommand);
 
