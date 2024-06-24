@@ -99,9 +99,34 @@ export class ApiGwStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(10)
     });
 
+    const updateMovieFn = new lambda.Function(this, 'updateMovieFn', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'index.handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, './src/update-movie')),
+      environment: {
+        S3_BUCKET: moviesBucket.bucketName,
+        DYNAMODB_TABLE: moviesDataTable.tableName,
+      },
+      timeout: cdk.Duration.seconds(10),
+    });
+
+    updateMovieFn.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['s3:PutObject', 's3:GetObject', 's3:DeleteObject'],
+      resources: [`${moviesBucket.bucketArn}/*`],
+    }));
+
+    moviesBucket.addToResourcePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      principals: [new iam.ArnPrincipal(updateMovieFn.role!.roleArn)],
+      actions: ['s3:PutObject', 's3:DeleteObject'],
+      resources: [`${moviesBucket.bucketArn}/*`],
+    }));
+
     moviesBucket.grantRead(uploadMovieFn);
     moviesBucket.grantRead(downloadMovieFn);
     moviesBucket.grantReadWrite(deleteMovieFn);
+    moviesBucket.grantReadWrite(updateMovieFn);
+    moviesDataTable.grantWriteData(uploadMovieFn);
     moviesDataTable.grantWriteData(uploadMovieFn);
     moviesDataTable.grantReadData(downloadMovieFn);
     moviesDataTable.grantReadData(getAllMoviesFn);
@@ -109,6 +134,7 @@ export class ApiGwStack extends cdk.Stack {
     moviesDataTable.grantReadData(searchMoviesFn);
     moviesDataTable.grantReadWriteData(uploadMovieFn);
     moviesDataTable.grantReadWriteData(deleteMovieFn);
+    moviesDataTable.grantReadWriteData(updateMovieFn);
 
     const api = new apigateway.RestApi(this, "MoviesApi", {
       restApiName: "Movies Service",
@@ -188,6 +214,17 @@ export class ApiGwStack extends cdk.Stack {
       },
       requestValidatorOptions: {
         validateRequestParameters: true,
+      },
+    });
+
+
+    const updateMovieLambdaIntegration = new apigateway.LambdaIntegration(updateMovieFn);
+    movieResource.addMethod('PUT', updateMovieLambdaIntegration, {
+      requestValidatorOptions: {
+        validateRequestBody: true,
+      },
+      requestParameters: {
+        'method.request.path.id': true,
       },
     });
   }
