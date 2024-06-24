@@ -21,7 +21,8 @@ const router = createBrowserRouter(
           <Route path="/" element={<Home />} />
           <Route path="/movies" element={<AllMovies />} />
           <Route path="/movies/:id" element={<MovieDetails />} />
-          <Route path="/upload-movie" element={<UploadMovie />} />
+          <Route path="/upload-movie" element={<UploadMovie isEditMode={false} />} />
+          <Route path="/edit-movie/:id" element={<UploadMovie isEditMode={true} />} />
       </Route>
     </>
   )
