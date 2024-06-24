@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge.jsx";
 import MovieCover from "@/assets/movie-placeholder.webp";
 import "./movie-details.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {faDownload, faHeart, faPlay, faTrash} from "@fortawesome/free-solid-svg-icons";
+import {faDownload, faEdit, faHeart, faPlay, faTrash} from "@fortawesome/free-solid-svg-icons";
 import Rating from "react-rating-stars-component";
 import axios from "axios";
 import { confirmAlert } from 'react-confirm-alert';
@@ -101,6 +101,10 @@ function MovieDetails() {
     });
   };
 
+  const handleEdit = () => {
+    navigate(`/edit-movie/${id}`);
+  };
+
   return (
     <>
       <Navbar />
@@ -121,6 +125,9 @@ function MovieDetails() {
             </button>
             <button className="delete-button" onClick={confirmDelete}>
               <FontAwesomeIcon icon={faTrash}/>
+            </button>
+            <button className="edit-button" onClick={handleEdit}>
+              <FontAwesomeIcon icon={faEdit}/>
             </button>
           </div>
           <div className="movie-genre-rating">

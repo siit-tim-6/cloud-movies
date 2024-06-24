@@ -62,7 +62,7 @@
     margin-bottom: 8px;
 }
 
-.favorite-button, .download-button, .delete-button {
+.favorite-button, .download-button, .delete-button, .edit-button {
     background: none;
     border: none;
     cursor: pointer;
