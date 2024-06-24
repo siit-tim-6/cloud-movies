@@ -39,5 +39,9 @@ export class FrontDeploymentStack extends cdk.Stack {
       distribution,
       distributionPaths: ["/*"],
     });
+
+    new cdk.CfnOutput(this, "CloudFrontURL", {
+      value: distribution.domainName,
+    });
   }
 }
