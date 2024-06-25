@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import Navbar from "@/components/navbar/navbar.jsx";
 import "./upload-movie.css";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { AccountContext } from "../auth/accountContext";
 
 function UploadMovie() {
   const [title, setTitle] = useState("");
@@ -11,24 +13,36 @@ function UploadMovie() {
   const [directors, setDirectors] = useState("");
   const [cover, setCover] = useState(null);
   const [video, setVideo] = useState(null);
+  const navigate = useNavigate();
+  const { getSession } = useContext(AccountContext);
 
   const handleSubmit = async (event) => {
     console.log(cover);
     console.log(video);
     event.preventDefault();
 
+    const session = await getSession();
+
     try {
-      const metadataResponse = await axios.post(`${import.meta.env.VITE_API_URL}/upload-movie`, {
-        title,
-        description,
-        genre,
-        actors,
-        directors,
-        coverFileName: cover.name,
-        coverFileType: cover.type,
-        videoFileName: video.name,
-        videoFileType: video.type,
-      });
+      const metadataResponse = await axios.post(
+        `${import.meta.env.VITE_API_URL}/upload-movie`,
+        {
+          title,
+          description,
+          genre,
+          actors,
+          directors,
+          coverFileName: cover.name,
+          coverFileType: cover.type,
+          videoFileName: video.name,
+          videoFileType: video.type,
+        },
+        {
+          headers: {
+            Authorization: session.accessToken.jwtToken,
+          },
+        }
+      );
 
       const { coverUploadURL, videoUploadURL } = metadataResponse.data;
       console.log(coverUploadURL, videoUploadURL);
@@ -48,6 +62,7 @@ function UploadMovie() {
       });
 
       alert("Movie uploaded successfully!");
+      navigate("/movies");
     } catch (error) {
       console.error("Error uploading movie:", error);
       alert("Failed to upload movie.");

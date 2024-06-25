@@ -4,7 +4,7 @@ import MovieCover from "@/assets/movie-placeholder.webp";
 import { ArrowRightIcon } from "@radix-ui/react-icons";
 import { Link } from "react-router-dom";
 
-function MovieCard({ MovieId, Title, Genre }) {
+function MovieCard({ MovieId, Title, Genre, CoverS3Url }) {
   return (
     <Link to={`/movies/${MovieId}`} className="movie-card-link">
       <div className="movie-card">

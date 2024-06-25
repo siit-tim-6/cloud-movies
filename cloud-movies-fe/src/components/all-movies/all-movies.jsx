@@ -21,10 +21,10 @@ function AllMovies() {
     <div className="all-movies">
       <Navbar />
       <div className="all-movies-content">
-        <MovieSearch />
+        <MovieSearch setMovies={setMovies} />
         <div className="all-movies-grid">
           {movies.map((movie) => (
-            <MovieCard Genre={movie.Genre} MovieId={movie.MovieId} Title={movie.Title} key={movie.MovieId} />
+            <MovieCard Genre={movie.Genre} MovieId={movie.MovieId} Title={movie.Title} CoverS3Url={movie.CoverS3Url} key={movie.MovieId} />
           ))}
         </div>
       </div>

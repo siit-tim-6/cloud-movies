@@ -66,12 +66,22 @@ export class ApiGwStack extends cdk.Stack {
       },
     });
 
-    moviesBucket.grantRead(uploadMovieFn);
+    const searchMoviesFn = new lambda.Function(this, "searchMoviesFn", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: "index.handler",
+      code: lambda.Code.fromAsset(path.join(__dirname, "./src/search-movies")),
+      environment: {
+        DYNAMODB_TABLE: moviesDataTable.tableName,
+      },
+    });
+
     moviesBucket.grantRead(downloadMovieFn);
-    moviesDataTable.grantWriteData(uploadMovieFn);
+    moviesBucket.grantReadWrite(uploadMovieFn);
     moviesDataTable.grantReadData(downloadMovieFn);
     moviesDataTable.grantReadData(getAllMoviesFn);
     moviesDataTable.grantReadData(getSingleMovieFn);
+    moviesDataTable.grantReadData(searchMoviesFn);
+    moviesDataTable.grantReadWriteData(uploadMovieFn);
 
     const api = new apigateway.RestApi(this, "MoviesApi", {
       restApiName: "Movies Service",
@@ -109,6 +119,9 @@ export class ApiGwStack extends cdk.Stack {
         validateRequestBody: true,
       },
     });
+    uploadMovieResource.addCorsPreflight({
+      allowOrigins: ["*"],
+    });
 
     const downloadMovieLambdaIntegration = new apigateway.LambdaIntegration(downloadMovieFn);
     const downloadMovieResource = api.root.addResource("download-movie");
@@ -130,6 +143,21 @@ export class ApiGwStack extends cdk.Stack {
     movieResource.addMethod("GET", getSingleMovieLambdaIntegration, {
       requestParameters: {
         "method.request.path.id": true,
+      },
+      requestValidatorOptions: {
+        validateRequestParameters: true,
+      },
+    });
+
+    const searchMoviesLambdaIntegration = new apigateway.LambdaIntegration(searchMoviesFn);
+    const searchMoviesResource = api.root.addResource("search-movies");
+    searchMoviesResource.addMethod("GET", searchMoviesLambdaIntegration, {
+      requestParameters: {
+        "method.request.path.title": false,
+        "method.request.path.description": false,
+        "method.request.path.actors": false,
+        "method.request.path.directors": false,
+        "method.request.path.genres": false,
       },
       requestValidatorOptions: {
         validateRequestParameters: true,
