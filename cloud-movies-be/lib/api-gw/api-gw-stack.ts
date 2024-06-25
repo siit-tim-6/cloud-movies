@@ -5,7 +5,6 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import path = require("path");
-import * as iam from "aws-cdk-lib/aws-iam";
 
 export class ApiGwStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -38,18 +37,6 @@ export class ApiGwStack extends cdk.Stack {
         DYNAMODB_TABLE: moviesDataTable.tableName,
       },
     });
-
-    uploadMovieFn.addToRolePolicy(new iam.PolicyStatement({
-      actions: ['s3:PutObject', 's3:GetObject'],
-      resources: [`${moviesBucket.bucketArn}/*`],
-    }));
-
-    moviesBucket.addToResourcePolicy(new iam.PolicyStatement({
-      effect: iam.Effect.ALLOW,
-      principals: [new iam.ArnPrincipal(uploadMovieFn.role!.roleArn)],
-      actions: ['s3:PutObject'],
-      resources: [`${moviesBucket.bucketArn}/*`],
-    }));
 
     const downloadMovieFn = new lambda.Function(this, "downloadMovieFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
@@ -88,21 +75,22 @@ export class ApiGwStack extends cdk.Stack {
       },
     });
 
-    const deleteMovieFn = new lambda.Function(this, 'deleteMovieFn', {
+    const deleteMovieFn = new lambda.Function(this, "deleteMovieFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
-      handler: 'index.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, './src/delete-movie')),
+      handler: "index.handler",
+      code: lambda.Code.fromAsset(path.join(__dirname, "./src/delete-movie")),
       environment: {
         S3_BUCKET: moviesBucket.bucketName,
         DYNAMODB_TABLE: moviesDataTable.tableName,
       },
-      timeout: cdk.Duration.seconds(10)
+      timeout: cdk.Duration.seconds(10),
     });
 
     moviesBucket.grantRead(uploadMovieFn);
-    moviesBucket.grantRead(downloadMovieFn);
     moviesBucket.grantReadWrite(deleteMovieFn);
     moviesDataTable.grantWriteData(uploadMovieFn);
+    moviesBucket.grantRead(downloadMovieFn);
+    moviesBucket.grantReadWrite(uploadMovieFn);
     moviesDataTable.grantReadData(downloadMovieFn);
     moviesDataTable.grantReadData(getAllMoviesFn);
     moviesDataTable.grantReadData(getSingleMovieFn);
@@ -146,6 +134,9 @@ export class ApiGwStack extends cdk.Stack {
         validateRequestBody: true,
       },
     });
+    uploadMovieResource.addCorsPreflight({
+      allowOrigins: ["*"],
+    });
 
     const downloadMovieLambdaIntegration = new apigateway.LambdaIntegration(downloadMovieFn);
     const downloadMovieResource = api.root.addResource("download-movie");
@@ -182,9 +173,9 @@ export class ApiGwStack extends cdk.Stack {
     });
 
     const deleteMovieLambdaIntegration = new apigateway.LambdaIntegration(deleteMovieFn);
-    movieResource.addMethod('DELETE', deleteMovieLambdaIntegration, {
+    movieResource.addMethod("DELETE", deleteMovieLambdaIntegration, {
       requestParameters: {
-        'method.request.path.id': true,
+        "method.request.path.id": true,
       },
       requestValidatorOptions: {
         validateRequestParameters: true,
