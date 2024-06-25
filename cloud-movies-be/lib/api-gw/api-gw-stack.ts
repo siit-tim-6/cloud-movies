@@ -74,7 +74,7 @@ export class ApiGwStack extends cdk.Stack {
         DYNAMODB_TABLE: moviesDataTable.tableName,
       },
     });
-
+    
     const deleteMovieFn = new lambda.Function(this, "deleteMovieFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: "index.handler",
