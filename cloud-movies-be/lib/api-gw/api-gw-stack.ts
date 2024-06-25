@@ -151,9 +151,16 @@ export class ApiGwStack extends cdk.Stack {
 
     const searchMoviesLambdaIntegration = new apigateway.LambdaIntegration(searchMoviesFn);
     const searchMoviesResource = api.root.addResource("search-movies");
-    searchMoviesResource.addMethod("POST", searchMoviesLambdaIntegration, {
+    searchMoviesResource.addMethod("GET", searchMoviesLambdaIntegration, {
+      requestParameters: {
+        "method.request.path.title": false,
+        "method.request.path.description": false,
+        "method.request.path.actors": false,
+        "method.request.path.directors": false,
+        "method.request.path.genres": false,
+      },
       requestValidatorOptions: {
-        validateRequestBody: true,
+        validateRequestParameters: true,
       },
     });
   }
