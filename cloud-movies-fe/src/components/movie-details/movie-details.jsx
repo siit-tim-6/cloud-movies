@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
-import {useNavigate, useParams} from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "@/components/navbar/navbar.jsx";
 import { Badge } from "@/components/ui/badge.jsx";
 import MovieCover from "@/assets/movie-placeholder.webp";
 import "./movie-details.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {faDownload, faHeart, faPlay, faTrash} from "@fortawesome/free-solid-svg-icons";
+import { faDownload, faHeart, faPlay, faTrash } from "@fortawesome/free-solid-svg-icons";
 import Rating from "react-rating-stars-component";
 import axios from "axios";
-import { confirmAlert } from 'react-confirm-alert';
-import 'react-confirm-alert/src/react-confirm-alert.css';
+import { confirmAlert } from "react-confirm-alert";
+import "react-confirm-alert/src/react-confirm-alert.css";
 
 function MovieDetails() {
   const { id } = useParams();
@@ -23,7 +23,6 @@ function MovieDetails() {
   const [actors, setActors] = useState("");
   const [directors, setDirectors] = useState("");
 
-
   useEffect(() => {
     const getMovie = async () => {
       const movieResponse = await axios.get(`${import.meta.env.VITE_API_URL}/movies/${id}`);
@@ -32,11 +31,10 @@ function MovieDetails() {
       setDescription(movieResponse.data.Description);
       setActors(movieResponse.data.Actors);
       setDirectors(movieResponse.data.Directors);
-    }
+    };
 
     getMovie();
-  }, [])
-  
+  }, []);
 
   const ratingChanged = (newRating) => {
     setRating(newRating);
@@ -77,7 +75,7 @@ function MovieDetails() {
     try {
       await axios.delete(`${import.meta.env.VITE_API_URL}/movies/${id}`);
       alert("Movie deleted successfully!");
-      navigate('/movies');
+      navigate("/movies");
     } catch (error) {
       console.error("Error deleting the movie:", error);
       alert("Failed to delete the movie.");
@@ -86,18 +84,18 @@ function MovieDetails() {
 
   const confirmDelete = () => {
     confirmAlert({
-      title: 'Confirm to delete',
-      message: 'Are you sure you want to delete this movie?',
+      title: "Confirm to delete",
+      message: "Are you sure you want to delete this movie?",
       buttons: [
         {
-          label: 'Yes',
-          onClick: handleDelete
+          label: "Yes",
+          onClick: handleDelete,
         },
         {
-          label: 'No',
-          onClick: () => {}
-        }
-      ]
+          label: "No",
+          onClick: () => {},
+        },
+      ],
     });
   };
 
@@ -114,13 +112,13 @@ function MovieDetails() {
           <div className="movie-title-favorite">
             <h1>{title}</h1>
             <button className="favorite-button" onClick={toggleLike}>
-              <FontAwesomeIcon icon={faHeart} color={liked ? "red" : "white"}/>
+              <FontAwesomeIcon icon={faHeart} color={liked ? "red" : "white"} />
             </button>
             <button className="download-button" onClick={handleDownload}>
-              <FontAwesomeIcon icon={faDownload}/>
+              <FontAwesomeIcon icon={faDownload} />
             </button>
             <button className="delete-button" onClick={confirmDelete}>
-              <FontAwesomeIcon icon={faTrash}/>
+              <FontAwesomeIcon icon={faTrash} />
             </button>
           </div>
           <div className="movie-genre-rating">
@@ -129,9 +127,7 @@ function MovieDetails() {
               <Rating count={5} value={rating} edit={false} size={24} activeColor="#ffd700" />
             </div>
           </div>
-          <p className="movie-description">
-            {description}
-          </p>
+          <p className="movie-description">{description}</p>
           <div className="movie-meta">
             <div className="meta-item">
               <strong>Actors:</strong> {actors}
