@@ -187,5 +187,8 @@ export class ApiGwStack extends cdk.Stack {
         validateRequestParameters: true,
       },
     });
+    movieResource.addCorsPreflight({
+      allowOrigins: ["*"],
+    });
   }
 }
