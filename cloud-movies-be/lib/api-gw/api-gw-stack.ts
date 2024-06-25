@@ -86,11 +86,10 @@ export class ApiGwStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(10),
     });
 
-    moviesBucket.grantRead(uploadMovieFn);
-    moviesBucket.grantReadWrite(deleteMovieFn);
-    moviesDataTable.grantWriteData(uploadMovieFn);
     moviesBucket.grantRead(downloadMovieFn);
     moviesBucket.grantReadWrite(uploadMovieFn);
+    moviesBucket.grantReadWrite(deleteMovieFn);
+
     moviesDataTable.grantReadData(downloadMovieFn);
     moviesDataTable.grantReadData(getAllMoviesFn);
     moviesDataTable.grantReadData(getSingleMovieFn);
