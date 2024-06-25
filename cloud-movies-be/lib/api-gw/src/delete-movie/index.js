@@ -24,6 +24,12 @@ exports.handler = async (event) => {
   if (!movie.Item) {
     return {
       statusCode: 404,
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Headers": "Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
+        "Access-Control-Allow-Methods": "GET,OPTIONS",
+        "Access-Control-Allow-Origin": "*",
+      },
       body: JSON.stringify({ message: "Movie not found" }),
     };
   }
