@@ -194,5 +194,44 @@ export class ApiGwStack extends cdk.Stack {
     movieResource.addCorsPreflight({
       allowOrigins: ["*"],
     });
+
+    // subscription related things
+    const subscriptionsDataTable = new dynamodb.Table(this, "SubscriptionsData", {
+      partitionKey: { name: "UserId", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "SubscribedTo", type: dynamodb.AttributeType.STRING },
+      readCapacity: 1,
+      writeCapacity: 1,
+    });
+
+    const subscribeFn = new lambda.Function(this, "subscribeFn", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: "index.handler",
+      code: lambda.Code.fromAsset(path.join(__dirname, "./src/subscribe")),
+      environment: {
+        DYNAMODB_TABLE: subscriptionsDataTable.tableName,
+      },
+    });
+
+    const getSubscriptionsFn = new lambda.Function(this, "getSubscriptionsFn", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: "index.handler",
+      code: lambda.Code.fromAsset(path.join(__dirname, "./src/get-subscriptions")),
+      environment: {
+        DYNAMODB_TABLE: subscriptionsDataTable.tableName,
+      },
+    });
+
+    const subscribeLambdaIntegration = new apigateway.LambdaIntegration(subscribeFn);
+    const subscriptionsResource = api.root.addResource("subscriptions");
+    subscriptionsResource.addMethod("POST", subscribeLambdaIntegration);
+    subscriptionsResource.addCorsPreflight({
+      allowOrigins: ["*"],
+    });
+
+    const getSubscriptionsLambdaIntegration = new apigateway.LambdaIntegration(getSubscriptionsFn);
+    subscriptionsResource.addMethod("GET", getSubscriptionsLambdaIntegration);
+
+    subscriptionsDataTable.grantWriteData(subscribeFn);
+    subscriptionsDataTable.grantReadData(getSubscriptionsFn);
   }
 }
