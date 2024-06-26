@@ -10,27 +10,29 @@ import Rating from "react-rating-stars-component";
 import axios from "axios";
 import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
+import { Button } from "../ui/button";
 
 function MovieDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [rating, setRating] = useState(4);
-  const [liked, setLiked] = useState(false);
   const [title, setTitle] = useState("");
-  const [genre, setGenre] = useState("");
   const [description, setDescription] = useState("");
-  const [actors, setActors] = useState("");
-  const [directors, setDirectors] = useState("");
+  const [genres, setGenres] = useState([]);
+  const [actors, setActors] = useState([]);
+  const [directors, setDirectors] = useState([]);
+  const [coverUrl, setCoverUrl] = useState("");
 
   useEffect(() => {
     const getMovie = async () => {
       const movieResponse = await axios.get(`${import.meta.env.VITE_API_URL}/movies/${id}`);
       setTitle(movieResponse.data.Title);
-      setGenre(movieResponse.data.Genre);
+      setGenres(movieResponse.data.Genres);
       setDescription(movieResponse.data.Description);
       setActors(movieResponse.data.Actors);
       setDirectors(movieResponse.data.Directors);
+      setCoverUrl(movieResponse.data.CoverS3Url);
     };
 
     getMovie();
@@ -103,7 +105,7 @@ function MovieDetails() {
     <>
       <Navbar />
       <div className="movie-details-page">
-        <div className="movie-cover" style={{ backgroundImage: `url(${MovieCover})` }}>
+        <div className="movie-cover" style={{ backgroundImage: `url(${coverUrl})` }}>
           <div className="play-button">
             <FontAwesomeIcon icon={faPlay} />
           </div>
@@ -111,9 +113,6 @@ function MovieDetails() {
         <div className="movie-info">
           <div className="movie-title-favorite">
             <h1>{title}</h1>
-            <button className="favorite-button" onClick={toggleLike}>
-              <FontAwesomeIcon icon={faHeart} color={liked ? "red" : "white"} />
-            </button>
             <button className="download-button" onClick={handleDownload}>
               <FontAwesomeIcon icon={faDownload} />
             </button>
@@ -122,7 +121,9 @@ function MovieDetails() {
             </button>
           </div>
           <div className="movie-genre-rating">
-            <Badge className="movie-genre">{genre}</Badge>
+            {genres.map((genre) => (
+              <Badge className="movie-genre">{genre}</Badge>
+            ))}
             <div className="rating">
               <Rating count={5} value={rating} edit={false} size={24} activeColor="#ffd700" />
             </div>
@@ -130,13 +131,33 @@ function MovieDetails() {
           <p className="movie-description">{description}</p>
           <div className="movie-meta">
             <div className="meta-item">
-              <strong>Actors:</strong> {actors}
+              <strong>Actors</strong>
+              {actors.map((actor) => (
+                <div className="data-line">
+                  <p>{actor}</p>
+                  <FontAwesomeIcon icon={faHeart} />
+                </div>
+              ))}
             </div>
             <div className="meta-item">
-              <strong>Directors:</strong> {directors}
+              <strong>Directors</strong>
+              {directors.map((director) => (
+                <div className="data-line">
+                  <p>{director}</p>
+                  <FontAwesomeIcon icon={faHeart} />
+                </div>
+              ))}
             </div>
             <div className="meta-item">
-              <strong>Genres:</strong> {genre}
+              <strong>Genres</strong>
+              <div className="data-list">
+                {genres.map((genre) => (
+                  <div className="data-line">
+                    <p>{genre}</p>
+                    <FontAwesomeIcon icon={faHeart} />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
