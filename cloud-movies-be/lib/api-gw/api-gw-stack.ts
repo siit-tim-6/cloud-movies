@@ -74,7 +74,7 @@ export class ApiGwStack extends cdk.Stack {
         DYNAMODB_TABLE: moviesDataTable.tableName,
       },
     });
-    
+
     const deleteMovieFn = new lambda.Function(this, "deleteMovieFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: "index.handler",
@@ -111,15 +111,15 @@ export class ApiGwStack extends cdk.Stack {
         properties: {
           title: { type: apigateway.JsonSchemaType.STRING },
           description: { type: apigateway.JsonSchemaType.STRING },
-          genre: { type: apigateway.JsonSchemaType.STRING },
-          actors: { type: apigateway.JsonSchemaType.STRING },
-          directors: { type: apigateway.JsonSchemaType.STRING },
+          genres: { type: apigateway.JsonSchemaType.ARRAY },
+          actors: { type: apigateway.JsonSchemaType.ARRAY },
+          directors: { type: apigateway.JsonSchemaType.ARRAY },
           coverFileName: { type: apigateway.JsonSchemaType.STRING },
           coverFileType: { type: apigateway.JsonSchemaType.STRING },
           videoFileName: { type: apigateway.JsonSchemaType.STRING },
           videoFileType: { type: apigateway.JsonSchemaType.STRING },
         },
-        required: ["title", "description", "genre", "actors", "directors", "coverFileName", "coverFileType", "videoFileName", "videoFileType"],
+        required: ["title", "description", "genres", "actors", "directors", "coverFileName", "coverFileType", "videoFileName", "videoFileType"],
       },
     });
 

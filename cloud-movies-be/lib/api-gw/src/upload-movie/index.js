@@ -13,7 +13,7 @@ const s3Client = new S3Client({});
 exports.handler = async (event) => {
   const bucketName = process.env.S3_BUCKET;
   const tableName = process.env.DYNAMODB_TABLE;
-  const { title, description, genre, actors, directors, coverFileName, coverFileType, videoFileName, videoFileType } = JSON.parse(event.body);
+  const { title, description, genres, actors, directors, coverFileName, coverFileType, videoFileName, videoFileType } = JSON.parse(event.body);
 
   const movieId = uuidv4();
 
@@ -44,12 +44,9 @@ exports.handler = async (event) => {
       LowerTitle: title.toLowerCase(),
       Description: description,
       LowerDescription: description.toLowerCase(),
-      Genre: genre,
-      LowerGenre: genre.toLowerCase(),
+      Genres: genres,
       Actors: actors,
-      LowerActors: actors.toLowerCase(),
       Directors: directors,
-      LowerDirectors: directors.toLowerCase(),
       CoverS3Url: `https://${bucketName}.s3.amazonaws.com/${movieId}/cover/${coverFileName}`,
       VideoS3Url: `https://${bucketName}.s3.amazonaws.com/${movieId}/video/${videoFileName}`,
       CreatedAt: new Date().toISOString(),
