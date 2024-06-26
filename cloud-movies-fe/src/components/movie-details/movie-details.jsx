@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "@/components/navbar/navbar.jsx";
 import { Badge } from "@/components/ui/badge.jsx";
@@ -12,10 +12,12 @@ import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
 import { Button } from "../ui/button";
 import ReactLoading from "react-loading";
+import { AccountContext } from "../auth/accountContext";
 
 function MovieDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { getSession } = useContext(AccountContext);
 
   const [rating, setRating] = useState(4);
   const [title, setTitle] = useState("");
@@ -104,6 +106,28 @@ function MovieDetails() {
     });
   };
 
+  const subscribeTo = async (item) => {
+    const session = await getSession();
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/subscribe`,
+        {
+          subscribedTo: item,
+        },
+        {
+          headers: {
+            Authorization: session.accessToken.jwtToken,
+          },
+        }
+      );
+
+      alert("Subscribed sucessfully.");
+    } catch (error) {
+      alert("Failed to subscribe.");
+    }
+  };
+
   return (
     <>
       <Navbar />
@@ -144,7 +168,7 @@ function MovieDetails() {
                   {actors.map((actor) => (
                     <div className="data-line">
                       <p>{actor}</p>
-                      <FontAwesomeIcon icon={faHeart} />
+                      <FontAwesomeIcon className="icon-btn" onClick={() => subscribeTo(actor)} icon={faHeart} />
                     </div>
                   ))}
                 </div>
@@ -153,7 +177,7 @@ function MovieDetails() {
                   {directors.map((director) => (
                     <div className="data-line">
                       <p>{director}</p>
-                      <FontAwesomeIcon icon={faHeart} />
+                      <FontAwesomeIcon className="icon-btn" onClick={() => subscribeTo(director)} icon={faHeart} />
                     </div>
                   ))}
                 </div>
@@ -163,7 +187,7 @@ function MovieDetails() {
                     {genres.map((genre) => (
                       <div className="data-line">
                         <p>{genre}</p>
-                        <FontAwesomeIcon icon={faHeart} />
+                        <FontAwesomeIcon className="icon-btn" onClick={() => subscribeTo(genre)} icon={faHeart} />
                       </div>
                     ))}
                   </div>

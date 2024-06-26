@@ -164,3 +164,11 @@
     flex-direction: column;
     justify-content: center;
 }
+
+.icon-btn {
+    cursor: pointer;
+}
+
+.icon-btn:hover {
+    color: grey;
+}
