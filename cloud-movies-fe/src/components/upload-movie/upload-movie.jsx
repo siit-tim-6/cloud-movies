@@ -4,21 +4,76 @@ import "./upload-movie.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { AccountContext } from "../auth/accountContext";
+import { Button } from "../ui/button";
+import { MinusIcon, PlusIcon } from "@radix-ui/react-icons";
 
 function UploadMovie() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [genre, setGenre] = useState("");
-  const [actors, setActors] = useState("");
-  const [directors, setDirectors] = useState("");
   const [cover, setCover] = useState(null);
   const [video, setVideo] = useState(null);
+  const [genreInputElems, setGenreInputElems] = useState([""]);
+  const [actorInputElems, setActorInputElems] = useState([""]);
+  const [directorInputElems, setDirectorInputElems] = useState([""]);
+
   const navigate = useNavigate();
   const { getSession } = useContext(AccountContext);
 
+  const handleAddInput = (type) => {
+    switch (type) {
+      case "genre":
+        setGenreInputElems([...genreInputElems, ""]);
+        break;
+      case "actor":
+        setActorInputElems([...actorInputElems, ""]);
+        break;
+      case "director":
+        setDirectorInputElems([...directorInputElems, ""]);
+        break;
+    }
+  };
+
+  const handleRemoveInput = (type, index) => {
+    switch (type) {
+      case "genre":
+        const inputElCopy1 = [...genreInputElems];
+        inputElCopy1.splice(index, 1);
+        setGenreInputElems(inputElCopy1);
+        break;
+      case "actor":
+        const inputElCopy2 = [...actorInputElems];
+        inputElCopy2.splice(index, 1);
+        setActorInputElems(inputElCopy2);
+        break;
+      case "director":
+        const inputElCopy3 = [...directorInputElems];
+        inputElCopy3.splice(index, 1);
+        setDirectorInputElems(inputElCopy3);
+        break;
+    }
+  };
+
+  const handleChangeInput = (type, index, newVal) => {
+    switch (type) {
+      case "genre":
+        const inputElCopy1 = [...genreInputElems];
+        inputElCopy1[index] = newVal;
+        setGenreInputElems(inputElCopy1);
+        break;
+      case "actor":
+        const inputElCopy2 = [...actorInputElems];
+        inputElCopy2[index] = newVal;
+        setActorInputElems(inputElCopy2);
+        break;
+      case "director":
+        const inputElCopy3 = [...directorInputElems];
+        inputElCopy3[index] = newVal;
+        setDirectorInputElems(inputElCopy3);
+        break;
+    }
+  };
+
   const handleSubmit = async (event) => {
-    console.log(cover);
-    console.log(video);
     event.preventDefault();
 
     const session = await getSession();
@@ -29,9 +84,9 @@ function UploadMovie() {
         {
           title,
           description,
-          genre,
-          actors,
-          directors,
+          genres: genreInputElems,
+          actors: actorInputElems,
+          directors: directorInputElems,
           coverFileName: cover.name,
           coverFileType: cover.type,
           videoFileName: video.name,
@@ -84,16 +139,57 @@ function UploadMovie() {
             <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} required></textarea>
           </div>
           <div className="form-group">
-            <label htmlFor="genre">Genre</label>
-            <input type="text" id="genre" value={genre} onChange={(e) => setGenre(e.target.value)} required />
+            <label htmlFor="genre-0">Genre</label>
+            {genreInputElems.map((_, i) => (
+              <div key={`genre${i}`} className="input-line">
+                <input
+                  type="text"
+                  id={`genre-${i}`}
+                  value={genreInputElems[i]}
+                  onChange={(e) => {
+                    handleChangeInput("genre", i, e.target.value);
+                  }}
+                  required
+                />
+                <Button type="button">
+                  {i !== genreInputElems.length - 1 ? (
+                    <MinusIcon onClick={(e) => handleRemoveInput("genre", i)} />
+                  ) : (
+                    <PlusIcon onClick={() => handleAddInput("genre")} />
+                  )}
+                </Button>
+              </div>
+            ))}
           </div>
           <div className="form-group">
-            <label htmlFor="actors">Actors</label>
-            <input type="text" id="actors" value={actors} onChange={(e) => setActors(e.target.value)} required />
+            <label htmlFor="actor-0">Actors</label>
+            {actorInputElems.map((_, i) => (
+              <div key={`actor${i}`} className="input-line">
+                <input type="text" id={`actor-${i}`} value={actorInputElems[i]} onChange={(e) => handleChangeInput("actor", i, e.target.value)} required />
+                <Button type="button">
+                  {i !== actorInputElems.length - 1 ? (
+                    <MinusIcon onClick={(e) => handleRemoveInput("actor", i)} />
+                  ) : (
+                    <PlusIcon onClick={() => handleAddInput("actor")} />
+                  )}
+                </Button>
+              </div>
+            ))}
           </div>
           <div className="form-group">
-            <label htmlFor="directors">Directors</label>
-            <input type="text" id="directors" value={directors} onChange={(e) => setDirectors(e.target.value)} required />
+            <label htmlFor="director-0">Directors</label>
+            {directorInputElems.map((_, i) => (
+              <div key={`director${i}`} className="input-line">
+                <input type="text" id={`director-${i}`} value={directorInputElems[i]} onChange={(e) => handleChangeInput("director", i, e.target.value)} required />
+                <Button type="button">
+                  {i !== directorInputElems.length - 1 ? (
+                    <MinusIcon onClick={(e) => handleRemoveInput("director", i)} />
+                  ) : (
+                    <PlusIcon onClick={() => handleAddInput("director")} />
+                  )}
+                </Button>
+              </div>
+            ))}
           </div>
           <div className="form-group">
             <label htmlFor="cover">Movie Cover</label>
