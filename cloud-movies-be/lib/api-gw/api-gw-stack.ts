@@ -74,14 +74,28 @@ export class ApiGwStack extends cdk.Stack {
         DYNAMODB_TABLE: moviesDataTable.tableName,
       },
     });
+    
+    const deleteMovieFn = new lambda.Function(this, "deleteMovieFn", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: "index.handler",
+      code: lambda.Code.fromAsset(path.join(__dirname, "./src/delete-movie")),
+      environment: {
+        S3_BUCKET: moviesBucket.bucketName,
+        DYNAMODB_TABLE: moviesDataTable.tableName,
+      },
+      timeout: cdk.Duration.seconds(10),
+    });
 
     moviesBucket.grantRead(downloadMovieFn);
     moviesBucket.grantReadWrite(uploadMovieFn);
+    moviesBucket.grantReadWrite(deleteMovieFn);
+
     moviesDataTable.grantReadData(downloadMovieFn);
     moviesDataTable.grantReadData(getAllMoviesFn);
     moviesDataTable.grantReadData(getSingleMovieFn);
     moviesDataTable.grantReadData(searchMoviesFn);
     moviesDataTable.grantReadWriteData(uploadMovieFn);
+    moviesDataTable.grantReadWriteData(deleteMovieFn);
 
     const api = new apigateway.RestApi(this, "MoviesApi", {
       restApiName: "Movies Service",
@@ -162,6 +176,19 @@ export class ApiGwStack extends cdk.Stack {
       requestValidatorOptions: {
         validateRequestParameters: true,
       },
+    });
+
+    const deleteMovieLambdaIntegration = new apigateway.LambdaIntegration(deleteMovieFn);
+    movieResource.addMethod("DELETE", deleteMovieLambdaIntegration, {
+      requestParameters: {
+        "method.request.path.id": true,
+      },
+      requestValidatorOptions: {
+        validateRequestParameters: true,
+      },
+    });
+    movieResource.addCorsPreflight({
+      allowOrigins: ["*"],
     });
   }
 }
