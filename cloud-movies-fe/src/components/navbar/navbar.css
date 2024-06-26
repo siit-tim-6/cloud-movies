@@ -58,6 +58,7 @@
   color: white;
   height: 30px;
   width: 30px;
+  cursor: pointer;
 }
 
 a {

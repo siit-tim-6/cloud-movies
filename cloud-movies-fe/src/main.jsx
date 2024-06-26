@@ -11,6 +11,7 @@ import { AccountProvider } from "@/components/auth/accountContext";
 import ProtectedRoutes from "./routes/protectedRoutes";
 import MovieDetails from "@/components/movie-details/movie-details.jsx";
 import UploadMovie from "@/components/upload-movie/upload-movie.jsx";
+import SubscriptionList from "./components/subscription-list/subscription-list";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -18,10 +19,11 @@ const router = createBrowserRouter(
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route element={<ProtectedRoutes />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/movies" element={<AllMovies />} />
-          <Route path="/movies/:id" element={<MovieDetails />} />
-          <Route path="/upload-movie" element={<UploadMovie />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/movies" element={<AllMovies />} />
+        <Route path="/movies/:id" element={<MovieDetails />} />
+        <Route path="/upload-movie" element={<UploadMovie />} />
+        <Route path="/subscriptions" element={<SubscriptionList />} />
       </Route>
     </>
   )
