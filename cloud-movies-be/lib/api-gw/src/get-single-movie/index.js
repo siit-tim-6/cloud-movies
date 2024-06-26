@@ -14,7 +14,7 @@ exports.handler = async (event) => {
   const bucketName = process.env.S3_BUCKET;
   const movieId = event.pathParameters.id;
 
-  const dynamoScanCommand = new QueryCommand({
+  const dynamoQueryCommand = new QueryCommand({
     TableName: tableName,
     KeyConditionExpression: "MovieId = :movieId",
     ExpressionAttributeValues: {
@@ -22,7 +22,7 @@ exports.handler = async (event) => {
     },
   });
 
-  const movieResponse = await dynamoDocClient.send(dynamoScanCommand);
+  const movieResponse = await dynamoDocClient.send(dynamoQueryCommand);
 
   if (movieResponse.Count < 1) {
     return {
