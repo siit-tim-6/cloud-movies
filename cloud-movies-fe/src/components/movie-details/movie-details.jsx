@@ -11,6 +11,7 @@ import axios from "axios";
 import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
 import { Button } from "../ui/button";
+import ReactLoading from "react-loading";
 
 function MovieDetails() {
   const { id } = useParams();
@@ -23,6 +24,7 @@ function MovieDetails() {
   const [actors, setActors] = useState([]);
   const [directors, setDirectors] = useState([]);
   const [coverUrl, setCoverUrl] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getMovie = async () => {
@@ -33,6 +35,7 @@ function MovieDetails() {
       setActors(movieResponse.data.Actors);
       setDirectors(movieResponse.data.Directors);
       setCoverUrl(movieResponse.data.CoverS3Url);
+      setLoading(false);
     };
 
     getMovie();
@@ -105,62 +108,70 @@ function MovieDetails() {
     <>
       <Navbar />
       <div className="movie-details-page">
-        <div className="movie-cover" style={{ backgroundImage: `url(${coverUrl})` }}>
-          <div className="play-button">
-            <FontAwesomeIcon icon={faPlay} />
+        {loading ? (
+          <div className="full-page">
+            <ReactLoading type="spokes" color="#ffffff" height={100} width={100} />
           </div>
-        </div>
-        <div className="movie-info">
-          <div className="movie-title-favorite">
-            <h1>{title}</h1>
-            <button className="download-button" onClick={handleDownload}>
-              <FontAwesomeIcon icon={faDownload} />
-            </button>
-            <button className="delete-button" onClick={confirmDelete}>
-              <FontAwesomeIcon icon={faTrash} />
-            </button>
-          </div>
-          <div className="movie-genre-rating">
-            {genres.map((genre) => (
-              <Badge className="movie-genre">{genre}</Badge>
-            ))}
-            <div className="rating">
-              <Rating count={5} value={rating} edit={false} size={24} activeColor="#ffd700" />
-            </div>
-          </div>
-          <p className="movie-description">{description}</p>
-          <div className="movie-meta">
-            <div className="meta-item">
-              <strong>Actors</strong>
-              {actors.map((actor) => (
-                <div className="data-line">
-                  <p>{actor}</p>
-                  <FontAwesomeIcon icon={faHeart} />
-                </div>
-              ))}
-            </div>
-            <div className="meta-item">
-              <strong>Directors</strong>
-              {directors.map((director) => (
-                <div className="data-line">
-                  <p>{director}</p>
-                  <FontAwesomeIcon icon={faHeart} />
-                </div>
-              ))}
-            </div>
-            <div className="meta-item">
-              <strong>Genres</strong>
-              <div className="data-list">
-                {genres.map((genre) => (
-                  <div className="data-line">
-                    <p>{genre}</p>
-                    <FontAwesomeIcon icon={faHeart} />
-                  </div>
-                ))}
+        ) : (
+          <>
+            <div className="movie-cover" style={{ backgroundImage: `url(${coverUrl})` }}>
+              <div className="play-button">
+                <FontAwesomeIcon icon={faPlay} />
               </div>
             </div>
-          </div>
-        </div>
+            <div className="movie-info">
+              <div className="movie-title-favorite">
+                <h1>{title}</h1>
+                <button className="download-button" onClick={handleDownload}>
+                  <FontAwesomeIcon icon={faDownload} />
+                </button>
+                <button className="delete-button" onClick={confirmDelete}>
+                  <FontAwesomeIcon icon={faTrash} />
+                </button>
+              </div>
+              <div className="movie-genre-rating">
+                {genres.map((genre) => (
+                  <Badge className="movie-genre">{genre}</Badge>
+                ))}
+                <div className="rating">
+                  <Rating count={5} value={rating} edit={false} size={24} activeColor="#ffd700" />
+                </div>
+              </div>
+              <p className="movie-description">{description}</p>
+              <div className="movie-meta">
+                <div className="meta-item">
+                  <strong>Actors</strong>
+                  {actors.map((actor) => (
+                    <div className="data-line">
+                      <p>{actor}</p>
+                      <FontAwesomeIcon icon={faHeart} />
+                    </div>
+                  ))}
+                </div>
+                <div className="meta-item">
+                  <strong>Directors</strong>
+                  {directors.map((director) => (
+                    <div className="data-line">
+                      <p>{director}</p>
+                      <FontAwesomeIcon icon={faHeart} />
+                    </div>
+                  ))}
+                </div>
+                <div className="meta-item">
+                  <strong>Genres</strong>
+                  <div className="data-list">
+                    {genres.map((genre) => (
+                      <div className="data-line">
+                        <p>{genre}</p>
+                        <FontAwesomeIcon icon={faHeart} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </>
   );

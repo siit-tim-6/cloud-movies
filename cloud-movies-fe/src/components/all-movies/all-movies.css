@@ -21,3 +21,11 @@
   justify-content: space-around;
   row-gap: 32px;
 }
+
+.full-page-80 {
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
