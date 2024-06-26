@@ -1,0 +1,28 @@
+.subscription-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 136px 32px 64px;
+  gap: 16px;
+  color: white;
+  width: 100vw;
+  background-color: black;
+  box-sizing: border-box;
+  overflow-y: auto;
+  min-height: 100vh;
+}
+
+.subscription-line {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.full-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
