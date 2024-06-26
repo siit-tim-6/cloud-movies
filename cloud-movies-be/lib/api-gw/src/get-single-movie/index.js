@@ -2,12 +2,16 @@
 
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { QueryCommand, DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
+const { GetObjectCommand, S3Client } = require("@aws-sdk/client-s3");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
 const dynamoClient = new DynamoDBClient({});
 const dynamoDocClient = DynamoDBDocumentClient.from(dynamoClient);
+const s3Client = new S3Client({});
 
 exports.handler = async (event) => {
   const tableName = process.env.DYNAMODB_TABLE;
+  const bucketName = process.env.S3_BUCKET;
   const movieId = event.pathParameters.id;
 
   const dynamoScanCommand = new QueryCommand({
@@ -33,6 +37,16 @@ exports.handler = async (event) => {
     };
   }
 
+  const responseItem = movieResponse.Items[0];
+
+  const s3CoverUrlKey = responseItem.CoverS3Url.split(`https://${bucketName}.s3.amazonaws.com/`)[1];
+  const getCoverCommand = new GetObjectCommand({
+    Bucket: bucketName,
+    Key: s3CoverUrlKey,
+  });
+  const s3CoverSignedUrl = await getSignedUrl(s3Client, getCoverCommand, { expiresIn: 3600 });
+  responseItem.CoverS3Url = s3CoverSignedUrl;
+
   return {
     statusCode: 200,
     headers: {
@@ -41,6 +55,6 @@ exports.handler = async (event) => {
       "Access-Control-Allow-Methods": "GET,OPTIONS",
       "Access-Control-Allow-Origin": "*",
     },
-    body: JSON.stringify(movieResponse.Items[0]),
+    body: JSON.stringify(responseItem),
   };
 };

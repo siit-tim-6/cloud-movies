@@ -63,6 +63,7 @@ export class ApiGwStack extends cdk.Stack {
       handler: "index.handler",
       code: lambda.Code.fromAsset(path.join(__dirname, "./src/get-single-movie")),
       environment: {
+        S3_BUCKET: moviesBucket.bucketName,
         DYNAMODB_TABLE: moviesDataTable.tableName,
       },
     });
@@ -89,6 +90,7 @@ export class ApiGwStack extends cdk.Stack {
 
     moviesBucket.grantRead(downloadMovieFn);
     moviesBucket.grantRead(getAllMoviesFn);
+    moviesBucket.grantRead(getSingleMovieFn);
     moviesBucket.grantReadWrite(uploadMovieFn);
     moviesBucket.grantReadWrite(deleteMovieFn);
 
