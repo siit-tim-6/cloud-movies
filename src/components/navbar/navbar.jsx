@@ -9,8 +9,9 @@ import { AccountContext } from "@/components/auth/accountContext";
 
 function Navbar() {
   const navigate = useNavigate();
-  const { logout } = useContext(AccountContext);
+  const { logout, getRole } = useContext(AccountContext);
   const [scrolled, setScrolled] = useState(false);
+  const [role, setRole] = useState(undefined);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,6 +22,12 @@ function Navbar() {
       }
     };
 
+    const exctractRole = async () => {
+      const userRole = await getRole();
+      setRole(userRole);
+    };
+
+    exctractRole();
     window.addEventListener("scroll", handleScroll);
     return () => {
       window.removeEventListener("scroll", handleScroll);
@@ -44,9 +51,13 @@ function Navbar() {
         <div className="white-icon" onClick={() => navigate("/subscriptions")}>
           <HeartFilledIcon />
         </div>
-        <div className="white-icon" onClick={() => navigate("/upload-movie")}>
-          <UploadIcon />
-        </div>
+        {role === "ADMIN" ? (
+          <div className="white-icon" onClick={() => navigate("/upload-movie")}>
+            <UploadIcon />
+          </div>
+        ) : (
+          ""
+        )}
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
