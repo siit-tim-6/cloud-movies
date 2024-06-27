@@ -64,16 +64,6 @@ export class ApiGwStack extends cdk.Stack {
       },
     });
 
-    const getAllMoviesFn = new lambda.Function(this, "getAllMoviesFn", {
-      runtime: lambda.Runtime.NODEJS_20_X,
-      handler: "index.handler",
-      code: lambda.Code.fromAsset(path.join(__dirname, "./src/get-all-movies")),
-      environment: {
-        S3_BUCKET: moviesBucket.bucketName,
-        DYNAMODB_TABLE: moviesDataTable.tableName,
-      },
-    });
-
     const getSingleMovieFn = new lambda.Function(this, "getSingleMovieFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: "index.handler",
@@ -84,10 +74,10 @@ export class ApiGwStack extends cdk.Stack {
       },
     });
 
-    const searchMoviesFn = new lambda.Function(this, "searchMoviesFn", {
+    const getMoviesFn = new lambda.Function(this, "getMoviesFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: "index.handler",
-      code: lambda.Code.fromAsset(path.join(__dirname, "./src/search-movies")),
+      code: lambda.Code.fromAsset(path.join(__dirname, "./src/get-movies")),
       environment: {
         S3_BUCKET: moviesBucket.bucketName,
         DYNAMODB_TABLE: moviesDataTable.tableName,
@@ -106,16 +96,14 @@ export class ApiGwStack extends cdk.Stack {
     });
 
     moviesBucket.grantRead(downloadMovieFn);
-    moviesBucket.grantRead(getAllMoviesFn);
-    moviesBucket.grantRead(searchMoviesFn);
+    moviesBucket.grantRead(getMoviesFn);
     moviesBucket.grantRead(getSingleMovieFn);
     moviesBucket.grantReadWrite(uploadMovieFn);
     moviesBucket.grantReadWrite(deleteMovieFn);
 
     moviesDataTable.grantReadData(downloadMovieFn);
-    moviesDataTable.grantReadData(getAllMoviesFn);
     moviesDataTable.grantReadData(getSingleMovieFn);
-    moviesDataTable.grantReadData(searchMoviesFn);
+    moviesDataTable.grantReadData(getMoviesFn);
     moviesDataTable.grantReadWriteData(uploadMovieFn);
     moviesDataTable.grantReadWriteData(deleteMovieFn);
 
@@ -171,8 +159,6 @@ export class ApiGwStack extends cdk.Stack {
     });
 
     const moviesResource = api.root.addResource("movies");
-    const getAllMoviesLambdaIntegration = new apigateway.LambdaIntegration(getAllMoviesFn);
-    moviesResource.addMethod("GET", getAllMoviesLambdaIntegration);
 
     const movieResource = moviesResource.addResource("{id}");
     const getSingleMovieLambdaIntegration = new apigateway.LambdaIntegration(getSingleMovieFn);
@@ -185,9 +171,8 @@ export class ApiGwStack extends cdk.Stack {
       },
     });
 
-    const searchMoviesLambdaIntegration = new apigateway.LambdaIntegration(searchMoviesFn);
-    const searchMoviesResource = api.root.addResource("search-movies");
-    searchMoviesResource.addMethod("GET", searchMoviesLambdaIntegration, {
+    const getMoviesLambdaIntegration = new apigateway.LambdaIntegration(getMoviesFn);
+    moviesResource.addMethod("GET", getMoviesLambdaIntegration, {
       requestParameters: {
         "method.request.path.title": false,
         "method.request.path.description": false,
