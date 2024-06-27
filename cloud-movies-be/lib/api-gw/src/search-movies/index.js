@@ -1,7 +1,7 @@
 "use strict";
 
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const { ScanCommand, DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
+const { QueryCommand, ScanCommand, DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
 
 const dynamoClient = new DynamoDBClient({});
 const dynamoDocClient = DynamoDBDocumentClient.from(dynamoClient);
@@ -11,55 +11,55 @@ exports.handler = async (event) => {
   if (event.queryStringParameters === null) {
     event.queryStringParameters = {};
   }
-  const { title, description, actors, directors, genres } = event?.queryStringParameters;
+  const { title, description, actor, director, genre } = event?.queryStringParameters;
 
   const filterExpressions = [];
-  const expressionAttributeNames = {};
   const expressionAttributeValues = {};
 
-  if (title) {
-    filterExpressions.push("contains(#lowerTitle, :lowerTitle)");
-    expressionAttributeNames["#lowerTitle"] = "LowerTitle";
-    expressionAttributeValues[":lowerTitle"] = title.toLowerCase();
-  }
-  if (description) {
-    filterExpressions.push("contains(#lowerDescription, :lowerDescription)");
-    expressionAttributeNames["#lowerDescription"] = "LowerDescription";
-    expressionAttributeValues[":lowerDescription"] = description.toLowerCase();
-  }
-  if (actors) {
-    filterExpressions.push("contains(#lowerActors, :lowerActors)");
-    expressionAttributeNames["#lowerActors"] = "LowerActors";
-    expressionAttributeValues[":lowerActors"] = actors.toLowerCase();
-  }
-  if (directors) {
-    filterExpressions.push("contains(#lowerDirectors, :lowerDirectors)");
-    expressionAttributeNames["#lowerDirectors"] = "LowerDirectors";
-    expressionAttributeValues[":lowerDirectors"] = directors.toLowerCase();
-  }
-  if (genres) {
-    filterExpressions.push("contains(#lowerGenre, :lowerGenre)");
-    expressionAttributeNames["#lowerGenre"] = "LowerGenre";
-    expressionAttributeValues[":lowerGenre"] = genres.toLowerCase();
+  if (actor) {
+    filterExpressions.push("contains(Actors, :actor)");
+    expressionAttributeValues[":actor"] = actor.toLowerCase();
   }
 
-  let dynamoScanCommand;
+  if (director) {
+    filterExpressions.push("contains(Directors, :director)");
+    expressionAttributeValues[":director"] = director.toLowerCase();
+  }
+
+  if (genre) {
+    filterExpressions.push("contains(Genres, :genre)");
+    expressionAttributeValues[":genre"] = genre.toLowerCase();
+  }
+
+  let dynamoCommandProps = {
+    TableName: tableName,
+    ProjectionExpression: "MovieId, Title, Genres, CoverS3Url",
+  };
+
+  if (title && description) {
+    dynamoCommandProps["IndexName"] = "titleSearch";
+    dynamoCommandProps["KeyConditionExpression"] = "LowerTitle = :title AND begins_with(LowerDescription, :description)";
+    expressionAttributeValues[":title"] = title.toLowerCase();
+    expressionAttributeValues[":description"] = description.toLowerCase();
+  } else if (title) {
+    dynamoCommandProps["IndexName"] = "titleSearch";
+    dynamoCommandProps["KeyConditionExpression"] = "LowerTitle = :title";
+    expressionAttributeValues[":title"] = title.toLowerCase();
+  } else if (description) {
+    dynamoCommandProps["IndexName"] = "descriptionSearch";
+    dynamoCommandProps["KeyConditionExpression"] = "LowerDescription = :description";
+    expressionAttributeValues[":description"] = description.toLowerCase();
+  }
+
+  dynamoCommandProps["ExpressionAttributeValues"] = expressionAttributeValues;
   if (filterExpressions.length > 0) {
-    const filterExpression = filterExpressions.join(" AND ");
-
-    dynamoScanCommand = new ScanCommand({
-      TableName: tableName,
-      FilterExpression: filterExpression,
-      ExpressionAttributeNames: expressionAttributeNames,
-      ExpressionAttributeValues: expressionAttributeValues,
-    });
-  } else {
-    dynamoScanCommand = new ScanCommand({
-      TableName: tableName,
-    });
+    dynamoCommandProps["FilterExpression"] = filterExpressions.join(" AND ");
   }
 
-  const moviesResponse = await dynamoDocClient.send(dynamoScanCommand);
+  console.log(dynamoCommandProps);
+
+  const dynamoCommand = title || description ? new QueryCommand(dynamoCommandProps) : new ScanCommand(dynamoCommandProps);
+  const moviesResponse = await dynamoDocClient.send(dynamoCommand);
 
   return {
     statusCode: 200,
