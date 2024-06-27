@@ -31,6 +31,16 @@ export class ApiGwStack extends cdk.Stack {
       cloudWatchRole: true,
     });
 
+    const downloadMovieResource = api.root.addResource("download-movie");
+    downloadMovieResource.addMethod("GET", downloadMovieLambdaIntegration, {
+      requestParameters: {
+        "method.request.querystring.movieId": true,
+      },
+      requestValidatorOptions: {
+        validateRequestParameters: true,
+      },
+    });
+
     const uploadMovieRequestBodySchema = new apigateway.Model(this, "uploadMovieRequestBodySchema", {
       restApi: api,
       contentType: "application/json",
@@ -51,29 +61,6 @@ export class ApiGwStack extends cdk.Stack {
       },
     });
 
-    const uploadMovieResource = api.root.addResource("upload-movie");
-    uploadMovieResource.addMethod("POST", uploadMovieLambdaIntegration, {
-      requestModels: {
-        "application/json": uploadMovieRequestBodySchema,
-      },
-      requestValidatorOptions: {
-        validateRequestBody: true,
-      },
-    });
-    uploadMovieResource.addCorsPreflight({
-      allowOrigins: ["*"],
-    });
-
-    const downloadMovieResource = api.root.addResource("download-movie");
-    downloadMovieResource.addMethod("GET", downloadMovieLambdaIntegration, {
-      requestParameters: {
-        "method.request.querystring.movieId": true,
-      },
-      requestValidatorOptions: {
-        validateRequestParameters: true,
-      },
-    });
-
     const moviesResource = api.root.addResource("movies");
     moviesResource.addMethod("GET", getMoviesLambdaIntegration, {
       requestParameters: {
@@ -86,6 +73,17 @@ export class ApiGwStack extends cdk.Stack {
       requestValidatorOptions: {
         validateRequestParameters: true,
       },
+    });
+    moviesResource.addMethod("POST", uploadMovieLambdaIntegration, {
+      requestModels: {
+        "application/json": uploadMovieRequestBodySchema,
+      },
+      requestValidatorOptions: {
+        validateRequestBody: true,
+      },
+    });
+    moviesResource.addCorsPreflight({
+      allowOrigins: ["*"],
     });
 
     const movieResource = moviesResource.addResource("{id}");
