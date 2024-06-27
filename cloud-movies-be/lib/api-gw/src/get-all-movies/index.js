@@ -18,9 +18,9 @@ exports.handler = async (event) => {
     ProjectionExpression: "MovieId, Title, Genres, CoverS3Url",
   });
 
-  const moviesReponse = await dynamoDocClient.send(dynamoScanCommand);
+  const moviesResponse = await dynamoDocClient.send(dynamoScanCommand);
 
-  const moviesWithCoverPromises = moviesReponse.Items.map(async (item) => {
+  const moviesWithCoverPromises = moviesResponse.Items.map(async (item) => {
     const s3CoverUrlKey = item.CoverS3Url.split(`https://${bucketName}.s3.amazonaws.com/`)[1];
     const getCoverCommand = new GetObjectCommand({
       Bucket: bucketName,
