@@ -5,13 +5,17 @@ import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import path = require("path");
 
+export interface LambdaStackProps extends cdk.StackProps {
+  moviesDataTable: dynamodb.Table;
+  subscriptionsDataTable: dynamodb.Table;
+  moviesBucket: s3.Bucket;
+}
+
 export class LambdaStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props?: LambdaStackProps) {
     super(scope, id, props);
 
-    const moviesBucket = s3.Bucket.fromBucketArn(this, "moviesBucket", cdk.Fn.importValue("moviesBucketArn"));
-    const moviesDataTable = dynamodb.Table.fromTableArn(this, "moviesDataTable", cdk.Fn.importValue("moviesDataTableArn"));
-    const subscriptionsDataTable = dynamodb.Table.fromTableArn(this, "subscriptionsDataTable", cdk.Fn.importValue("subscriptionsDataTableArn"));
+    const { moviesBucket, moviesDataTable, subscriptionsDataTable } = props!;
 
     const uploadMovieFn = new lambda.Function(this, "uploadMovieFn", {
       runtime: lambda.Runtime.NODEJS_20_X,

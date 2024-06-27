@@ -4,6 +4,10 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import { Construct } from "constructs";
 
 export class DataStack extends cdk.Stack {
+  public readonly moviesDataTable: dynamodb.Table;
+  public readonly subscriptionsDataTable: dynamodb.Table;
+  public readonly moviesBucket: s3.Bucket;
+
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -56,19 +60,8 @@ export class DataStack extends cdk.Stack {
       ],
     });
 
-    new cdk.CfnOutput(this, "moviesDataTableArn", {
-      exportName: "moviesDataTableArn",
-      value: moviesDataTable.tableArn,
-    });
-
-    new cdk.CfnOutput(this, "subscriptionsDataTableArn", {
-      exportName: "subscriptionsDataTableArn",
-      value: subscriptionsDataTable.tableArn,
-    });
-
-    new cdk.CfnOutput(this, "moviesBucketArn", {
-      exportName: "moviesBucketArn",
-      value: moviesBucket.bucketArn,
-    });
+    this.moviesDataTable = moviesDataTable;
+    this.subscriptionsDataTable = subscriptionsDataTable;
+    this.moviesBucket = moviesBucket;
   }
 }

@@ -10,8 +10,12 @@ import { LambdaStack } from "../lib/lambda/lambda-stack";
 const app = new cdk.App();
 
 new CognitoStack(app, "CognitoStack", {});
-new DataStack(app, "DataStack", {});
-new LambdaStack(app, "LambdaStack", {});
+const dataStack = new DataStack(app, "DataStack", {});
+const lambdaStack = new LambdaStack(app, "LambdaStack", {
+  moviesBucket: dataStack.moviesBucket,
+  moviesDataTable: dataStack.moviesDataTable,
+  subscriptionsDataTable: dataStack.subscriptionsDataTable,
+});
 new ApiGwStack(app, "ApiGwStack", {});
 new FrontDeploymentStack(app, "FrontDeploymentStack", {});
 
