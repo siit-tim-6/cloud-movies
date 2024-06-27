@@ -47,10 +47,11 @@ function MovieDetails() {
       setDirectors(movieResponse.data.Directors);
       setCoverUrl(movieResponse.data.CoverS3Url);
       setSubscriptions(subscriptionsReponse.data);
-      setLoading(false);
 
       const userRole = await getRole();
       setRole(userRole);
+
+      setLoading(false);
     };
 
     getMovie();
