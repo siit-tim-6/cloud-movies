@@ -28,6 +28,22 @@ function SubscriptionList() {
     getAllSubscriptions();
   }, []);
 
+  const unsubscribe = async (item) => {
+    const session = await getSession();
+
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/subscriptions?subscribedTo=${item}`, {
+        headers: {
+          Authorization: session.accessToken.jwtToken,
+        },
+      });
+      setSubscriptions(subscriptions.filter((subscription) => subscription !== item));
+      alert("Unsubscribed sucessfully.");
+    } catch (error) {
+      alert("Failed to unsubscribe.");
+    }
+  };
+
   return (
     <>
       <Navbar />
@@ -42,7 +58,7 @@ function SubscriptionList() {
             {subscriptions.map((subscription) => (
               <div className="subscription-line">
                 <p>{subscription}</p>
-                <Button>Unsubscribe</Button>
+                <Button onClick={() => unsubscribe(subscription)}>Unsubscribe</Button>
               </div>
             ))}
           </>
