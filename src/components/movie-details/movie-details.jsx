@@ -17,7 +17,7 @@ import { AccountContext } from "../auth/accountContext";
 function MovieDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getSession } = useContext(AccountContext);
+  const { getSession, getRole } = useContext(AccountContext);
 
   const [rating, setRating] = useState(4);
   const [title, setTitle] = useState("");
@@ -28,6 +28,7 @@ function MovieDetails() {
   const [coverUrl, setCoverUrl] = useState("");
   const [loading, setLoading] = useState(true);
   const [subscriptions, setSubscriptions] = useState([]);
+  const [role, setRole] = useState(undefined);
 
   useEffect(() => {
     const getMovie = async () => {
@@ -47,6 +48,9 @@ function MovieDetails() {
       setCoverUrl(movieResponse.data.CoverS3Url);
       setSubscriptions(subscriptionsReponse.data);
       setLoading(false);
+
+      const userRole = await getRole();
+      setRole(userRole);
     };
 
     getMovie();
@@ -168,9 +172,13 @@ function MovieDetails() {
                 <button className="download-button" onClick={handleDownload}>
                   <FontAwesomeIcon icon={faDownload} />
                 </button>
-                <button className="delete-button" onClick={confirmDelete}>
-                  <FontAwesomeIcon icon={faTrash} />
-                </button>
+                {role === "ADMIN" ? (
+                  <button className="delete-button" onClick={confirmDelete}>
+                    <FontAwesomeIcon icon={faTrash} />
+                  </button>
+                ) : (
+                  ""
+                )}
               </div>
               <div className="movie-genre-rating">
                 {genres.map((genre, i) => (
