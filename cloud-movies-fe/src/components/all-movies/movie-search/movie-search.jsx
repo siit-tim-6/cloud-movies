@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 
-function MovieSearch({ setMovies }) {
+function MovieSearch({ setMovies, setLoading }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [actor, setActor] = useState("");
@@ -12,6 +12,7 @@ function MovieSearch({ setMovies }) {
   const [genre, setGenre] = useState("");
 
   const handleSearch = async () => {
+    setLoading(true);
     let query = `title=${title}&description=${description}&actor=${actor}&director=${director}&genre=${genre}`;
     const response = await fetch(`${import.meta.env.VITE_API_URL}/search-movies?${query}`, {
       method: "GET",
@@ -23,6 +24,7 @@ function MovieSearch({ setMovies }) {
     } else {
       console.error("Failed to fetch movies");
     }
+    setLoading(false);
   };
 
   return (

@@ -24,7 +24,7 @@ function AllMovies() {
     <div className="all-movies">
       <Navbar />
       <div className="all-movies-content">
-        <MovieSearch setMovies={setMovies} />
+        <MovieSearch setMovies={setMovies} setLoading={setLoading} />
         {loading ? (
           <div className="full-page-80" style={{ marginLeft: "20vw" }}>
             <ReactLoading type="spokes" color="#ffffff" height={100} width={100} />
