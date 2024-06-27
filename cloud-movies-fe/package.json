@@ -30,6 +30,7 @@
     "react-confirm-alert": "^3.0.6",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.2.0",
+    "react-loading": "^2.0.3",
     "react-rating-stars-component": "^2.2.0",
     "react-router-dom": "^6.23.0",
     "swiper": "^11.1.1",

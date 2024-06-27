@@ -8,7 +8,7 @@ function MovieCard({ MovieId, Title, Genre, CoverS3Url }) {
   return (
     <Link to={`/movies/${MovieId}`} className="movie-card-link">
       <div className="movie-card">
-        <div className="movie-image" style={{ backgroundImage: `url(${MovieCover})` }}>
+        <div className="movie-image" style={{ backgroundImage: `url(${CoverS3Url})` }}>
           <Badge>{Genre}</Badge>
         </div>
         <div className="movie-title">

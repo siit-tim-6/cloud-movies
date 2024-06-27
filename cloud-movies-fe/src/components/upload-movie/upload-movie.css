@@ -108,4 +108,13 @@ textarea {
     background-color: #555;
 }
 
+.input-line {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
 
+.input-line > button {
+    height: 100%;
+    margin-left: 10px;
+}
