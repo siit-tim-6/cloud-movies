@@ -18,15 +18,16 @@ export class ApiGwStack extends cdk.Stack {
     });
 
     moviesDataTable.addGlobalSecondaryIndex({
-      indexName: "descriptionSearch",
-      partitionKey: { name: "LowerDescription", type: dynamodb.AttributeType.STRING },
+      indexName: "titleSearch",
+      partitionKey: { name: "LowerTitle", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "LowerDescription", type: dynamodb.AttributeType.STRING },
       readCapacity: 1,
       writeCapacity: 1,
     });
 
     moviesDataTable.addGlobalSecondaryIndex({
-      indexName: "titleDescriptionSearch",
-      partitionKey: { name: "TitleDescriptionSearch", type: dynamodb.AttributeType.STRING },
+      indexName: "descriptionSearch",
+      partitionKey: { name: "LowerDescription", type: dynamodb.AttributeType.STRING },
       readCapacity: 1,
       writeCapacity: 1,
     });
@@ -188,9 +189,9 @@ export class ApiGwStack extends cdk.Stack {
       requestParameters: {
         "method.request.path.title": false,
         "method.request.path.description": false,
-        "method.request.path.actors": false,
-        "method.request.path.directors": false,
-        "method.request.path.genres": false,
+        "method.request.path.actor": false,
+        "method.request.path.director": false,
+        "method.request.path.genre": false,
       },
       requestValidatorOptions: {
         validateRequestParameters: true,
@@ -214,6 +215,14 @@ export class ApiGwStack extends cdk.Stack {
     const subscriptionsDataTable = new dynamodb.Table(this, "SubscriptionsData", {
       partitionKey: { name: "UserId", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "SubscribedTo", type: dynamodb.AttributeType.STRING },
+      readCapacity: 1,
+      writeCapacity: 1,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
+    subscriptionsDataTable.addGlobalSecondaryIndex({
+      indexName: "SubscribedToSearch",
+      partitionKey: { name: "SubscribedTo", type: dynamodb.AttributeType.STRING },
       readCapacity: 1,
       writeCapacity: 1,
     });
