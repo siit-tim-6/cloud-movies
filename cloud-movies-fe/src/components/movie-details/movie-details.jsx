@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "@/components/navbar/navbar.jsx";
 import { Badge } from "@/components/ui/badge.jsx";
@@ -12,10 +12,12 @@ import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
 import { Button } from "../ui/button";
 import ReactLoading from "react-loading";
+import { AccountContext } from "../auth/accountContext";
 
 function MovieDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { getSession } = useContext(AccountContext);
 
   const [rating, setRating] = useState(4);
   const [title, setTitle] = useState("");
@@ -25,16 +27,25 @@ function MovieDetails() {
   const [directors, setDirectors] = useState([]);
   const [coverUrl, setCoverUrl] = useState("");
   const [loading, setLoading] = useState(true);
+  const [subscriptions, setSubscriptions] = useState([]);
 
   useEffect(() => {
     const getMovie = async () => {
+      const session = await getSession();
+
       const movieResponse = await axios.get(`${import.meta.env.VITE_API_URL}/movies/${id}`);
+      const subscriptionsReponse = await axios.get(`${import.meta.env.VITE_API_URL}/subscriptions`, {
+        headers: {
+          Authorization: session.accessToken.jwtToken,
+        },
+      });
       setTitle(movieResponse.data.Title);
       setGenres(movieResponse.data.Genres);
       setDescription(movieResponse.data.Description);
       setActors(movieResponse.data.Actors);
       setDirectors(movieResponse.data.Directors);
       setCoverUrl(movieResponse.data.CoverS3Url);
+      setSubscriptions(subscriptionsReponse.data);
       setLoading(false);
     };
 
@@ -104,6 +115,38 @@ function MovieDetails() {
     });
   };
 
+  const subUnsubTo = async (item) => {
+    const session = await getSession();
+
+    try {
+      if (subscriptions.includes(item)) {
+        await axios.delete(`${import.meta.env.VITE_API_URL}/subscriptions?subscribedTo=${item}`, {
+          headers: {
+            Authorization: session.accessToken.jwtToken,
+          },
+        });
+        setSubscriptions(subscriptions.filter((subscription) => subscription !== item));
+        alert("Unsubscribed sucessfully.");
+      } else {
+        await axios.post(
+          `${import.meta.env.VITE_API_URL}/subscriptions`,
+          {
+            subscribedTo: item,
+          },
+          {
+            headers: {
+              Authorization: session.accessToken.jwtToken,
+            },
+          }
+        );
+        setSubscriptions([...subscriptions, item]);
+        alert("Subscribed sucessfully.");
+      }
+    } catch (error) {
+      alert(`Failed to ${subscriptions.includes(item) ? "un" : ""}subscribe.`);
+    }
+  };
+
   return (
     <>
       <Navbar />
@@ -130,8 +173,10 @@ function MovieDetails() {
                 </button>
               </div>
               <div className="movie-genre-rating">
-                {genres.map((genre) => (
-                  <Badge className="movie-genre">{genre}</Badge>
+                {genres.map((genre, i) => (
+                  <Badge key={i} className="movie-genre">
+                    {genre}
+                  </Badge>
                 ))}
                 <div className="rating">
                   <Rating count={5} value={rating} edit={false} size={24} activeColor="#ffd700" />
@@ -141,29 +186,44 @@ function MovieDetails() {
               <div className="movie-meta">
                 <div className="meta-item">
                   <strong>Actors</strong>
-                  {actors.map((actor) => (
-                    <div className="data-line">
+                  {actors.map((actor, i) => (
+                    <div key={i} className="data-line">
                       <p>{actor}</p>
-                      <FontAwesomeIcon icon={faHeart} />
+                      <FontAwesomeIcon
+                        className="icon-btn"
+                        onClick={() => subUnsubTo(actor)}
+                        icon={faHeart}
+                        color={subscriptions.includes(actor) ? "red" : "white"}
+                      />
                     </div>
                   ))}
                 </div>
                 <div className="meta-item">
                   <strong>Directors</strong>
-                  {directors.map((director) => (
-                    <div className="data-line">
+                  {directors.map((director, i) => (
+                    <div key={i} className="data-line">
                       <p>{director}</p>
-                      <FontAwesomeIcon icon={faHeart} />
+                      <FontAwesomeIcon
+                        className="icon-btn"
+                        onClick={() => subUnsubTo(director)}
+                        icon={faHeart}
+                        color={subscriptions.includes(director) ? "red" : "white"}
+                      />
                     </div>
                   ))}
                 </div>
                 <div className="meta-item">
                   <strong>Genres</strong>
                   <div className="data-list">
-                    {genres.map((genre) => (
-                      <div className="data-line">
+                    {genres.map((genre, i) => (
+                      <div key={i} className="data-line">
                         <p>{genre}</p>
-                        <FontAwesomeIcon icon={faHeart} />
+                        <FontAwesomeIcon
+                          className="icon-btn"
+                          onClick={() => subUnsubTo(genre)}
+                          icon={faHeart}
+                          color={subscriptions.includes(genre) ? "red" : "white"}
+                        />
                       </div>
                     ))}
                   </div>

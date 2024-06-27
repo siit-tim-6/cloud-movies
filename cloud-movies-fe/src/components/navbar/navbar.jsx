@@ -1,10 +1,10 @@
 import "./navbar.css";
-import {HamburgerMenuIcon, MagnifyingGlassIcon, BellIcon, ExitIcon, UploadIcon} from "@radix-ui/react-icons";
+import { HamburgerMenuIcon, HeartFilledIcon, ExitIcon, UploadIcon } from "@radix-ui/react-icons";
 import { Link, useNavigate } from "react-router-dom";
 import Logo from "@/assets/brief-cinema-logo.svg";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import {useContext, useEffect, useState} from "react";
+import { useContext, useEffect, useState } from "react";
 import { AccountContext } from "@/components/auth/accountContext";
 
 function Navbar() {
@@ -34,7 +34,6 @@ function Navbar() {
           <HamburgerMenuIcon />
         </div>
         <Link to="/movies">Movies</Link>
-        <a href="">New & Popular</a>
       </div>
       <div className="navbar-center">
         <Link to="/">
@@ -42,14 +41,11 @@ function Navbar() {
         </Link>
       </div>
       <div className="navbar-right">
-        <div className="white-icon">
-          <MagnifyingGlassIcon/>
-        </div>
-        <div className="white-icon">
-          <BellIcon/>
+        <div className="white-icon" onClick={() => navigate("/subscriptions")}>
+          <HeartFilledIcon />
         </div>
         <div className="white-icon" onClick={() => navigate("/upload-movie")}>
-          <UploadIcon/>
+          <UploadIcon />
         </div>
 
         <DropdownMenu>
@@ -60,13 +56,13 @@ function Navbar() {
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem
-                onClick={() => {
-                  logout();
-                  navigate("/login");
-                }}
+              onClick={() => {
+                logout();
+                navigate("/login");
+              }}
             >
               <div className="flex flex-row items-center">
-                <ExitIcon className="mr-3"/> Log Out
+                <ExitIcon className="mr-3" /> Log Out
               </div>
             </DropdownMenuItem>
           </DropdownMenuContent>
