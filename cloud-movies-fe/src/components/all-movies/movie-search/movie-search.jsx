@@ -14,7 +14,7 @@ function MovieSearch({ setMovies, setLoading }) {
   const handleSearch = async () => {
     setLoading(true);
     let query = `title=${title}&description=${description}&actor=${actor}&director=${director}&genre=${genre}`;
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/search-movies?${query}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/movies?${query}`, {
       method: "GET",
     });
 
