@@ -221,9 +221,37 @@ export class ApiGwStack extends cdk.Stack {
       },
     });
 
+    const unsubscibeFn = new lambda.Function(this, "unsubscribeFn", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: "index.handler",
+      code: lambda.Code.fromAsset(path.join(__dirname, "./src/unsubscribe")),
+      environment: {
+        DYNAMODB_TABLE: subscriptionsDataTable.tableName,
+      },
+    });
+
+    const subscribeRequestBodySchema = new apigateway.Model(this, "subscribeRequestBodySchema", {
+      restApi: api,
+      contentType: "application/json",
+      schema: {
+        type: apigateway.JsonSchemaType.OBJECT,
+        properties: {
+          subscribedTo: { type: apigateway.JsonSchemaType.STRING },
+        },
+        required: ["subscribeTo"],
+      },
+    });
+
     const subscribeLambdaIntegration = new apigateway.LambdaIntegration(subscribeFn);
     const subscriptionsResource = api.root.addResource("subscriptions");
-    subscriptionsResource.addMethod("POST", subscribeLambdaIntegration);
+    subscriptionsResource.addMethod("POST", subscribeLambdaIntegration, {
+      requestModels: {
+        "application/json": subscribeRequestBodySchema,
+      },
+      requestValidatorOptions: {
+        validateRequestBody: true,
+      },
+    });
     subscriptionsResource.addCorsPreflight({
       allowOrigins: ["*"],
     });
@@ -231,7 +259,18 @@ export class ApiGwStack extends cdk.Stack {
     const getSubscriptionsLambdaIntegration = new apigateway.LambdaIntegration(getSubscriptionsFn);
     subscriptionsResource.addMethod("GET", getSubscriptionsLambdaIntegration);
 
+    const unsubscribeLambdaIntegration = new apigateway.LambdaIntegration(unsubscibeFn);
+    subscriptionsResource.addMethod("DELETE", unsubscribeLambdaIntegration, {
+      requestParameters: {
+        "method.request.querystring.subscribedTo": true,
+      },
+      requestValidatorOptions: {
+        validateRequestParameters: true,
+      },
+    });
+
     subscriptionsDataTable.grantWriteData(subscribeFn);
     subscriptionsDataTable.grantReadData(getSubscriptionsFn);
+    subscriptionsDataTable.grantWriteData(unsubscibeFn);
   }
 }
