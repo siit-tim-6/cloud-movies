@@ -3,18 +3,22 @@ import { Construct } from "constructs";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 
+export interface ApiGwStackProps extends cdk.StackProps {
+  uploadMovieFn: lambda.Function;
+  downloadMovieFn: lambda.Function;
+  getSingleMovieFn: lambda.Function;
+  getMoviesFn: lambda.Function;
+  deleteMovieFn: lambda.Function;
+  subscribeFn: lambda.Function;
+  getSubscriptionsFn: lambda.Function;
+  unsubscribeFn: lambda.Function;
+}
+
 export class ApiGwStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props?: ApiGwStackProps) {
     super(scope, id, props);
 
-    const uploadMovieFn = lambda.Function.fromFunctionArn(this, "uploadMovieFn", cdk.Fn.importValue("uploadMovieFnArn"));
-    const downloadMovieFn = lambda.Function.fromFunctionArn(this, "downloadMovieFn", cdk.Fn.importValue("downloadMovieFnArn"));
-    const getSingleMovieFn = lambda.Function.fromFunctionArn(this, "getSingleMovieFn", cdk.Fn.importValue("getSingleMovieFnArn"));
-    const getMoviesFn = lambda.Function.fromFunctionArn(this, "getMoviesFn", cdk.Fn.importValue("getMoviesFnArn"));
-    const deleteMovieFn = lambda.Function.fromFunctionArn(this, "deleteMovieFn", cdk.Fn.importValue("deleteMovieFnArn"));
-    const subscribeFn = lambda.Function.fromFunctionArn(this, "subscribeFn", cdk.Fn.importValue("subscribeFnArn"));
-    const getSubscriptionsFn = lambda.Function.fromFunctionArn(this, "getSubscriptionsFn", cdk.Fn.importValue("getSubscriptionsFnArn"));
-    const unsubscribeFn = lambda.Function.fromFunctionArn(this, "unsubscribeFn", cdk.Fn.importValue("unsubscribeFnArn"));
+    const { uploadMovieFn, downloadMovieFn, getSingleMovieFn, getMoviesFn, deleteMovieFn, subscribeFn, getSubscriptionsFn, unsubscribeFn } = props!;
 
     const uploadMovieLambdaIntegration = new apigateway.LambdaIntegration(uploadMovieFn);
     const downloadMovieLambdaIntegration = new apigateway.LambdaIntegration(downloadMovieFn);
