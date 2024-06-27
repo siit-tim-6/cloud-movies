@@ -174,7 +174,7 @@ function MovieDetails() {
               </div>
               <div className="movie-genre-rating">
                 {genres.map((genre, i) => (
-                  <Badge key={i} className="movie-genre">
+                  <Badge key={i} className="movie-genre uppercased">
                     {genre}
                   </Badge>
                 ))}
@@ -188,7 +188,7 @@ function MovieDetails() {
                   <strong>Actors</strong>
                   {actors.map((actor, i) => (
                     <div key={i} className="data-line">
-                      <p>{actor}</p>
+                      <p className="uppercased">{actor}</p>
                       <FontAwesomeIcon
                         className="icon-btn"
                         onClick={() => subUnsubTo(actor)}
@@ -202,7 +202,7 @@ function MovieDetails() {
                   <strong>Directors</strong>
                   {directors.map((director, i) => (
                     <div key={i} className="data-line">
-                      <p>{director}</p>
+                      <p className="uppercased">{director}</p>
                       <FontAwesomeIcon
                         className="icon-btn"
                         onClick={() => subUnsubTo(director)}
@@ -217,7 +217,7 @@ function MovieDetails() {
                   <div className="data-list">
                     {genres.map((genre, i) => (
                       <div key={i} className="data-line">
-                        <p>{genre}</p>
+                        <p className="uppercased">{genre}</p>
                         <FontAwesomeIcon
                           className="icon-btn"
                           onClick={() => subUnsubTo(genre)}

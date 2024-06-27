@@ -27,3 +27,7 @@
 .movie-card-link {
   text-decoration: none;
 }
+
+.capitalized {
+  text-transform: capitalize;
+}
