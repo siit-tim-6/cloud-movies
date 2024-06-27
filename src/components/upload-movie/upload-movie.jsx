@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Navbar from "@/components/navbar/navbar.jsx";
 import "./upload-movie.css";
 import axios from "axios";
@@ -15,9 +15,21 @@ function UploadMovie() {
   const [genreInputElems, setGenreInputElems] = useState([""]);
   const [actorInputElems, setActorInputElems] = useState([""]);
   const [directorInputElems, setDirectorInputElems] = useState([""]);
+  const [role, setRole] = useState(undefined);
 
   const navigate = useNavigate();
-  const { getSession } = useContext(AccountContext);
+  const { getSession, getRole } = useContext(AccountContext);
+
+  useEffect(() => {
+    getRole()
+      .then((extractedRole) => {
+        setRole(extractedRole);
+        if (extractedRole !== "ADMIN") navigate("/");
+      })
+      .catch((err) => {
+        navigate("/");
+      });
+  }, []);
 
   const handleAddInput = (type) => {
     switch (type) {
@@ -128,89 +140,101 @@ function UploadMovie() {
     <>
       <Navbar />
       <div className="upload-movie-page">
-        <h1 className="title">Upload Movie</h1>
-        <form className="upload-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="title">Title</label>
-            <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
-          </div>
-          <div className="form-group">
-            <label htmlFor="description">Description</label>
-            <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} required></textarea>
-          </div>
-          <div className="form-group">
-            <label htmlFor="genre-0">Genre</label>
-            {genreInputElems.map((_, i) => (
-              <div key={`genre${i}`} className="input-line">
-                <input
-                  type="text"
-                  id={`genre-${i}`}
-                  value={genreInputElems[i]}
-                  onChange={(e) => {
-                    handleChangeInput("genre", i, e.target.value);
-                  }}
-                  required
-                />
-                <Button type="button">
-                  {i !== genreInputElems.length - 1 ? (
-                    <MinusIcon onClick={(e) => handleRemoveInput("genre", i)} />
-                  ) : (
-                    <PlusIcon onClick={() => handleAddInput("genre")} />
-                  )}
-                </Button>
+        {role === "ADMIN" ? (
+          <>
+            <h1 className="title">Upload Movie</h1>
+            <form className="upload-form" onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label htmlFor="title">Title</label>
+                <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
               </div>
-            ))}
-          </div>
-          <div className="form-group">
-            <label htmlFor="actor-0">Actors</label>
-            {actorInputElems.map((_, i) => (
-              <div key={`actor${i}`} className="input-line">
-                <input type="text" id={`actor-${i}`} value={actorInputElems[i]} onChange={(e) => handleChangeInput("actor", i, e.target.value)} required />
-                <Button type="button">
-                  {i !== actorInputElems.length - 1 ? (
-                    <MinusIcon onClick={(e) => handleRemoveInput("actor", i)} />
-                  ) : (
-                    <PlusIcon onClick={() => handleAddInput("actor")} />
-                  )}
-                </Button>
+              <div className="form-group">
+                <label htmlFor="description">Description</label>
+                <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} required></textarea>
               </div>
-            ))}
-          </div>
-          <div className="form-group">
-            <label htmlFor="director-0">Directors</label>
-            {directorInputElems.map((_, i) => (
-              <div key={`director${i}`} className="input-line">
-                <input type="text" id={`director-${i}`} value={directorInputElems[i]} onChange={(e) => handleChangeInput("director", i, e.target.value)} required />
-                <Button type="button">
-                  {i !== directorInputElems.length - 1 ? (
-                    <MinusIcon onClick={(e) => handleRemoveInput("director", i)} />
-                  ) : (
-                    <PlusIcon onClick={() => handleAddInput("director")} />
-                  )}
-                </Button>
+              <div className="form-group">
+                <label htmlFor="genre-0">Genre</label>
+                {genreInputElems.map((_, i) => (
+                  <div key={`genre${i}`} className="input-line">
+                    <input
+                      type="text"
+                      id={`genre-${i}`}
+                      value={genreInputElems[i]}
+                      onChange={(e) => {
+                        handleChangeInput("genre", i, e.target.value);
+                      }}
+                      required
+                    />
+                    <Button type="button">
+                      {i !== genreInputElems.length - 1 ? (
+                        <MinusIcon onClick={(e) => handleRemoveInput("genre", i)} />
+                      ) : (
+                        <PlusIcon onClick={() => handleAddInput("genre")} />
+                      )}
+                    </Button>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <div className="form-group">
-            <label htmlFor="cover">Movie Cover</label>
-            <div className="custom-file-input">
-              <input type="file" id="cover" accept="image/*" onChange={(e) => setCover(e.target.files[0])} required />
-              <span>Choose Cover Image</span>
-            </div>
-            {cover && <img src={URL.createObjectURL(cover)} alt="Movie Cover" className="cover-preview" />}
-          </div>
-          <div className="form-group">
-            <label htmlFor="video">Movie File (MP4)</label>
-            <div className="custom-file-input">
-              <input type="file" id="video" accept="video/mp4" onChange={(e) => setVideo(e.target.files[0])} required />
-              <span>Choose MP4 File</span>
-            </div>
-            {video && <video src={URL.createObjectURL(video)} controls className="video-preview"></video>}
-          </div>
-          <button type="submit" className="submit-button">
-            Upload Movie
-          </button>
-        </form>
+              <div className="form-group">
+                <label htmlFor="actor-0">Actors</label>
+                {actorInputElems.map((_, i) => (
+                  <div key={`actor${i}`} className="input-line">
+                    <input type="text" id={`actor-${i}`} value={actorInputElems[i]} onChange={(e) => handleChangeInput("actor", i, e.target.value)} required />
+                    <Button type="button">
+                      {i !== actorInputElems.length - 1 ? (
+                        <MinusIcon onClick={(e) => handleRemoveInput("actor", i)} />
+                      ) : (
+                        <PlusIcon onClick={() => handleAddInput("actor")} />
+                      )}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              <div className="form-group">
+                <label htmlFor="director-0">Directors</label>
+                {directorInputElems.map((_, i) => (
+                  <div key={`director${i}`} className="input-line">
+                    <input
+                      type="text"
+                      id={`director-${i}`}
+                      value={directorInputElems[i]}
+                      onChange={(e) => handleChangeInput("director", i, e.target.value)}
+                      required
+                    />
+                    <Button type="button">
+                      {i !== directorInputElems.length - 1 ? (
+                        <MinusIcon onClick={(e) => handleRemoveInput("director", i)} />
+                      ) : (
+                        <PlusIcon onClick={() => handleAddInput("director")} />
+                      )}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              <div className="form-group">
+                <label htmlFor="cover">Movie Cover</label>
+                <div className="custom-file-input">
+                  <input type="file" id="cover" accept="image/*" onChange={(e) => setCover(e.target.files[0])} required />
+                  <span>Choose Cover Image</span>
+                </div>
+                {cover && <img src={URL.createObjectURL(cover)} alt="Movie Cover" className="cover-preview" />}
+              </div>
+              <div className="form-group">
+                <label htmlFor="video">Movie File (MP4)</label>
+                <div className="custom-file-input">
+                  <input type="file" id="video" accept="video/mp4" onChange={(e) => setVideo(e.target.files[0])} required />
+                  <span>Choose MP4 File</span>
+                </div>
+                {video && <video src={URL.createObjectURL(video)} controls className="video-preview"></video>}
+              </div>
+              <button type="submit" className="submit-button">
+                Upload Movie
+              </button>
+            </form>
+          </>
+        ) : (
+          ""
+        )}
       </div>
     </>
   );
