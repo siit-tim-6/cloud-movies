@@ -14,6 +14,22 @@ export class ApiGwStack extends cdk.Stack {
       partitionKey: { name: "MovieId", type: dynamodb.AttributeType.STRING },
       readCapacity: 1,
       writeCapacity: 1,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
+    moviesDataTable.addGlobalSecondaryIndex({
+      indexName: "titleSearch",
+      partitionKey: { name: "LowerTitle", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "LowerDescription", type: dynamodb.AttributeType.STRING },
+      readCapacity: 1,
+      writeCapacity: 1,
+    });
+
+    moviesDataTable.addGlobalSecondaryIndex({
+      indexName: "descriptionSearch",
+      partitionKey: { name: "LowerDescription", type: dynamodb.AttributeType.STRING },
+      readCapacity: 1,
+      writeCapacity: 1,
     });
 
     const moviesBucket = new s3.Bucket(this, "MoviesBucket", {
@@ -48,16 +64,6 @@ export class ApiGwStack extends cdk.Stack {
       },
     });
 
-    const getAllMoviesFn = new lambda.Function(this, "getAllMoviesFn", {
-      runtime: lambda.Runtime.NODEJS_20_X,
-      handler: "index.handler",
-      code: lambda.Code.fromAsset(path.join(__dirname, "./src/get-all-movies")),
-      environment: {
-        S3_BUCKET: moviesBucket.bucketName,
-        DYNAMODB_TABLE: moviesDataTable.tableName,
-      },
-    });
-
     const getSingleMovieFn = new lambda.Function(this, "getSingleMovieFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: "index.handler",
@@ -68,11 +74,12 @@ export class ApiGwStack extends cdk.Stack {
       },
     });
 
-    const searchMoviesFn = new lambda.Function(this, "searchMoviesFn", {
+    const getMoviesFn = new lambda.Function(this, "getMoviesFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: "index.handler",
-      code: lambda.Code.fromAsset(path.join(__dirname, "./src/search-movies")),
+      code: lambda.Code.fromAsset(path.join(__dirname, "./src/get-movies")),
       environment: {
+        S3_BUCKET: moviesBucket.bucketName,
         DYNAMODB_TABLE: moviesDataTable.tableName,
       },
     });
@@ -89,15 +96,14 @@ export class ApiGwStack extends cdk.Stack {
     });
 
     moviesBucket.grantRead(downloadMovieFn);
-    moviesBucket.grantRead(getAllMoviesFn);
+    moviesBucket.grantRead(getMoviesFn);
     moviesBucket.grantRead(getSingleMovieFn);
     moviesBucket.grantReadWrite(uploadMovieFn);
     moviesBucket.grantReadWrite(deleteMovieFn);
 
     moviesDataTable.grantReadData(downloadMovieFn);
-    moviesDataTable.grantReadData(getAllMoviesFn);
     moviesDataTable.grantReadData(getSingleMovieFn);
-    moviesDataTable.grantReadData(searchMoviesFn);
+    moviesDataTable.grantReadData(getMoviesFn);
     moviesDataTable.grantReadWriteData(uploadMovieFn);
     moviesDataTable.grantReadWriteData(deleteMovieFn);
 
@@ -153,8 +159,6 @@ export class ApiGwStack extends cdk.Stack {
     });
 
     const moviesResource = api.root.addResource("movies");
-    const getAllMoviesLambdaIntegration = new apigateway.LambdaIntegration(getAllMoviesFn);
-    moviesResource.addMethod("GET", getAllMoviesLambdaIntegration);
 
     const movieResource = moviesResource.addResource("{id}");
     const getSingleMovieLambdaIntegration = new apigateway.LambdaIntegration(getSingleMovieFn);
@@ -167,15 +171,14 @@ export class ApiGwStack extends cdk.Stack {
       },
     });
 
-    const searchMoviesLambdaIntegration = new apigateway.LambdaIntegration(searchMoviesFn);
-    const searchMoviesResource = api.root.addResource("search-movies");
-    searchMoviesResource.addMethod("GET", searchMoviesLambdaIntegration, {
+    const getMoviesLambdaIntegration = new apigateway.LambdaIntegration(getMoviesFn);
+    moviesResource.addMethod("GET", getMoviesLambdaIntegration, {
       requestParameters: {
         "method.request.path.title": false,
         "method.request.path.description": false,
-        "method.request.path.actors": false,
-        "method.request.path.directors": false,
-        "method.request.path.genres": false,
+        "method.request.path.actor": false,
+        "method.request.path.director": false,
+        "method.request.path.genre": false,
       },
       requestValidatorOptions: {
         validateRequestParameters: true,
@@ -199,6 +202,14 @@ export class ApiGwStack extends cdk.Stack {
     const subscriptionsDataTable = new dynamodb.Table(this, "SubscriptionsData", {
       partitionKey: { name: "UserId", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "SubscribedTo", type: dynamodb.AttributeType.STRING },
+      readCapacity: 1,
+      writeCapacity: 1,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
+    subscriptionsDataTable.addGlobalSecondaryIndex({
+      indexName: "SubscribedToSearch",
+      partitionKey: { name: "SubscribedTo", type: dynamodb.AttributeType.STRING },
       readCapacity: 1,
       writeCapacity: 1,
     });
@@ -238,7 +249,7 @@ export class ApiGwStack extends cdk.Stack {
         properties: {
           subscribedTo: { type: apigateway.JsonSchemaType.STRING },
         },
-        required: ["subscribeTo"],
+        required: ["subscribedTo"],
       },
     });
 

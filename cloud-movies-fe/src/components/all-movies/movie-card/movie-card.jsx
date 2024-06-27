@@ -9,7 +9,7 @@ function MovieCard({ MovieId, Title, Genre, CoverS3Url }) {
     <Link to={`/movies/${MovieId}`} className="movie-card-link">
       <div className="movie-card">
         <div className="movie-image" style={{ backgroundImage: `url(${CoverS3Url})` }}>
-          <Badge>{Genre}</Badge>
+          <Badge className="capitalized">{Genre}</Badge>
         </div>
         <div className="movie-title">
           <h3 className="text-white scroll-m-20 text-2xl font-semibold tracking-tight">{Title}</h3>
