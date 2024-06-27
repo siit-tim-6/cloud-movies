@@ -41,9 +41,9 @@ exports.handler = async (event) => {
     Item: {
       MovieId: movieId,
       Title: title,
-      LowerTitle: title.toLowerCase(),
       Description: description,
       LowerDescription: description.toLowerCase(),
+      TitleDescriptionSearch: title.toLowerCase() + "#" + description.toLowerCase(),
       Genres: genres,
       Actors: actors,
       Directors: directors,
