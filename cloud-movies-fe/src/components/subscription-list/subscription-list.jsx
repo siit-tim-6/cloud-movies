@@ -57,7 +57,7 @@ function SubscriptionList() {
             <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight mb-3">Your Subscriptions</h3>
             {subscriptions.map((subscription) => (
               <div className="subscription-line">
-                <p>{subscription}</p>
+                <p className="capitalized">{subscription}</p>
                 <Button onClick={() => unsubscribe(subscription)}>Unsubscribe</Button>
               </div>
             ))}
