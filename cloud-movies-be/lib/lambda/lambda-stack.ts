@@ -12,12 +12,21 @@ export interface LambdaStackProps extends cdk.StackProps {
 }
 
 export class LambdaStack extends cdk.Stack {
+  public readonly uploadMovieFn: lambda.Function;
+  public readonly downloadMovieFn: lambda.Function;
+  public readonly getSingleMovieFn: lambda.Function;
+  public readonly getMoviesFn: lambda.Function;
+  public readonly deleteMovieFn: lambda.Function;
+  public readonly subscribeFn: lambda.Function;
+  public readonly getSubscriptionsFn: lambda.Function;
+  public readonly unsubscribeFn: lambda.Function;
+
   constructor(scope: Construct, id: string, props?: LambdaStackProps) {
     super(scope, id, props);
 
     const { moviesBucket, moviesDataTable, subscriptionsDataTable } = props!;
 
-    const uploadMovieFn = new lambda.Function(this, "uploadMovieFn", {
+    this.uploadMovieFn = new lambda.Function(this, "uploadMovieFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: "index.handler",
       code: lambda.Code.fromAsset(path.join(__dirname, "./src/upload-movie")),
@@ -27,7 +36,7 @@ export class LambdaStack extends cdk.Stack {
       },
     });
 
-    const downloadMovieFn = new lambda.Function(this, "downloadMovieFn", {
+    this.downloadMovieFn = new lambda.Function(this, "downloadMovieFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: "index.handler",
       code: lambda.Code.fromAsset(path.join(__dirname, "./src/download-movie")),
@@ -37,7 +46,7 @@ export class LambdaStack extends cdk.Stack {
       },
     });
 
-    const getSingleMovieFn = new lambda.Function(this, "getSingleMovieFn", {
+    this.getSingleMovieFn = new lambda.Function(this, "getSingleMovieFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: "index.handler",
       code: lambda.Code.fromAsset(path.join(__dirname, "./src/get-single-movie")),
@@ -47,7 +56,7 @@ export class LambdaStack extends cdk.Stack {
       },
     });
 
-    const getMoviesFn = new lambda.Function(this, "getMoviesFn", {
+    this.getMoviesFn = new lambda.Function(this, "getMoviesFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: "index.handler",
       code: lambda.Code.fromAsset(path.join(__dirname, "./src/get-movies")),
@@ -57,7 +66,7 @@ export class LambdaStack extends cdk.Stack {
       },
     });
 
-    const deleteMovieFn = new lambda.Function(this, "deleteMovieFn", {
+    this.deleteMovieFn = new lambda.Function(this, "deleteMovieFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: "index.handler",
       code: lambda.Code.fromAsset(path.join(__dirname, "./src/delete-movie")),
@@ -68,7 +77,7 @@ export class LambdaStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(10),
     });
 
-    const subscribeFn = new lambda.Function(this, "subscribeFn", {
+    this.subscribeFn = new lambda.Function(this, "subscribeFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: "index.handler",
       code: lambda.Code.fromAsset(path.join(__dirname, "./src/subscribe")),
@@ -77,7 +86,7 @@ export class LambdaStack extends cdk.Stack {
       },
     });
 
-    const getSubscriptionsFn = new lambda.Function(this, "getSubscriptionsFn", {
+    this.getSubscriptionsFn = new lambda.Function(this, "getSubscriptionsFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: "index.handler",
       code: lambda.Code.fromAsset(path.join(__dirname, "./src/get-subscriptions")),
@@ -86,7 +95,7 @@ export class LambdaStack extends cdk.Stack {
       },
     });
 
-    const unsubscribeFn = new lambda.Function(this, "unsubscribeFn", {
+    this.unsubscribeFn = new lambda.Function(this, "unsubscribeFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: "index.handler",
       code: lambda.Code.fromAsset(path.join(__dirname, "./src/unsubscribe")),
@@ -95,60 +104,20 @@ export class LambdaStack extends cdk.Stack {
       },
     });
 
-    moviesBucket.grantRead(downloadMovieFn);
-    moviesBucket.grantRead(getMoviesFn);
-    moviesBucket.grantRead(getSingleMovieFn);
-    moviesBucket.grantReadWrite(uploadMovieFn);
-    moviesBucket.grantReadWrite(deleteMovieFn);
+    moviesBucket.grantRead(this.downloadMovieFn);
+    moviesBucket.grantRead(this.getMoviesFn);
+    moviesBucket.grantRead(this.getSingleMovieFn);
+    moviesBucket.grantReadWrite(this.uploadMovieFn);
+    moviesBucket.grantReadWrite(this.deleteMovieFn);
 
-    moviesDataTable.grantReadData(downloadMovieFn);
-    moviesDataTable.grantReadData(getSingleMovieFn);
-    moviesDataTable.grantReadData(getMoviesFn);
-    moviesDataTable.grantReadWriteData(uploadMovieFn);
-    moviesDataTable.grantReadWriteData(deleteMovieFn);
+    moviesDataTable.grantReadData(this.downloadMovieFn);
+    moviesDataTable.grantReadData(this.getSingleMovieFn);
+    moviesDataTable.grantReadData(this.getMoviesFn);
+    moviesDataTable.grantReadWriteData(this.uploadMovieFn);
+    moviesDataTable.grantReadWriteData(this.deleteMovieFn);
 
-    subscriptionsDataTable.grantWriteData(subscribeFn);
-    subscriptionsDataTable.grantReadData(getSubscriptionsFn);
-    subscriptionsDataTable.grantWriteData(unsubscribeFn);
-
-    new cdk.CfnOutput(this, "uploadMovieFnArn", {
-      exportName: "uploadMovieFnArn",
-      value: uploadMovieFn.functionArn,
-    });
-
-    new cdk.CfnOutput(this, "downloadMovieFnArn", {
-      exportName: "downloadMovieFnArn",
-      value: downloadMovieFn.functionArn,
-    });
-
-    new cdk.CfnOutput(this, "getSingleMovieFnArn", {
-      exportName: "getSingleMovieFnArn",
-      value: getSingleMovieFn.functionArn,
-    });
-
-    new cdk.CfnOutput(this, "getMoviesFnArn", {
-      exportName: "getMoviesFnArn",
-      value: getMoviesFn.functionArn,
-    });
-
-    new cdk.CfnOutput(this, "deleteMovieFnArn", {
-      exportName: "deleteMovieFnArn",
-      value: deleteMovieFn.functionArn,
-    });
-
-    new cdk.CfnOutput(this, "subscribeFnArn", {
-      exportName: "subscribeFnArn",
-      value: subscribeFn.functionArn,
-    });
-
-    new cdk.CfnOutput(this, "getSubscriptionsFnArn", {
-      exportName: "getSubscriptionsFnArn",
-      value: getSubscriptionsFn.functionArn,
-    });
-
-    new cdk.CfnOutput(this, "unsubscribeFnArn", {
-      exportName: "unsubscribeFnArn",
-      value: unsubscribeFn.functionArn,
-    });
+    subscriptionsDataTable.grantWriteData(this.subscribeFn);
+    subscriptionsDataTable.grantReadData(this.getSubscriptionsFn);
+    subscriptionsDataTable.grantWriteData(this.unsubscribeFn);
   }
 }
