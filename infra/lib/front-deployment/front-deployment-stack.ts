@@ -6,7 +6,7 @@ import { BucketDeployment, Source } from "aws-cdk-lib/aws-s3-deployment";
 import { Construct } from "constructs";
 import path = require("path");
 
-const frontendPath = path.join(__dirname, "../../../cloud-movies-fe/dist");
+const frontendPath = path.join(__dirname, "../../../dist");
 
 export class FrontDeploymentStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -27,6 +27,11 @@ export class FrontDeploymentStack extends cdk.Stack {
       errorResponses: [
         {
           httpStatus: 404,
+          responseHttpStatus: 200,
+          responsePagePath: "/index.html",
+        },
+        {
+          httpStatus: 403,
           responseHttpStatus: 200,
           responsePagePath: "/index.html",
         },
