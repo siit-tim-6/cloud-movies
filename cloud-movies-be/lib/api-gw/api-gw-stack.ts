@@ -14,6 +14,21 @@ export class ApiGwStack extends cdk.Stack {
       partitionKey: { name: "MovieId", type: dynamodb.AttributeType.STRING },
       readCapacity: 1,
       writeCapacity: 1,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
+    moviesDataTable.addGlobalSecondaryIndex({
+      indexName: "descriptionSearch",
+      partitionKey: { name: "LowerDescription", type: dynamodb.AttributeType.STRING },
+      readCapacity: 1,
+      writeCapacity: 1,
+    });
+
+    moviesDataTable.addGlobalSecondaryIndex({
+      indexName: "titleDescriptionSearch",
+      partitionKey: { name: "TitleDescriptionSearch", type: dynamodb.AttributeType.STRING },
+      readCapacity: 1,
+      writeCapacity: 1,
     });
 
     const moviesBucket = new s3.Bucket(this, "MoviesBucket", {
@@ -238,7 +253,7 @@ export class ApiGwStack extends cdk.Stack {
         properties: {
           subscribedTo: { type: apigateway.JsonSchemaType.STRING },
         },
-        required: ["subscribeTo"],
+        required: ["subscribedTo"],
       },
     });
 
