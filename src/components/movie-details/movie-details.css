@@ -62,7 +62,7 @@
     margin-bottom: 8px;
 }
 
-.favorite-button, .download-button, .delete-button {
+.favorite-button, .download-button, .delete-button, .edit-button {
     background: none;
     border: none;
     cursor: pointer;
@@ -72,7 +72,7 @@
     transition: color 0.5s;
 }
 
-.favorite-button:hover, .download-button:hover {
+.favorite-button:hover, .download-button:hover, edit-button:hover {
     color: #ffd700;
 }
 
