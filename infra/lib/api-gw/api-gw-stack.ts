@@ -2,6 +2,8 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as cognito from "aws-cdk-lib/aws-cognito";
+import path = require("path");
 
 export interface ApiGwStackProps extends cdk.StackProps {
   uploadMovieFn: lambda.Function;
@@ -12,13 +14,53 @@ export interface ApiGwStackProps extends cdk.StackProps {
   subscribeFn: lambda.Function;
   getSubscriptionsFn: lambda.Function;
   unsubscribeFn: lambda.Function;
+  userPool: cognito.UserPool;
+  userPoolClient: cognito.UserPoolClient;
 }
 
 export class ApiGwStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: ApiGwStackProps) {
     super(scope, id, props);
 
-    const { uploadMovieFn, downloadMovieFn, getSingleMovieFn, getMoviesFn, deleteMovieFn, subscribeFn, getSubscriptionsFn, unsubscribeFn } = props!;
+    const {
+      uploadMovieFn,
+      downloadMovieFn,
+      getSingleMovieFn,
+      getMoviesFn,
+      deleteMovieFn,
+      subscribeFn,
+      getSubscriptionsFn,
+      unsubscribeFn,
+      userPool,
+      userPoolClient,
+    } = props!;
+
+    const userAuthorizerFn = new lambda.Function(this, "userAuthorizerFn", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: "index.handler",
+      code: lambda.Code.fromAsset(path.join(__dirname, "./src/user-authorizer")),
+      environment: {
+        USER_POOL_ID: userPool.userPoolId,
+        CLIENT_ID: userPoolClient.userPoolClientId,
+      },
+    });
+
+    // const adminAuthorizerFn = new lambda.Function(this, "adminAuthorizerFn", {
+    //   runtime: lambda.Runtime.NODEJS_20_X,
+    //   handler: "index.handler",
+    //   code: lambda.Code.fromAsset(path.join(__dirname, "./src/admin-authorizer")),
+    //   environment: {
+    //     USER_POOL_ID: userPool.userPoolId,
+    //     CLIENT_ID: userPoolClient.userPoolClientId,
+    //   },
+    // });
+
+    const userAuth = new apigateway.TokenAuthorizer(this, "userAuthorizer", {
+      handler: userAuthorizerFn,
+    });
+    // const adminAuth = new apigateway.TokenAuthorizer(this, "adminAuthorizer", {
+    //   handler: adminAuthorizerFn,
+    // });
 
     const uploadMovieLambdaIntegration = new apigateway.LambdaIntegration(uploadMovieFn);
     const downloadMovieLambdaIntegration = new apigateway.LambdaIntegration(downloadMovieFn);
@@ -43,6 +85,10 @@ export class ApiGwStack extends cdk.Stack {
       requestValidatorOptions: {
         validateRequestParameters: true,
       },
+      authorizer: userAuth,
+    });
+    downloadMovieResource.addCorsPreflight({
+      allowOrigins: ["*"],
     });
 
     const uploadMovieRequestBodySchema = new apigateway.Model(this, "uploadMovieRequestBodySchema", {
