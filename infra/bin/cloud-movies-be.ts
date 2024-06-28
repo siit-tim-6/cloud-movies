@@ -9,7 +9,7 @@ import { LambdaStack } from "../lib/lambda/lambda-stack";
 
 const app = new cdk.App();
 
-new CognitoStack(app, "CognitoStack", {});
+const cognitoStack = new CognitoStack(app, "CognitoStack", {});
 
 const dataStack = new DataStack(app, "DataStack", {});
 
@@ -28,6 +28,8 @@ new ApiGwStack(app, "ApiGwStack", {
   getSubscriptionsFn: lambdaStack.getSubscriptionsFn,
   subscribeFn: lambdaStack.subscribeFn,
   unsubscribeFn: lambdaStack.unsubscribeFn,
+  userPool: cognitoStack.userPool,
+  userPoolClient: cognitoStack.userPoolClient,
 });
 
 new FrontDeploymentStack(app, "FrontDeploymentStack", {});
