@@ -67,14 +67,15 @@ function MovieDetails() {
 
   const handleDownload = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/download-movie?movieId=${id}`);
+      const session = await getSession();
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      const downloadUrlResponse = await axios.get(`${import.meta.env.VITE_API_URL}/download-movie?movieId=${id}`, {
+        headers: {
+          Authorization: session.accessToken.jwtToken,
+        },
+      });
 
-      const data = await response.json();
-      const downloadUrl = data.downloadUrl;
+      const downloadUrl = downloadUrlResponse.data.downloadUrl;
 
       if (!downloadUrl) {
         throw new Error("Download URL is undefined");
