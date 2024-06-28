@@ -5,12 +5,11 @@ import { Badge } from "@/components/ui/badge.jsx";
 import MovieCover from "@/assets/movie-placeholder.webp";
 import "./movie-details.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDownload, faHeart, faPlay, faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
+import { faDownload, faHeart, faPlay, faTrash, faEdit, faTimes } from "@fortawesome/free-solid-svg-icons";
 import Rating from "react-rating-stars-component";
 import axios from "axios";
 import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
-import { Button } from "../ui/button";
 import ReactLoading from "react-loading";
 import { AccountContext } from "../auth/accountContext";
 
@@ -53,7 +52,7 @@ function MovieDetails() {
     };
 
     getMovie();
-  }, []);
+  }, [id, getSession]);
 
   const ratingChanged = (newRating) => {
     setRating(newRating);
@@ -125,7 +124,7 @@ function MovieDetails() {
           },
         });
         setSubscriptions(subscriptions.filter((subscription) => subscription !== item));
-        alert("Unsubscribed sucessfully.");
+        alert("Unsubscribed successfully.");
       } else {
         await axios.post(
             `${import.meta.env.VITE_API_URL}/subscriptions`,
@@ -139,7 +138,7 @@ function MovieDetails() {
             }
         );
         setSubscriptions([...subscriptions, item]);
-        alert("Subscribed sucessfully.");
+        alert("Subscribed successfully.");
       }
     } catch (error) {
       alert(`Failed to ${subscriptions.includes(item) ? "un" : ""}subscribe.`);
@@ -166,7 +165,7 @@ function MovieDetails() {
                     <div className="video-player">
                       <video src={videoUrl} controls autoPlay className="video-element" />
                       <button className="close-button" onClick={() => setIsPlaying(false)}>
-                        Close
+                        <FontAwesomeIcon icon={faTimes} />
                       </button>
                     </div>
                 )}
