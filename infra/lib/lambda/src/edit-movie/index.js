@@ -1,8 +1,8 @@
 "use strict";
 
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const { UpdateCommand, DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
-const { PutObjectCommand, S3Client } = require("@aws-sdk/client-s3");
+const { UpdateCommand, GetCommand, DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
+const { PutObjectCommand, DeleteObjectCommand, S3Client } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
 const dynamoClient = new DynamoDBClient({});
@@ -14,6 +14,13 @@ exports.handler = async (event) => {
     const tableName = process.env.DYNAMODB_TABLE;
     const movieId = event.pathParameters.id;
     const { title, description, genres, actors, directors, coverFileName, coverFileType, videoFileName, videoFileType } = JSON.parse(event.body);
+
+    // Fetch the current movie details
+    const getCommand = new GetCommand({
+        TableName: tableName,
+        Key: { MovieId: movieId },
+    });
+    const currentMovie = await dynamoDocClient.send(getCommand);
 
     const updateExpressions = [];
     const expressionAttributeNames = {};
@@ -54,6 +61,15 @@ exports.handler = async (event) => {
 
     let s3CoverSignedUrl, s3VideoSignedUrl;
     if (coverFileName && coverFileType) {
+        if (currentMovie.Item.CoverS3Url) {
+            const oldCoverKey = currentMovie.Item.CoverS3Url.split('s3.amazonaws.com/')[1];
+            const deleteOldCoverCommand = new DeleteObjectCommand({
+                Bucket: bucketName,
+                Key: oldCoverKey,
+            });
+            await s3Client.send(deleteOldCoverCommand);
+        }
+
         const putCoverCommand = new PutObjectCommand({
             Bucket: bucketName,
             Key: `${movieId}/cover/${coverFileName}`,
@@ -65,6 +81,15 @@ exports.handler = async (event) => {
         expressionAttributeValues[":coverS3Url"] = `https://${bucketName}.s3.amazonaws.com/${movieId}/cover/${coverFileName}`;
     }
     if (videoFileName && videoFileType) {
+        if (currentMovie.Item.VideoS3Url) {
+            const oldVideoKey = currentMovie.Item.VideoS3Url.split('s3.amazonaws.com/')[1];
+            const deleteOldVideoCommand = new DeleteObjectCommand({
+                Bucket: bucketName,
+                Key: oldVideoKey,
+            });
+            await s3Client.send(deleteOldVideoCommand);
+        }
+
         const putVideoCommand = new PutObjectCommand({
             Bucket: bucketName,
             Key: `${movieId}/video/${videoFileName}`,
@@ -95,7 +120,7 @@ exports.handler = async (event) => {
         headers: {
             "Content-Type": "application/json",
             "Access-Control-Allow-Headers": "Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
-            "Access-Control-Allow-Methods": "POST,OPTIONS",
+            "Access-Control-Allow-Methods": "PUT,OPTIONS",
             "Access-Control-Allow-Origin": "*",
         },
         body: JSON.stringify({
