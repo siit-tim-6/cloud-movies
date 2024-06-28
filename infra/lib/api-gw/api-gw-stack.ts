@@ -12,13 +12,14 @@ export interface ApiGwStackProps extends cdk.StackProps {
   subscribeFn: lambda.Function;
   getSubscriptionsFn: lambda.Function;
   unsubscribeFn: lambda.Function;
+  editMovieFn: lambda.Function;
 }
 
 export class ApiGwStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: ApiGwStackProps) {
     super(scope, id, props);
 
-    const { uploadMovieFn, downloadMovieFn, getSingleMovieFn, getMoviesFn, deleteMovieFn, subscribeFn, getSubscriptionsFn, unsubscribeFn } = props!;
+    const { uploadMovieFn, downloadMovieFn, getSingleMovieFn, getMoviesFn, deleteMovieFn, subscribeFn, getSubscriptionsFn, unsubscribeFn, editMovieFn } = props!;
 
     const uploadMovieLambdaIntegration = new apigateway.LambdaIntegration(uploadMovieFn);
     const downloadMovieLambdaIntegration = new apigateway.LambdaIntegration(downloadMovieFn);
@@ -28,6 +29,7 @@ export class ApiGwStack extends cdk.Stack {
     const subscribeLambdaIntegration = new apigateway.LambdaIntegration(subscribeFn);
     const getSubscriptionsLambdaIntegration = new apigateway.LambdaIntegration(getSubscriptionsFn);
     const unsubscribeLambdaIntegration = new apigateway.LambdaIntegration(unsubscribeFn);
+    const editMovieLambdaIntegration = new apigateway.LambdaIntegration(editMovieFn);
 
     const api = new apigateway.RestApi(this, "MoviesApi", {
       restApiName: "Movies Service",
@@ -105,6 +107,17 @@ export class ApiGwStack extends cdk.Stack {
       },
       requestValidatorOptions: {
         validateRequestParameters: true,
+      },
+    });
+    movieResource.addMethod("PUT", editMovieLambdaIntegration, {
+      requestModels: {
+        "application/json": uploadMovieRequestBodySchema,
+      },
+      requestValidatorOptions: {
+        validateRequestBody: true,
+      },
+      requestParameters: {
+        "method.request.path.id": true,
       },
     });
     movieResource.addCorsPreflight({
