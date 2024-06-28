@@ -31,9 +31,7 @@ function UploadMovie({ isEditMode = false }) {
 
   useEffect(() => {
     if (isEditMode) {
-      fetchMovieDetails().then(() => {
-        console.log("State after fetching movie details:", movieDetails);
-      });
+      fetchMovieDetails();
     }
   }, [isEditMode, id]);
 
@@ -106,13 +104,7 @@ function UploadMovie({ isEditMode = false }) {
     event.preventDefault();
 
     const session = await getSession();
-    let apiUrl = ""
-
-    if (isEditMode) {
-      apiUrl = `${import.meta.env.VITE_API_URL}/movies/${id}`;
-    } else {
-      apiUrl = `${import.meta.env.VITE_API_URL}/movies`;
-    }
+    const apiUrl = isEditMode ? `${import.meta.env.VITE_API_URL}/movies/${id}` : `${import.meta.env.VITE_API_URL}/movies`;
 
     try {
       const metadataResponse = await axios({
