@@ -26,8 +26,10 @@ function MovieDetails() {
   const [actors, setActors] = useState([]);
   const [directors, setDirectors] = useState([]);
   const [coverUrl, setCoverUrl] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
   const [loading, setLoading] = useState(true);
   const [subscriptions, setSubscriptions] = useState([]);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     const getMovie = async () => {
@@ -45,6 +47,7 @@ function MovieDetails() {
       setActors(movieResponse.data.Actors);
       setDirectors(movieResponse.data.Directors);
       setCoverUrl(movieResponse.data.CoverS3Url);
+      setVideoUrl(movieResponse.data.VideoS3Url);
       setSubscriptions(subscriptionsReponse.data);
       setLoading(false);
     };
@@ -153,11 +156,20 @@ function MovieDetails() {
               </div>
           ) : (
               <>
-                <div className="movie-cover" style={{ backgroundImage: `url(${coverUrl})` }}>
-                  <div className="play-button">
-                    <FontAwesomeIcon icon={faPlay} />
-                  </div>
-                </div>
+                {!isPlaying ? (
+                    <div className="movie-cover" style={{ backgroundImage: `url(${coverUrl})` }}>
+                      <div className="play-button" onClick={() => setIsPlaying(true)}>
+                        <FontAwesomeIcon icon={faPlay} />
+                      </div>
+                    </div>
+                ) : (
+                    <div className="video-player">
+                      <video src={videoUrl} controls autoPlay className="video-element" />
+                      <button className="close-button" onClick={() => setIsPlaying(false)}>
+                        Close
+                      </button>
+                    </div>
+                )}
                 <div className="movie-info">
                   <div className="movie-title-favorite">
                     <h1>{title}</h1>
