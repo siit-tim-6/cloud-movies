@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "@/components/navbar/navbar.jsx";
 import { Badge } from "@/components/ui/badge.jsx";
-import MovieCover from "@/assets/movie-placeholder.webp";
 import "./movie-details.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload, faHeart, faPlay, faTrash, faEdit, faTimes } from "@fortawesome/free-solid-svg-icons";
@@ -16,7 +15,7 @@ import { AccountContext } from "../auth/accountContext";
 function MovieDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getSession } = useContext(AccountContext);
+  const { getSession, getRole } = useContext(AccountContext);
 
   const [rating, setRating] = useState(4);
   const [title, setTitle] = useState("");
@@ -29,6 +28,7 @@ function MovieDetails() {
   const [loading, setLoading] = useState(true);
   const [subscriptions, setSubscriptions] = useState([]);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [role, setRole] = useState(undefined);
 
   useEffect(() => {
     const getMovie = async () => {
@@ -48,6 +48,10 @@ function MovieDetails() {
       setCoverUrl(movieResponse.data.CoverS3Url);
       setVideoUrl(movieResponse.data.VideoS3Url);
       setSubscriptions(subscriptionsReponse.data);
+
+      const userRole = await getRole();
+      setRole(userRole);
+
       setLoading(false);
     };
 
@@ -175,12 +179,16 @@ function MovieDetails() {
                     <button className="download-button" onClick={handleDownload}>
                       <FontAwesomeIcon icon={faDownload} />
                     </button>
-                    <button className="edit-button" onClick={() => navigate(`/edit-movie/${id}`)}>
-                      <FontAwesomeIcon icon={faEdit} />
-                    </button>
-                    <button className="delete-button" onClick={confirmDelete}>
-                      <FontAwesomeIcon icon={faTrash} />
-                    </button>
+                    {role === "ADMIN" ? (
+                        <button className="edit-button" onClick={() => navigate(`/edit-movie/${id}`)}>
+                          <FontAwesomeIcon icon={faEdit} />
+                        </button>
+                    ) : null}
+                    {role === "ADMIN" ? (
+                        <button className="delete-button" onClick={confirmDelete}>
+                          <FontAwesomeIcon icon={faTrash}/>
+                        </button>
+                    ) : null}
                   </div>
                   <div className="movie-genre-rating">
                     {genres.map((genre, i) => (

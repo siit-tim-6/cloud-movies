@@ -24,12 +24,22 @@ function UploadMovie({ isEditMode = false }) {
 
   const [cover, setCover] = useState(null);
   const [video, setVideo] = useState(null);
+  const [role, setRole] = useState(undefined);
 
   const navigate = useNavigate();
-  const { getSession } = useContext(AccountContext);
+  const { getSession, getRole } = useContext(AccountContext);
   const { id } = useParams();
 
   useEffect(() => {
+    getRole()
+        .then((extractedRole) => {
+          setRole(extractedRole);
+          if (extractedRole !== "ADMIN") navigate("/");
+        })
+        .catch((err) => {
+          navigate("/");
+        });
+
     if (isEditMode) {
       fetchMovieDetails();
     }
@@ -156,105 +166,111 @@ function UploadMovie({ isEditMode = false }) {
       <>
         <Navbar />
         <div className="upload-movie-page">
-          <h1 className="title">{isEditMode ? "Edit" : "Upload"} Movie</h1>
-          <form className="upload-form" onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="title">Title</label>
-              <input type="text" id="title" value={movieDetails.title} onChange={(e) => setMovieDetails({ ...movieDetails, title: e.target.value })} required />
-            </div>
-            <div className="form-group">
-              <label htmlFor="description">Description</label>
-              <textarea id="description" value={movieDetails.description} onChange={(e) => setMovieDetails({ ...movieDetails, description: e.target.value })} required></textarea>
-            </div>
-            <div className="form-group">
-              <label htmlFor="genre-0">Genre</label>
-              {movieDetails.genres.map((genre, i) => (
-                  <div key={`genre${i}`} className="input-line">
-                    <input
-                        type="text"
-                        id={`genre-${i}`}
-                        value={genre}
-                        onChange={(e) => handleChangeInput("genres", i, e.target.value)}
-                        required
-                    />
-                    <Button type="button">
-                      {i !== movieDetails.genres.length - 1 ? (
-                          <MinusIcon onClick={() => handleRemoveInput("genres", i)} />
-                      ) : (
-                          <PlusIcon onClick={() => handleAddInput("genres")} />
-                      )}
-                    </Button>
+          {role === "ADMIN" ? (
+              <>
+                <h1 className="title">{isEditMode ? "Edit" : "Upload"} Movie</h1>
+                <form className="upload-form" onSubmit={handleSubmit}>
+                  <div className="form-group">
+                    <label htmlFor="title">Title</label>
+                    <input type="text" id="title" value={movieDetails.title} onChange={(e) => setMovieDetails({ ...movieDetails, title: e.target.value })} required />
                   </div>
-              ))}
-            </div>
-            <div className="form-group">
-              <label htmlFor="actor-0">Actors</label>
-              {movieDetails.actors.map((actor, i) => (
-                  <div key={`actor${i}`} className="input-line">
-                    <input
-                        type="text"
-                        id={`actor-${i}`}
-                        value={actor}
-                        onChange={(e) => handleChangeInput("actors", i, e.target.value)}
-                        required
-                    />
-                    <Button type="button">
-                      {i !== movieDetails.actors.length - 1 ? (
-                          <MinusIcon onClick={() => handleRemoveInput("actors", i)} />
-                      ) : (
-                          <PlusIcon onClick={() => handleAddInput("actors")} />
-                      )}
-                    </Button>
+                  <div className="form-group">
+                    <label htmlFor="description">Description</label>
+                    <textarea id="description" value={movieDetails.description} onChange={(e) => setMovieDetails({ ...movieDetails, description: e.target.value })} required></textarea>
                   </div>
-              ))}
-            </div>
-            <div className="form-group">
-              <label htmlFor="director-0">Directors</label>
-              {movieDetails.directors.map((director, i) => (
-                  <div key={`director${i}`} className="input-line">
-                    <input
-                        type="text"
-                        id={`director-${i}`}
-                        value={director}
-                        onChange={(e) => handleChangeInput("directors", i, e.target.value)}
-                        required
-                    />
-                    <Button type="button">
-                      {i !== movieDetails.directors.length - 1 ? (
-                          <MinusIcon onClick={() => handleRemoveInput("directors", i)} />
-                      ) : (
-                          <PlusIcon onClick={() => handleAddInput("directors")} />
-                      )}
-                    </Button>
+                  <div className="form-group">
+                    <label htmlFor="genre-0">Genre</label>
+                    {movieDetails.genres.map((genre, i) => (
+                        <div key={`genre${i}`} className="input-line">
+                          <input
+                              type="text"
+                              id={`genre-${i}`}
+                              value={genre}
+                              onChange={(e) => handleChangeInput("genres", i, e.target.value)}
+                              required
+                          />
+                          <Button type="button">
+                            {i !== movieDetails.genres.length - 1 ? (
+                                <MinusIcon onClick={() => handleRemoveInput("genres", i)} />
+                            ) : (
+                                <PlusIcon onClick={() => handleAddInput("genres")} />
+                            )}
+                          </Button>
+                        </div>
+                    ))}
                   </div>
-              ))}
-            </div>
-            <div className="form-group">
-              <label htmlFor="cover">Movie Cover</label>
-              <div className="custom-file-input">
-                <input type="file" id="cover" accept="image/*" onChange={(e) => setCover(e.target.files[0])} />
-                <span>Choose Cover Image</span>
-              </div>
-              {movieDetails.coverS3Url && !cover && (
-                  <img src={movieDetails.coverS3Url} alt="Movie Cover" className="cover-preview" />
-              )}
-              {cover && <img src={URL.createObjectURL(cover)} alt="Movie Cover" className="cover-preview" />}
-            </div>
-            <div className="form-group">
-              <label htmlFor="video">Movie File (MP4)</label>
-              <div className="custom-file-input">
-                <input type="file" id="video" accept="video/mp4" onChange={(e) => setVideo(e.target.files[0])} />
-                <span>Choose MP4 File</span>
-              </div>
-              {movieDetails.videoS3Url && !video && (
-                  <video src={movieDetails.videoS3Url} controls className="video-preview"></video>
-              )}
-              {video && <video src={URL.createObjectURL(video)} controls className="video-preview"></video>}
-            </div>
-            <button type="submit" className="submit-button">
-              {isEditMode ? "Update" : "Upload"} Movie
-            </button>
-          </form>
+                  <div className="form-group">
+                    <label htmlFor="actor-0">Actors</label>
+                    {movieDetails.actors.map((actor, i) => (
+                        <div key={`actor${i}`} className="input-line">
+                          <input
+                              type="text"
+                              id={`actor-${i}`}
+                              value={actor}
+                              onChange={(e) => handleChangeInput("actors", i, e.target.value)}
+                              required
+                          />
+                          <Button type="button">
+                            {i !== movieDetails.actors.length - 1 ? (
+                                <MinusIcon onClick={() => handleRemoveInput("actors", i)} />
+                            ) : (
+                                <PlusIcon onClick={() => handleAddInput("actors")} />
+                            )}
+                          </Button>
+                        </div>
+                    ))}
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="director-0">Directors</label>
+                    {movieDetails.directors.map((director, i) => (
+                        <div key={`director${i}`} className="input-line">
+                          <input
+                              type="text"
+                              id={`director-${i}`}
+                              value={director}
+                              onChange={(e) => handleChangeInput("directors", i, e.target.value)}
+                              required
+                          />
+                          <Button type="button">
+                            {i !== movieDetails.directors.length - 1 ? (
+                                <MinusIcon onClick={() => handleRemoveInput("directors", i)} />
+                            ) : (
+                                <PlusIcon onClick={() => handleAddInput("directors")} />
+                            )}
+                          </Button>
+                        </div>
+                    ))}
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="cover">Movie Cover</label>
+                    <div className="custom-file-input">
+                      <input type="file" id="cover" accept="image/*" onChange={(e) => setCover(e.target.files[0])} />
+                      <span>Choose Cover Image</span>
+                    </div>
+                    {movieDetails.coverS3Url && !cover && (
+                        <img src={movieDetails.coverS3Url} alt="Movie Cover" className="cover-preview" />
+                    )}
+                    {cover && <img src={URL.createObjectURL(cover)} alt="Movie Cover" className="cover-preview" />}
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="video">Movie File (MP4)</label>
+                    <div className="custom-file-input">
+                      <input type="file" id="video" accept="video/mp4" onChange={(e) => setVideo(e.target.files[0])} />
+                      <span>Choose MP4 File</span>
+                    </div>
+                    {movieDetails.videoS3Url && !video && (
+                        <video src={movieDetails.videoS3Url} controls className="video-preview"></video>
+                    )}
+                    {video && <video src={URL.createObjectURL(video)} controls className="video-preview"></video>}
+                  </div>
+                  <button type="submit" className="submit-button">
+                    {isEditMode ? "Update" : "Upload"} Movie
+                  </button>
+                </form>
+              </>
+          ) : (
+              ""
+          )}
         </div>
       </>
   );
