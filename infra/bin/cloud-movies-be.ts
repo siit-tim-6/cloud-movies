@@ -28,6 +28,7 @@ new ApiGwStack(app, "ApiGwStack", {
   getSubscriptionsFn: lambdaStack.getSubscriptionsFn,
   subscribeFn: lambdaStack.subscribeFn,
   unsubscribeFn: lambdaStack.unsubscribeFn,
+  editMovieFn: lambdaStack.editMovieFn,
 });
 
 new FrontDeploymentStack(app, "FrontDeploymentStack", {});
