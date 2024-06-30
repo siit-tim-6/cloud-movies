@@ -7,6 +7,7 @@ export class DataStack extends cdk.Stack {
   public readonly moviesDataTable: dynamodb.Table;
   public readonly subscriptionsDataTable: dynamodb.Table;
   public readonly moviesBucket: s3.Bucket;
+  public readonly movieRatingsTable: dynamodb.Table;
 
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -58,6 +59,14 @@ export class DataStack extends cdk.Stack {
           allowedHeaders: ["*"],
         },
       ],
+    });
+
+    this.movieRatingsTable = new dynamodb.Table(this, "MovieRatings", {
+      partitionKey: { name: "MovieId", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "UserId", type: dynamodb.AttributeType.STRING },
+      readCapacity: 1,
+      writeCapacity: 1,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
   }
 }

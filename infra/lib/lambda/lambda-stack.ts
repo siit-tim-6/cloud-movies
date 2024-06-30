@@ -9,6 +9,7 @@ export interface LambdaStackProps extends cdk.StackProps {
   moviesDataTable: dynamodb.Table;
   subscriptionsDataTable: dynamodb.Table;
   moviesBucket: s3.Bucket;
+  movieRatingsTable: dynamodb.Table;
 }
 
 export class LambdaStack extends cdk.Stack {
@@ -20,11 +21,13 @@ export class LambdaStack extends cdk.Stack {
   public readonly subscribeFn: lambda.Function;
   public readonly getSubscriptionsFn: lambda.Function;
   public readonly unsubscribeFn: lambda.Function;
+  public readonly editMovieFn: lambda.Function;
+  public readonly rateMovieFn: lambda.Function;
 
   constructor(scope: Construct, id: string, props?: LambdaStackProps) {
     super(scope, id, props);
 
-    const { moviesBucket, moviesDataTable, subscriptionsDataTable } = props!;
+    const { moviesBucket, moviesDataTable, subscriptionsDataTable, movieRatingsTable } = props!;
 
     this.uploadMovieFn = new lambda.Function(this, "uploadMovieFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
@@ -53,6 +56,7 @@ export class LambdaStack extends cdk.Stack {
       environment: {
         S3_BUCKET: moviesBucket.bucketName,
         DYNAMODB_TABLE: moviesDataTable.tableName,
+        RATINGS_TABLE: movieRatingsTable.tableName
       },
     });
 
@@ -104,20 +108,45 @@ export class LambdaStack extends cdk.Stack {
       },
     });
 
+    this.editMovieFn = new lambda.Function(this, "editMovieFn", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: "index.handler",
+      code: lambda.Code.fromAsset(path.join(__dirname, "./src/edit-movie")),
+      environment: {
+        S3_BUCKET: moviesBucket.bucketName,
+        DYNAMODB_TABLE: moviesDataTable.tableName,
+      },
+    });
+
+    this.rateMovieFn = new lambda.Function(this, "rateMovieFn", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: "index.handler",
+      code: lambda.Code.fromAsset(path.join(__dirname, "./src/rate-movie")),
+      environment: {
+        MOVIE_RATINGS_TABLE: movieRatingsTable.tableName,
+      },
+    });
+
+
     moviesBucket.grantRead(this.downloadMovieFn);
     moviesBucket.grantRead(this.getMoviesFn);
     moviesBucket.grantRead(this.getSingleMovieFn);
     moviesBucket.grantReadWrite(this.uploadMovieFn);
     moviesBucket.grantReadWrite(this.deleteMovieFn);
+    moviesBucket.grantReadWrite(this.editMovieFn);
 
     moviesDataTable.grantReadData(this.downloadMovieFn);
     moviesDataTable.grantReadData(this.getSingleMovieFn);
     moviesDataTable.grantReadData(this.getMoviesFn);
     moviesDataTable.grantReadWriteData(this.uploadMovieFn);
     moviesDataTable.grantReadWriteData(this.deleteMovieFn);
+    moviesDataTable.grantReadWriteData(this.editMovieFn);
 
     subscriptionsDataTable.grantWriteData(this.subscribeFn);
     subscriptionsDataTable.grantReadData(this.getSubscriptionsFn);
     subscriptionsDataTable.grantWriteData(this.unsubscribeFn);
+
+    movieRatingsTable.grantReadWriteData(this.rateMovieFn);
+    movieRatingsTable.grantReadData(this.getSingleMovieFn);
   }
 }

@@ -47,7 +47,7 @@ export class CognitoStack extends cdk.Stack {
 
     userPool.addDomain("briefCinemaCognitoDomain", {
       cognitoDomain: {
-        domainPrefix: "briefcinemausers",
+        domainPrefix: "briefcinemausersteo",
       },
     });
 

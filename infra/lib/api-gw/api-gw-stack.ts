@@ -12,13 +12,15 @@ export interface ApiGwStackProps extends cdk.StackProps {
   subscribeFn: lambda.Function;
   getSubscriptionsFn: lambda.Function;
   unsubscribeFn: lambda.Function;
+  editMovieFn: lambda.Function;
+  rateMovieFn: lambda.Function;
 }
 
 export class ApiGwStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: ApiGwStackProps) {
     super(scope, id, props);
 
-    const { uploadMovieFn, downloadMovieFn, getSingleMovieFn, getMoviesFn, deleteMovieFn, subscribeFn, getSubscriptionsFn, unsubscribeFn } = props!;
+    const { uploadMovieFn, downloadMovieFn, getSingleMovieFn, getMoviesFn, deleteMovieFn, subscribeFn, getSubscriptionsFn, unsubscribeFn, editMovieFn, rateMovieFn } = props!;
 
     const uploadMovieLambdaIntegration = new apigateway.LambdaIntegration(uploadMovieFn);
     const downloadMovieLambdaIntegration = new apigateway.LambdaIntegration(downloadMovieFn);
@@ -28,6 +30,8 @@ export class ApiGwStack extends cdk.Stack {
     const subscribeLambdaIntegration = new apigateway.LambdaIntegration(subscribeFn);
     const getSubscriptionsLambdaIntegration = new apigateway.LambdaIntegration(getSubscriptionsFn);
     const unsubscribeLambdaIntegration = new apigateway.LambdaIntegration(unsubscribeFn);
+    const editMovieLambdaIntegration = new apigateway.LambdaIntegration(editMovieFn);
+    const rateMovieLambdaIntegration = new apigateway.LambdaIntegration(rateMovieFn);
 
     const api = new apigateway.RestApi(this, "MoviesApi", {
       restApiName: "Movies Service",
@@ -107,6 +111,17 @@ export class ApiGwStack extends cdk.Stack {
         validateRequestParameters: true,
       },
     });
+    movieResource.addMethod("PUT", editMovieLambdaIntegration, {
+      requestModels: {
+        "application/json": uploadMovieRequestBodySchema,
+      },
+      requestValidatorOptions: {
+        validateRequestBody: true,
+      },
+      requestParameters: {
+        "method.request.path.id": true,
+      },
+    });
     movieResource.addCorsPreflight({
       allowOrigins: ["*"],
     });
@@ -143,6 +158,32 @@ export class ApiGwStack extends cdk.Stack {
       requestValidatorOptions: {
         validateRequestParameters: true,
       },
+    });
+
+    const rateMovieRequestBodySchema = new apigateway.Model(this, "rateMovieRequestBodySchema", {
+      restApi: api,
+      contentType: "application/json",
+      schema: {
+        type: apigateway.JsonSchemaType.OBJECT,
+        properties: {
+          movieId: { type: apigateway.JsonSchemaType.STRING },
+          rating: { type: apigateway.JsonSchemaType.NUMBER },
+        },
+        required: ["movieId", "rating"],
+      },
+    });
+
+    const rateMovieResource = api.root.addResource("rate-movie");
+    rateMovieResource.addMethod("POST", rateMovieLambdaIntegration, {
+      requestModels: {
+        "application/json": rateMovieRequestBodySchema,
+      },
+      requestValidatorOptions: {
+        validateRequestBody: true,
+      },
+    });
+    rateMovieResource.addCorsPreflight({
+      allowOrigins: ["*"],
     });
   }
 }

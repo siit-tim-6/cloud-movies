@@ -23,6 +23,7 @@ const router = createBrowserRouter(
         <Route path="/movies" element={<AllMovies />} />
         <Route path="/movies/:id" element={<MovieDetails />} />
         <Route path="/upload-movie" element={<UploadMovie />} />
+          <Route path="/edit-movie/:id" element={<UploadMovie isEditMode={true} />} />
         <Route path="/subscriptions" element={<SubscriptionList />} />
       </Route>
     </>

@@ -17,6 +17,7 @@ const lambdaStack = new LambdaStack(app, "LambdaStack", {
   moviesBucket: dataStack.moviesBucket,
   moviesDataTable: dataStack.moviesDataTable,
   subscriptionsDataTable: dataStack.subscriptionsDataTable,
+  movieRatingsTable: dataStack.movieRatingsTable,
 });
 
 new ApiGwStack(app, "ApiGwStack", {
@@ -28,6 +29,8 @@ new ApiGwStack(app, "ApiGwStack", {
   getSubscriptionsFn: lambdaStack.getSubscriptionsFn,
   subscribeFn: lambdaStack.subscribeFn,
   unsubscribeFn: lambdaStack.unsubscribeFn,
+  editMovieFn: lambdaStack.editMovieFn,
+  rateMovieFn: lambdaStack.rateMovieFn,
 });
 
 new FrontDeploymentStack(app, "FrontDeploymentStack", {});
