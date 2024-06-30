@@ -4,7 +4,7 @@ import Navbar from "@/components/navbar/navbar.jsx";
 import { Badge } from "@/components/ui/badge.jsx";
 import "./movie-details.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDownload, faHeart, faPlay, faTrash, faEdit, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faDownload, faHeart, faPlay, faTrash, faEdit, faTimes, faStar } from "@fortawesome/free-solid-svg-icons";
 import Rating from "react-rating-stars-component";
 import axios from "axios";
 import { confirmAlert } from "react-confirm-alert";
@@ -17,7 +17,6 @@ function MovieDetails() {
   const navigate = useNavigate();
   const { getSession, getRole } = useContext(AccountContext);
 
-  const [rating, setRating] = useState(4);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [genres, setGenres] = useState([]);
@@ -29,6 +28,9 @@ function MovieDetails() {
   const [subscriptions, setSubscriptions] = useState([]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [role, setRole] = useState(undefined);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [userRating, setUserRating] = useState(0);
+  const [averageRating, setAverageRating] = useState(0);
 
   useEffect(() => {
     const getMovie = async () => {
@@ -48,6 +50,7 @@ function MovieDetails() {
       setCoverUrl(movieResponse.data.CoverS3Url);
       setVideoUrl(movieResponse.data.VideoS3Url);
       setSubscriptions(subscriptionsReponse.data);
+      setAverageRating(movieResponse.data.AverageRating || 0); // Assuming the backend returns the average rating
 
       const userRole = await getRole();
       setRole(userRole);
@@ -58,8 +61,24 @@ function MovieDetails() {
     getMovie();
   }, [id, getSession]);
 
+  const handleRatingSubmit = async () => {
+    const session = await getSession();
+    try {
+      const response = await axios.post(
+          `${import.meta.env.VITE_API_URL}/rate-movie`,
+          { movieId: id, rating: userRating },
+          { headers: { Authorization: session.accessToken.jwtToken } }
+      );
+      setAverageRating(response.data.averageRating);
+      setShowRatingModal(false);
+    } catch (error) {
+      console.error("Error rating the movie:", error);
+      alert("Failed to rate the movie.");
+    }
+  };
+
   const ratingChanged = (newRating) => {
-    setRating(newRating);
+    setUserRating(newRating);
   };
 
   const handleDownload = async () => {
@@ -132,14 +151,8 @@ function MovieDetails() {
       } else {
         await axios.post(
             `${import.meta.env.VITE_API_URL}/subscriptions`,
-            {
-              subscribedTo: item,
-            },
-            {
-              headers: {
-                Authorization: session.accessToken.jwtToken,
-              },
-            }
+            { subscribedTo: item },
+            { headers: { Authorization: session.accessToken.jwtToken } }
         );
         setSubscriptions([...subscriptions, item]);
         alert("Subscribed successfully.");
@@ -186,9 +199,12 @@ function MovieDetails() {
                     ) : null}
                     {role === "ADMIN" ? (
                         <button className="delete-button" onClick={confirmDelete}>
-                          <FontAwesomeIcon icon={faTrash}/>
+                          <FontAwesomeIcon icon={faTrash} />
                         </button>
                     ) : null}
+                    <button className="rate-button" onClick={() => setShowRatingModal(true)}>
+                      <FontAwesomeIcon icon={faStar} />
+                    </button>
                   </div>
                   <div className="movie-genre-rating">
                     {genres.map((genre, i) => (
@@ -197,7 +213,7 @@ function MovieDetails() {
                         </Badge>
                     ))}
                     <div className="rating">
-                      <Rating count={5} value={rating} edit={false} size={24} activeColor="#ffd700" />
+                      <Rating count={5} value={averageRating} edit={false} size={24} activeColor="#ffd700" />
                     </div>
                   </div>
                   <p className="movie-description">{description}</p>
@@ -251,6 +267,24 @@ function MovieDetails() {
               </>
           )}
         </div>
+        {showRatingModal && (
+            <div className="custom-modal">
+              <div className="custom-modal-content">
+                <h2>Rate Movie</h2>
+                <div className="rating-wrapper">
+                  <Rating count={5} value={userRating} onChange={ratingChanged} size={36} activeColor="#ffd700" />
+                </div>
+                <div className="button-group">
+                  <button className="submit-button" onClick={handleRatingSubmit}>
+                    Submit Rating
+                  </button>
+                  <button className="close-modal-button" onClick={() => setShowRatingModal(false)}>
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+        )}
       </>
   );
 }
