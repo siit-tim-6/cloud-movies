@@ -226,7 +226,8 @@ function MovieDetails() {
                         </Badge>
                     ))}
                     <div className="rating">
-                      <Rating count={5} value={averageRating} edit={false} size={24} activeColor="#ffd700" />
+                      <Rating count={5} value={averageRating} edit={false} size={24} activeColor="#ffd700"/>
+                      <span className="average-rating">({averageRating.toFixed(1)})</span>
                     </div>
                   </div>
                   <p className="movie-description">{description}</p>
