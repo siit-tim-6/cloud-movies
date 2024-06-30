@@ -11,6 +11,7 @@ const s3Client = new S3Client({});
 
 exports.handler = async (event) => {
   const tableName = process.env.DYNAMODB_TABLE;
+  const ratingsTableName = process.env.RATINGS_TABLE;
   const bucketName = process.env.S3_BUCKET;
   const movieId = event.pathParameters.id;
 
@@ -55,6 +56,20 @@ exports.handler = async (event) => {
   const s3VideoSignedUrl = await getSignedUrl(s3Client, getVideoCommand, { expiresIn: 3600 });
   responseItem.VideoS3Url = s3VideoSignedUrl;
 
+  const ratingsQueryCommand = new QueryCommand({
+    TableName: ratingsTableName,
+    KeyConditionExpression: "MovieId = :movieId",
+    ExpressionAttributeValues: {
+      ":movieId": movieId,
+    },
+  });
+
+  const ratingsResponse = await dynamoDocClient.send(ratingsQueryCommand);
+  const totalRatings = ratingsResponse.Items.length;
+  const sumRatings = ratingsResponse.Items.reduce((sum, item) => sum + item.Rating, 0);
+  const averageRating = totalRatings > 0 ? sumRatings / totalRatings : 0;
+
+  responseItem.AverageRating = averageRating;
 
   return {
     statusCode: 200,
