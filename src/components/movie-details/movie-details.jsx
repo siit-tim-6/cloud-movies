@@ -50,7 +50,7 @@ function MovieDetails() {
       setCoverUrl(movieResponse.data.CoverS3Url);
       setVideoUrl(movieResponse.data.VideoS3Url);
       setSubscriptions(subscriptionsReponse.data);
-      setAverageRating(movieResponse.data.AverageRating || 0); // Assuming the backend returns the average rating
+      setAverageRating(movieResponse.data.AverageRating || 0);
 
       const userRole = await getRole();
       setRole(userRole);
@@ -69,13 +69,18 @@ function MovieDetails() {
           { movieId: id, rating: userRating },
           { headers: { Authorization: session.accessToken.jwtToken } }
       );
+
       setAverageRating(response.data.averageRating);
       setShowRatingModal(false);
+
+      alert("Movie rated successfully!");
+      window.location.reload();
     } catch (error) {
       console.error("Error rating the movie:", error);
       alert("Failed to rate the movie.");
     }
   };
+
 
   const ratingChanged = (newRating) => {
     setUserRating(newRating);
