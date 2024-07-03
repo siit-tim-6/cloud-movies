@@ -47,6 +47,15 @@ exports.handler = async (event) => {
   const s3CoverSignedUrl = await getSignedUrl(s3Client, getCoverCommand, { expiresIn: 3600 });
   responseItem.CoverS3Url = s3CoverSignedUrl;
 
+  const s3VideoUrlKey = responseItem.VideoS3Url.split(`https://${bucketName}.s3.amazonaws.com/`)[1];
+  const getVideoCommand = new GetObjectCommand({
+    Bucket: bucketName,
+    Key: s3VideoUrlKey,
+  });
+  const s3VideoSignedUrl = await getSignedUrl(s3Client, getVideoCommand, { expiresIn: 3600 });
+  responseItem.VideoS3Url = s3VideoSignedUrl;
+
+
   return {
     statusCode: 200,
     headers: {

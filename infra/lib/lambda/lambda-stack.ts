@@ -20,6 +20,7 @@ export class LambdaStack extends cdk.Stack {
   public readonly subscribeFn: lambda.Function;
   public readonly getSubscriptionsFn: lambda.Function;
   public readonly unsubscribeFn: lambda.Function;
+  public readonly editMovieFn: lambda.Function;
 
   constructor(scope: Construct, id: string, props?: LambdaStackProps) {
     super(scope, id, props);
@@ -104,17 +105,30 @@ export class LambdaStack extends cdk.Stack {
       },
     });
 
+    this.editMovieFn = new lambda.Function(this, "editMovieFn", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: "index.handler",
+      code: lambda.Code.fromAsset(path.join(__dirname, "./src/edit-movie")),
+      environment: {
+        S3_BUCKET: moviesBucket.bucketName,
+        DYNAMODB_TABLE: moviesDataTable.tableName,
+      },
+    });
+
+
     moviesBucket.grantRead(this.downloadMovieFn);
     moviesBucket.grantRead(this.getMoviesFn);
     moviesBucket.grantRead(this.getSingleMovieFn);
     moviesBucket.grantReadWrite(this.uploadMovieFn);
     moviesBucket.grantReadWrite(this.deleteMovieFn);
+    moviesBucket.grantReadWrite(this.editMovieFn);
 
     moviesDataTable.grantReadData(this.downloadMovieFn);
     moviesDataTable.grantReadData(this.getSingleMovieFn);
     moviesDataTable.grantReadData(this.getMoviesFn);
     moviesDataTable.grantReadWriteData(this.uploadMovieFn);
     moviesDataTable.grantReadWriteData(this.deleteMovieFn);
+    moviesDataTable.grantReadWriteData(this.editMovieFn);
 
     subscriptionsDataTable.grantWriteData(this.subscribeFn);
     subscriptionsDataTable.grantReadData(this.getSubscriptionsFn);

@@ -62,7 +62,7 @@
     margin-bottom: 8px;
 }
 
-.favorite-button, .download-button, .delete-button {
+.favorite-button, .download-button, .delete-button, .edit-button {
     background: none;
     border: none;
     cursor: pointer;
@@ -72,7 +72,7 @@
     transition: color 0.5s;
 }
 
-.favorite-button:hover, .download-button:hover {
+.favorite-button:hover, .download-button:hover, edit-button:hover {
     color: #ffd700;
 }
 
@@ -175,4 +175,43 @@
 
 .uppercased {
     text-transform: capitalize;
+}
+
+.video-player {
+    position: relative;
+    width: 70%;
+    margin: 0 auto;
+}
+
+.video-element {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    z-index: 999;
+}
+
+.close-button:hover {
+    background-color: rgb(76, 76, 76);
+}
+
+.close-button svg {
+    color: #ffffff;
+    font-size: 24px;
 }
