@@ -1,9 +1,10 @@
 import * as cdk from "aws-cdk-lib";
-import { Construct } from "constructs";
+import {Construct} from "constructs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as iam from "aws-cdk-lib/aws-iam";
+import {Effect} from "aws-cdk-lib/aws-iam";
 import path = require("path");
 
 export interface LambdaStackProps extends cdk.StackProps {
@@ -11,6 +12,7 @@ export interface LambdaStackProps extends cdk.StackProps {
   subscriptionsDataTable: dynamodb.Table;
   moviesBucket: s3.Bucket;
   movieRatingsTable: dynamodb.Table;
+  cognitoStackId: string;
 }
 
 export class LambdaStack extends cdk.Stack {
@@ -28,7 +30,7 @@ export class LambdaStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: LambdaStackProps) {
     super(scope, id, props);
 
-    const { moviesBucket, moviesDataTable, subscriptionsDataTable, movieRatingsTable } = props!;
+    const { moviesBucket, moviesDataTable, subscriptionsDataTable, movieRatingsTable, cognitoStackId } = props!;
 
     this.uploadMovieFn = new lambda.Function(this, "uploadMovieFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
@@ -88,6 +90,7 @@ export class LambdaStack extends cdk.Stack {
       code: lambda.Code.fromAsset(path.join(__dirname, "./src/subscribe")),
       environment: {
         DYNAMODB_TABLE: subscriptionsDataTable.tableName,
+        COGNITO_USER_POOL_ID: cognitoStackId
       },
     });
 
@@ -138,6 +141,14 @@ export class LambdaStack extends cdk.Stack {
       resources: ['*'], // Adjust as needed for more specific permissions
     }));
 
+    // AdminGetUser permission to get user details
+    this.subscribeFn.addToRolePolicy(new iam.PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: [
+            'cognito-idp:AdminGetUser',
+        ],
+        resources: ['*'],
+    }));
 
     moviesBucket.grantRead(this.downloadMovieFn);
     moviesBucket.grantRead(this.getMoviesFn);

@@ -10,7 +10,7 @@ import { SnsStack } from "../lib/sns/sns-stack";
 
 const app = new cdk.App();
 
-new CognitoStack(app, "CognitoStack", {});
+const cognitoStack = new CognitoStack(app, "CognitoStack", {});
 
 const dataStack = new DataStack(app, "DataStack", {});
 
@@ -19,6 +19,7 @@ const lambdaStack = new LambdaStack(app, "LambdaStack", {
   moviesDataTable: dataStack.moviesDataTable,
   subscriptionsDataTable: dataStack.subscriptionsDataTable,
   movieRatingsTable: dataStack.movieRatingsTable,
+  cognitoStackId: cognitoStack.stackId,
 });
 
 new ApiGwStack(app, "ApiGwStack", {
