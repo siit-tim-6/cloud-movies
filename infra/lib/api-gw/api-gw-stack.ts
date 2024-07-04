@@ -49,6 +49,10 @@ export class ApiGwStack extends cdk.Stack {
       },
     });
 
+    downloadMovieResource.addCorsPreflight({
+      allowOrigins: ["*"],
+    });
+
     const uploadMovieRequestBodySchema = new apigateway.Model(this, "uploadMovieRequestBodySchema", {
       restApi: api,
       contentType: "application/json",

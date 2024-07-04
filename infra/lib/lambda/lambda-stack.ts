@@ -10,6 +10,7 @@ export interface LambdaStackProps extends cdk.StackProps {
   subscriptionsDataTable: dynamodb.Table;
   moviesBucket: s3.Bucket;
   movieRatingsTable: dynamodb.Table;
+  downloadsDataTable: dynamodb.Table;
 }
 
 export class LambdaStack extends cdk.Stack {
@@ -27,7 +28,7 @@ export class LambdaStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: LambdaStackProps) {
     super(scope, id, props);
 
-    const { moviesBucket, moviesDataTable, subscriptionsDataTable, movieRatingsTable } = props!;
+    const { moviesBucket, moviesDataTable, subscriptionsDataTable, movieRatingsTable, downloadsDataTable } = props!;
 
     this.uploadMovieFn = new lambda.Function(this, "uploadMovieFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
@@ -46,6 +47,7 @@ export class LambdaStack extends cdk.Stack {
       environment: {
         S3_BUCKET: moviesBucket.bucketName,
         DYNAMODB_TABLE: moviesDataTable.tableName,
+        DOWNLOADS_TABLE: downloadsDataTable.tableName,
       },
     });
 
@@ -148,5 +150,7 @@ export class LambdaStack extends cdk.Stack {
 
     movieRatingsTable.grantReadWriteData(this.rateMovieFn);
     movieRatingsTable.grantReadData(this.getSingleMovieFn);
+
+    downloadsDataTable.grantReadWriteData(this.downloadMovieFn);
   }
 }
