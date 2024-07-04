@@ -6,6 +6,7 @@ import { ApiGwStack } from "../lib/api-gw/api-gw-stack";
 import { FrontDeploymentStack } from "../lib/front-deployment/front-deployment-stack";
 import { DataStack } from "../lib/data/data-stack";
 import { LambdaStack } from "../lib/lambda/lambda-stack";
+import {StepFunctionStack} from "../lib/feed/step-function-stack";
 
 const app = new cdk.App();
 
@@ -32,6 +33,13 @@ new ApiGwStack(app, "ApiGwStack", {
   unsubscribeFn: lambdaStack.unsubscribeFn,
   editMovieFn: lambdaStack.editMovieFn,
   rateMovieFn: lambdaStack.rateMovieFn,
+});
+
+new StepFunctionStack(app, "StepFunctionStack", {
+  getSubscriptionsFnArn: lambdaStack.getSubscriptionsFn.functionArn,
+  getRatingsFnArn: lambdaStack.getRatingsFn.functionArn,
+  getDownloadsFnArn: lambdaStack.getDownloadsFn.functionArn,
+  generateFeedFnArn: lambdaStack.generateFeedFn.functionArn,
 });
 
 new FrontDeploymentStack(app, "FrontDeploymentStack", {});

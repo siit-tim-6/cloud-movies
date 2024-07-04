@@ -24,6 +24,9 @@ export class LambdaStack extends cdk.Stack {
   public readonly unsubscribeFn: lambda.Function;
   public readonly editMovieFn: lambda.Function;
   public readonly rateMovieFn: lambda.Function;
+  public readonly getRatingsFn: lambda.Function;
+  public readonly getDownloadsFn: lambda.Function;
+  public readonly generateFeedFn: lambda.Function;
 
   constructor(scope: Construct, id: string, props?: LambdaStackProps) {
     super(scope, id, props);
@@ -129,6 +132,32 @@ export class LambdaStack extends cdk.Stack {
       },
     });
 
+    this.getRatingsFn = new lambda.Function(this, "getRatingsFn", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: "index.handler",
+      code: lambda.Code.fromAsset(path.join(__dirname, "./src/get-ratings")),
+      environment: {
+        RATINGS_TABLE: movieRatingsTable.tableName,
+      },
+    });
+
+    this.getDownloadsFn = new lambda.Function(this, "getDownloadsFn", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: "index.handler",
+      code: lambda.Code.fromAsset(path.join(__dirname, "./src/get-downloads")),
+      environment: {
+        DOWNLOADS_TABLE: downloadsDataTable.tableName,
+      },
+    });
+
+    this.generateFeedFn = new lambda.Function(this, "generateFeedFn", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: "index.handler",
+      code: lambda.Code.fromAsset(path.join(__dirname, "./src/get-feed")),
+      environment: {
+        MOVIES_TABLE: moviesDataTable.tableName,
+      },
+    });
 
     moviesBucket.grantRead(this.downloadMovieFn);
     moviesBucket.grantRead(this.getMoviesFn);
@@ -150,7 +179,9 @@ export class LambdaStack extends cdk.Stack {
 
     movieRatingsTable.grantReadWriteData(this.rateMovieFn);
     movieRatingsTable.grantReadData(this.getSingleMovieFn);
+    movieRatingsTable.grantReadData(this.getRatingsFn);
 
     downloadsDataTable.grantReadWriteData(this.downloadMovieFn);
+    downloadsDataTable.grantReadData(this.getDownloadsFn);
   }
 }
