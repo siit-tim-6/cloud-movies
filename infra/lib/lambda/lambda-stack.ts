@@ -3,6 +3,7 @@ import { Construct } from "constructs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as s3 from "aws-cdk-lib/aws-s3";
+import * as iam from "aws-cdk-lib/aws-iam";
 import path = require("path");
 
 export interface LambdaStackProps extends cdk.StackProps {
@@ -126,6 +127,16 @@ export class LambdaStack extends cdk.Stack {
         MOVIE_RATINGS_TABLE: movieRatingsTable.tableName,
       },
     });
+
+    // Add SNS permissions to the uploadMovieFn
+    this.uploadMovieFn.addToRolePolicy(new iam.PolicyStatement({
+      actions: [
+        'sns:ListTopics',
+        'sns:CreateTopic',
+        'sns:Publish',
+      ],
+      resources: ['*'], // Adjust as needed for more specific permissions
+    }));
 
 
     moviesBucket.grantRead(this.downloadMovieFn);

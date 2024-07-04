@@ -5,10 +5,13 @@ const { PutCommand, DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
 const { PutObjectCommand, S3Client } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
+const { PublishCommand, SNSClient, CreateTopicCommand, ListTopicsCommand } = require("@aws-sdk/client-sns");
+
 const { v4: uuidv4 } = require("uuid");
 const dynamoClient = new DynamoDBClient({});
 const dynamoDocClient = DynamoDBDocumentClient.from(dynamoClient);
 const s3Client = new S3Client({});
+const snsClient = new SNSClient({});
 
 exports.handler = async (event) => {
   const bucketName = process.env.S3_BUCKET;
@@ -59,6 +62,37 @@ exports.handler = async (event) => {
 
   const dynamoResponse = await dynamoDocClient.send(dynamoPutCommand);
   console.log(dynamoResponse);
+
+  // Check if SNS topic exists, if not create it
+  const actorName = actorsLower[0]; // Assuming you want to notify about the first actor
+  const topicName = `${actorName.replace(/\s/g, "-")}`
+  let topicArn;
+
+  try {
+    const listTopicsCommand = new ListTopicsCommand({});
+    const listTopicsResponse = await snsClient.send(listTopicsCommand);
+    const existingTopic = listTopicsResponse.Topics.find(topic => topic.TopicArn.split(':').pop() === topicName);
+
+    if (existingTopic) {
+      topicArn = existingTopic.TopicArn;
+    } else {
+      const createTopicCommand = new CreateTopicCommand({ Name: topicName });
+      const createTopicResponse = await snsClient.send(createTopicCommand);
+      topicArn = createTopicResponse.TopicArn;
+    }
+
+    // Publish to SNS topic
+    const publishCommand = new PublishCommand({
+      TopicArn: topicArn,
+      Message: `A new movie titled "${title}" featuring ${actorName} has been released.`,
+      Subject: "New Movie Release",
+    });
+
+    await snsClient.send(publishCommand);
+  } catch (error) {
+    console.error("Error handling SNS topic:", error);
+    throw error;
+  }
 
   return {
     statusCode: 200,
