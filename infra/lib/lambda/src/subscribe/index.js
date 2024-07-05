@@ -12,7 +12,7 @@ const snsClient = new SNSClient({});
 
 exports.handler = async (event) => {
   const tableName = process.env.DYNAMODB_TABLE;
-  const userPoolId = process.env.COGNITO_USER_POOL_ID;
+  const userPoolId = process.env.COGNITO_USER_POOL_ID.split("/").pop();
   const { subscribedTo } = JSON.parse(event.body);
   const { Authorization } = event.headers;
 

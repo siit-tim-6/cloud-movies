@@ -6,10 +6,11 @@ import { Construct } from "constructs";
 import path = require("path");
 
 export class CognitoStack extends cdk.Stack {
+  public readonly userPool: cognito.UserPool;
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const userPool = new cognito.UserPool(this, "movieUserPool", {
+    this.userPool = new cognito.UserPool(this, "movieUserPool", {
       signInAliases: {
         username: true,
       },
@@ -41,23 +42,23 @@ export class CognitoStack extends cdk.Stack {
       email: cognito.UserPoolEmail.withCognito(),
     });
 
-    const userPoolClient = userPool.addClient("briefCinemaFe", {
+    const userPoolClient = this.userPool.addClient("briefCinemaFe", {
       preventUserExistenceErrors: true,
     });
 
-    userPool.addDomain("briefCinemaCognitoDomain", {
+    this.userPool.addDomain("briefCinemaCognitoDomain", {
       cognitoDomain: {
         domainPrefix: "briefcinemausersbalsa",
       },
     });
 
     const regularUserGroup = new cognito.CfnUserPoolGroup(this, "regularUserGroup", {
-      userPoolId: userPool.userPoolId,
+      userPoolId: this.userPool.userPoolId,
       groupName: "RegularUsers",
     });
 
     const adminUserGroup = new cognito.CfnUserPoolGroup(this, "adminUserGroup", {
-      userPoolId: userPool.userPoolId,
+      userPoolId: this.userPool.userPoolId,
       groupName: "Admins",
     });
 
@@ -75,6 +76,6 @@ export class CognitoStack extends cdk.Stack {
       })
     );
 
-    userPool.addTrigger(cognito.UserPoolOperation.POST_CONFIRMATION, addToDefaultUserGroupFn);
+    this.userPool.addTrigger(cognito.UserPoolOperation.POST_CONFIRMATION, addToDefaultUserGroupFn);
   }
 }

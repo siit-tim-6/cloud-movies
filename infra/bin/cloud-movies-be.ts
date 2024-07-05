@@ -19,7 +19,7 @@ const lambdaStack = new LambdaStack(app, "LambdaStack", {
   moviesDataTable: dataStack.moviesDataTable,
   subscriptionsDataTable: dataStack.subscriptionsDataTable,
   movieRatingsTable: dataStack.movieRatingsTable,
-  cognitoStackId: cognitoStack.stackId,
+  cognitoUserPool: cognitoStack.userPool,
 });
 
 new ApiGwStack(app, "ApiGwStack", {
