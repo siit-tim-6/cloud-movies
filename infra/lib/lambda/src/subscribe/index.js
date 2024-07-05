@@ -55,7 +55,7 @@ exports.handler = async (event) => {
 
   console.log("Sending message to SQS...");
   const sqsCommand = new SendMessageCommand(sqsParams);
-  sqsClient.send(sqsCommand); // TODO: check if await is needed
+  await sqsClient.send(sqsCommand);
 
   return {
     statusCode: 201,

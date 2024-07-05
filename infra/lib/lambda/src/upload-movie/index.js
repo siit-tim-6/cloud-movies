@@ -79,7 +79,7 @@ exports.handler = async (event) => {
     };
 
     const sqsCommand = new SendMessageCommand(sqsParams);
-    await sqsClient.send(sqsCommand); // TODO: check if await is needed
+    await sqsClient.send(sqsCommand);
   }
 
   return {

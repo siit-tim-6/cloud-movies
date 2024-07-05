@@ -144,7 +144,6 @@ export class LambdaStack extends cdk.Stack {
       code: lambda.Code.fromAsset(path.join(__dirname, "./src/handle-topic-message")),
     });
 
-    // Add SNS permissions to the uploadMovieFn
     this.uploadMovieFn.addToRolePolicy(new iam.PolicyStatement({
       actions: [
         'sqs:SendMessage',
@@ -152,7 +151,6 @@ export class LambdaStack extends cdk.Stack {
       resources: ['*'], // Adjust as needed for more specific permissions
     }));
 
-    // AdminGetUser permission to get user details
     this.subscribeFn.addToRolePolicy(new iam.PolicyStatement({
         effect: Effect.ALLOW,
         actions: [
@@ -162,16 +160,13 @@ export class LambdaStack extends cdk.Stack {
         resources: ['*'],
     }));
 
-    // Allow the lambda function to publish messages to SNS topics
     this.handleTopicMessageFn.addToRolePolicy(new iam.PolicyStatement({
       actions: ['sns:*'],
-      resources: ['*'], // You may want to restrict this to specific SNS topics
+      resources: ['*'],
     }));
 
-    // Trigger handleTopicMessageFn from SQS queue
     this.handleTopicMessageFn.addEventSource(new SqsEventSource(sqsQueue));
 
-    // Grant necessary permissions
     sqsQueue.grantConsumeMessages(this.handleTopicMessageFn);
 
     moviesBucket.grantRead(this.downloadMovieFn);
