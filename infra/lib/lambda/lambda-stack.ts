@@ -8,6 +8,7 @@ import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as sqs from "aws-cdk-lib/aws-sqs";
 import {Effect} from "aws-cdk-lib/aws-iam";
 import path = require("path");
+import {SqsEventSource} from "aws-cdk-lib/aws-lambda-event-sources";
 
 export interface LambdaStackProps extends cdk.StackProps {
   moviesDataTable: dynamodb.Table;
@@ -43,6 +44,7 @@ export class LambdaStack extends cdk.Stack {
       environment: {
         S3_BUCKET: moviesBucket.bucketName,
         DYNAMODB_TABLE: moviesDataTable.tableName,
+        SQS_QUEUE_URL: sqsQueue.queueUrl,
       },
     });
 
@@ -95,6 +97,7 @@ export class LambdaStack extends cdk.Stack {
       environment: {
         DYNAMODB_TABLE: subscriptionsDataTable.tableName,
         COGNITO_USER_POOL_ID: cognitoUserPool.userPoolId,
+        SQS_QUEUE_URL: sqsQueue.queueUrl,
       },
     });
 
@@ -144,9 +147,7 @@ export class LambdaStack extends cdk.Stack {
     // Add SNS permissions to the uploadMovieFn
     this.uploadMovieFn.addToRolePolicy(new iam.PolicyStatement({
       actions: [
-        'sns:ListTopics',
-        'sns:CreateTopic',
-        'sns:Publish',
+        'sqs:SendMessage',
       ],
       resources: ['*'], // Adjust as needed for more specific permissions
     }));
@@ -156,7 +157,7 @@ export class LambdaStack extends cdk.Stack {
         effect: Effect.ALLOW,
         actions: [
             'cognito-idp:AdminGetUser',
-            'sns:*',
+            'sqs:SendMessage',
         ],
         resources: ['*'],
     }));
@@ -167,7 +168,11 @@ export class LambdaStack extends cdk.Stack {
       resources: ['*'], // You may want to restrict this to specific SNS topics
     }));
 
-    sqsQueue.grantSendMessages(this.handleTopicMessageFn);
+    // Trigger handleTopicMessageFn from SQS queue
+    this.handleTopicMessageFn.addEventSource(new SqsEventSource(sqsQueue));
+
+    // Grant necessary permissions
+    sqsQueue.grantConsumeMessages(this.handleTopicMessageFn);
 
     moviesBucket.grantRead(this.downloadMovieFn);
     moviesBucket.grantRead(this.getMoviesFn);

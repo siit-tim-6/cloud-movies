@@ -4,18 +4,18 @@ const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { PutCommand, DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
 const { PutObjectCommand, S3Client } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
-
-const { PublishCommand, SNSClient, CreateTopicCommand, ListTopicsCommand } = require("@aws-sdk/client-sns");
+const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");
 
 const { v4: uuidv4 } = require("uuid");
 const dynamoClient = new DynamoDBClient({});
 const dynamoDocClient = DynamoDBDocumentClient.from(dynamoClient);
 const s3Client = new S3Client({});
-const snsClient = new SNSClient({});
+const sqsClient = new SQSClient({});
 
 exports.handler = async (event) => {
   const bucketName = process.env.S3_BUCKET;
   const tableName = process.env.DYNAMODB_TABLE;
+  const sqsQueueUrl = process.env.SQS_QUEUE_URL;
   const { title, description, genres, actors, directors, coverFileName, coverFileType, videoFileName, videoFileType } = JSON.parse(event.body);
 
   const movieId = uuidv4();
@@ -63,35 +63,23 @@ exports.handler = async (event) => {
   const dynamoResponse = await dynamoDocClient.send(dynamoPutCommand);
   console.log(dynamoResponse);
 
-  // Check if SNS topic exists, if not create it
-  const actorName = actorsLower[0]; // Assuming you want to notify about the first actor
-  const topicName = `${actorName.replace(/\s/g, "-")}`
-  let topicArn;
+  const topics = genresLower.concat(actorsLower, directorsLower);
+  console.log(topics);
+  console.log(`SQS Queue URL: ${sqsQueueUrl}`);
+  for (const topic of topics) {
 
-  try {
-    const listTopicsCommand = new ListTopicsCommand({});
-    const listTopicsResponse = await snsClient.send(listTopicsCommand);
-    const existingTopic = listTopicsResponse.Topics.find(topic => topic.TopicArn.split(':').pop() === topicName);
+    const sqsMessage = {
+      topicName: topic,
+      email: null,
+    };
 
-    if (existingTopic) {
-      topicArn = existingTopic.TopicArn;
-    } else {
-      const createTopicCommand = new CreateTopicCommand({ Name: topicName });
-      const createTopicResponse = await snsClient.send(createTopicCommand);
-      topicArn = createTopicResponse.TopicArn;
-    }
+    const sqsParams = {
+      QueueUrl: sqsQueueUrl,
+      MessageBody: JSON.stringify(sqsMessage),
+    };
 
-    // Publish to SNS topic
-    const publishCommand = new PublishCommand({
-      TopicArn: topicArn,
-      Message: `A new movie titled "${title}" featuring ${actorName} has been released.`,
-      Subject: "New Movie Release",
-    });
-
-    await snsClient.send(publishCommand);
-  } catch (error) {
-    console.error("Error handling SNS topic:", error);
-    throw error;
+    const sqsCommand = new SendMessageCommand(sqsParams);
+    await sqsClient.send(sqsCommand); // TODO: check if await is needed
   }
 
   return {
