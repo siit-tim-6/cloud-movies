@@ -154,8 +154,9 @@ function MovieDetails() {
     });
   };
 
-  const subUnsubTo = async (item) => {
+  const subUnsubTo = async (type,value) => {
     const session = await getSession();
+    const item = `${type}:${value}`;
 
     try {
       if (subscriptions.includes(item)) {
@@ -164,7 +165,7 @@ function MovieDetails() {
             Authorization: session.accessToken.jwtToken,
           },
         });
-        setSubscriptions(subscriptions.filter((subscription) => subscription !== item));
+        setSubscriptions(subscriptions.filter((sub) => sub.type !== type || sub.value !== value));
         alert("Unsubscribed successfully.");
       } else {
         await axios.post(
@@ -244,9 +245,9 @@ function MovieDetails() {
                             <p className="uppercased">{actor}</p>
                             <FontAwesomeIcon
                                 className="icon-btn"
-                                onClick={() => subUnsubTo(actor)}
+                                onClick={() => subUnsubTo('actor',actor)}
                                 icon={faHeart}
-                                color={subscriptions.includes(actor) ? "red" : "white"}
+                                color={subscriptions.some(sub => sub.type === "actor" && sub.value === actor) ? "red" : "white"}
                             />
                           </div>
                       ))}
@@ -258,9 +259,9 @@ function MovieDetails() {
                             <p className="uppercased">{director}</p>
                             <FontAwesomeIcon
                                 className="icon-btn"
-                                onClick={() => subUnsubTo(director)}
+                                onClick={() => subUnsubTo('director',director)}
                                 icon={faHeart}
-                                color={subscriptions.includes(director) ? "red" : "white"}
+                                color={subscriptions.some(sub => sub.type === "director" && sub.value === director) ? "red" : "white"}
                             />
                           </div>
                       ))}
@@ -273,9 +274,9 @@ function MovieDetails() {
                               <p className="uppercased">{genre}</p>
                               <FontAwesomeIcon
                                   className="icon-btn"
-                                  onClick={() => subUnsubTo(genre)}
+                                  onClick={() => subUnsubTo('genre',genre)}
                                   icon={faHeart}
-                                  color={subscriptions.includes(genre) ? "red" : "white"}
+                                  color={subscriptions.some(sub => sub.type === "genre" && sub.value === genre) ? "red" : "white"}
                               />
                             </div>
                         ))}

@@ -32,7 +32,7 @@ function SubscriptionList() {
     const session = await getSession();
 
     try {
-      await axios.delete(`${import.meta.env.VITE_API_URL}/subscriptions?subscribedTo=${item}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/subscriptions?subscribedTo=${item.type}:${item.value}`, {
         headers: {
           Authorization: session.accessToken.jwtToken,
         },
@@ -44,6 +44,17 @@ function SubscriptionList() {
     }
   };
 
+  const renderSubscriptionsByType = (type) => {
+    return subscriptions
+        .filter((sub) => sub.type === type)
+        .map((sub) => (
+            <div className="subscription-line" key={sub.value}>
+              <p className="capitalized">{sub.value}</p>
+              <Button onClick={() => unsubscribe(sub)}>Unsubscribe</Button>
+            </div>
+        ));
+  };
+
   return (
     <>
       <Navbar />
@@ -53,15 +64,21 @@ function SubscriptionList() {
             <ReactLoading type="spokes" color="#ffffff" height={100} width={100} />
           </div>
         ) : (
-          <>
-            <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight mb-3">Your Subscriptions</h3>
-            {subscriptions.map((subscription) => (
-              <div className="subscription-line">
-                <p className="capitalized">{subscription}</p>
-                <Button onClick={() => unsubscribe(subscription)}>Unsubscribe</Button>
+            <>
+              <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight mb-3">Your Subscriptions</h3>
+              <div>
+                <h4 className="text-xl font-semibold">Genres</h4>
+                {renderSubscriptionsByType("genre")}
               </div>
-            ))}
-          </>
+              <div>
+                <h4 className="text-xl font-semibold">Actors</h4>
+                {renderSubscriptionsByType("actor")}
+              </div>
+              <div>
+                <h4 className="text-xl font-semibold">Directors</h4>
+                {renderSubscriptionsByType("director")}
+              </div>
+            </>
         )}
       </div>
     </>
