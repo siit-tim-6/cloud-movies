@@ -18,6 +18,7 @@ exports.handler = async (event) => {
 
   // Decode the user ID from the Authorization header
   const userId = JSON.parse(Buffer.from(Authorization.split(".")[1], "base64").toString()).sub;
+  const username = JSON.parse(Buffer.from(Authorization.split(".")[1], "base64").toString()).username;
 
   // Store the subscription preferences in DynamoDB
   const dynamoPutCommand = new PutCommand({
@@ -33,9 +34,10 @@ exports.handler = async (event) => {
   // Get the user's email from Cognito
   const userCommand = new AdminGetUserCommand({
     UserPoolId: userPoolId,
-    Username: userId,
+    Username: username,
   });
 
+  console.log("Getting user email...");
   const userResponse = await cognitoClient.send(userCommand);
   const userEmail = userResponse.UserAttributes.find(attr => attr.Name === "email").Value;
 

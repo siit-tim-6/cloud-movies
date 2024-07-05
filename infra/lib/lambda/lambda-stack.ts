@@ -156,6 +156,7 @@ export class LambdaStack extends cdk.Stack {
         effect: Effect.ALLOW,
         actions: [
             'cognito-idp:AdminGetUser',
+            'sns:*',
         ],
         resources: ['*'],
     }));
