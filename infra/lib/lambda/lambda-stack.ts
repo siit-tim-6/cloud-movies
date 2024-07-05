@@ -5,6 +5,7 @@ import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as cognito from "aws-cdk-lib/aws-cognito";
+import * as sqs from "aws-cdk-lib/aws-sqs";
 import {Effect} from "aws-cdk-lib/aws-iam";
 import path = require("path");
 
@@ -14,6 +15,7 @@ export interface LambdaStackProps extends cdk.StackProps {
   moviesBucket: s3.Bucket;
   movieRatingsTable: dynamodb.Table;
   cognitoUserPool: cognito.UserPool;
+  sqsQueue: sqs.Queue;
 }
 
 export class LambdaStack extends cdk.Stack {
@@ -27,11 +29,12 @@ export class LambdaStack extends cdk.Stack {
   public readonly unsubscribeFn: lambda.Function;
   public readonly editMovieFn: lambda.Function;
   public readonly rateMovieFn: lambda.Function;
+  public readonly handleTopicMessageFn: lambda.Function;
 
   constructor(scope: Construct, id: string, props?: LambdaStackProps) {
     super(scope, id, props);
 
-    const { moviesBucket, moviesDataTable, subscriptionsDataTable, movieRatingsTable, cognitoUserPool } = props!;
+    const { moviesBucket, moviesDataTable, subscriptionsDataTable, movieRatingsTable, cognitoUserPool, sqsQueue } = props!;
 
     this.uploadMovieFn = new lambda.Function(this, "uploadMovieFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
@@ -132,6 +135,12 @@ export class LambdaStack extends cdk.Stack {
       },
     });
 
+    this.handleTopicMessageFn = new lambda.Function(this, "handleTopicMessageFn", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: "index.handler",
+      code: lambda.Code.fromAsset(path.join(__dirname, "./src/handle-topic-message")),
+    });
+
     // Add SNS permissions to the uploadMovieFn
     this.uploadMovieFn.addToRolePolicy(new iam.PolicyStatement({
       actions: [
@@ -150,6 +159,14 @@ export class LambdaStack extends cdk.Stack {
         ],
         resources: ['*'],
     }));
+
+    // Allow the lambda function to publish messages to SNS topics
+    this.handleTopicMessageFn.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['sns:*'],
+      resources: ['*'], // You may want to restrict this to specific SNS topics
+    }));
+
+    sqsQueue.grantSendMessages(this.handleTopicMessageFn);
 
     moviesBucket.grantRead(this.downloadMovieFn);
     moviesBucket.grantRead(this.getMoviesFn);

@@ -7,6 +7,7 @@ import { FrontDeploymentStack } from "../lib/front-deployment/front-deployment-s
 import { DataStack } from "../lib/data/data-stack";
 import { LambdaStack } from "../lib/lambda/lambda-stack";
 import { SnsStack } from "../lib/sns/sns-stack";
+import {SqsStack} from "../lib/sqs/sqs-stack";
 
 const app = new cdk.App();
 
@@ -14,12 +15,15 @@ const cognitoStack = new CognitoStack(app, "CognitoStack", {});
 
 const dataStack = new DataStack(app, "DataStack", {});
 
+const sqsStack = new SqsStack(app, "SqsStack", {});
+
 const lambdaStack = new LambdaStack(app, "LambdaStack", {
   moviesBucket: dataStack.moviesBucket,
   moviesDataTable: dataStack.moviesDataTable,
   subscriptionsDataTable: dataStack.subscriptionsDataTable,
   movieRatingsTable: dataStack.movieRatingsTable,
   cognitoUserPool: cognitoStack.userPool,
+  sqsQueue: sqsStack.queue,
 });
 
 new ApiGwStack(app, "ApiGwStack", {
