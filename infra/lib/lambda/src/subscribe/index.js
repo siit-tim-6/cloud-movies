@@ -45,6 +45,7 @@ exports.handler = async (event) => {
   const sqsMessage = {
     topicName: subscribedTo,
     email: userEmail,
+    unsubscribe: false,
   }
 
   // Send a message to the SQS queue
