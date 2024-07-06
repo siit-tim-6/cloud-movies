@@ -59,7 +59,7 @@ function MovieDetails() {
       setVideoUrl(movieResponse.data.VideoS3Url);
       setSubscriptions(subscriptionsReponse.data);
       setAverageRating(movieResponse.data.AverageRating || 0);
-
+      console.log(subscriptionsReponse.data);
       const userRole = await getRole();
       setRole(userRole);
 
@@ -154,30 +154,31 @@ function MovieDetails() {
     });
   };
 
-  const subUnsubTo = async (type,value) => {
+  const subUnsubTo = async (type, value) => {
     const session = await getSession();
-    const item = `${type}:${value}`;
+    const item = { type, value };
+    console.log(item);
 
     try {
-      if (subscriptions.includes(item)) {
-        await axios.delete(`${import.meta.env.VITE_API_URL}/subscriptions?subscribedTo=${item}`, {
+      if (subscriptions.some(sub => sub.type === type && sub.value === value)) {
+        await axios.delete(`${import.meta.env.VITE_API_URL}/subscriptions?subscribedTo=${item.type}:${item.value}`, {
           headers: {
             Authorization: session.accessToken.jwtToken,
           },
         });
-        setSubscriptions(subscriptions.filter((sub) => sub.type !== type || sub.value !== value));
+        setSubscriptions(subscriptions.filter(sub => sub.type !== type || sub.value !== value));
         alert("Unsubscribed successfully.");
       } else {
         await axios.post(
             `${import.meta.env.VITE_API_URL}/subscriptions`,
-            { subscribedTo: item },
+            { subscribedTo: `${item.type}:${item.value}` },
             { headers: { Authorization: session.accessToken.jwtToken } }
         );
         setSubscriptions([...subscriptions, item]);
         alert("Subscribed successfully.");
       }
     } catch (error) {
-      alert(`Failed to ${subscriptions.includes(item) ? "un" : ""}subscribe.`);
+      alert(`Failed to ${subscriptions.some(sub => sub.type === type && sub.value === value) ? "un" : ""}subscribe.`);
     }
   };
 
