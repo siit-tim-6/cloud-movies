@@ -14,6 +14,7 @@ exports.handler = async (event) => {
 
     const dynamoQueryCommand = new QueryCommand({
         TableName: tableName,
+        IndexName: 'UserIdIndex',
         KeyConditionExpression: "UserId = :userId",
         ExpressionAttributeValues: {
             ":userId": userId,
