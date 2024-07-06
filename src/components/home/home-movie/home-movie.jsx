@@ -16,12 +16,23 @@ function HomeMovie({ movie }) {
           <h1>{movie.Title.S}</h1>
           <p>{movie.Description.S}</p>
           <div className="details-buttons">
-            <Button variant="outline" className="text-lg py-8 px-10 rounded-full font-medium">
-              <PlayIcon className="mr-2" /> Watch Movie
-            </Button>
+            <a
+                href={movie.VideoS3Url.S}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="no-underline"
+                style={{textDecoration: 'none', color: 'inherit'}}
+            >
+              <Button
+                  variant="outline"
+                  className="text-lg py-8 px-10 rounded-full font-medium"
+              >
+                <PlayIcon className="mr-2"/> Watch Movie
+              </Button>
+            </a>
             <Link to={`/movies/${movie.MovieId.S}`}>
               <Button className="text-lg py-8 px-10 rounded-full font-medium bg-transparent border-2 border-slate-400">
-                More Info <ArrowRightIcon className="ml-2" />
+                More Info <ArrowRightIcon className="ml-2"/>
               </Button>
             </Link>
           </div>
