@@ -1,5 +1,5 @@
 import "./home.css";
-import React, {useContext, useEffect, useState} from "react";
+import React, {useContext, useEffect, useRef, useState} from "react";
 import Navbar from "@/components/navbar/navbar";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, EffectCoverflow, Navigation, Autoplay } from "swiper/modules";
@@ -15,8 +15,13 @@ import "swiper/css/navigation";
 function Home() {
     const [movies, setMovies] = useState([]);
     const { getSession } = useContext(AccountContext);
+    const hasFetchedMovies = useRef(false);
 
     useEffect(() => {
+        if (hasFetchedMovies.current) {
+            return;
+        }
+        hasFetchedMovies.current = true;
         const fetchMovies = async () => {
             const session = await getSession();
 
