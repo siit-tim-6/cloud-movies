@@ -143,7 +143,7 @@ exports.handler = async (event) => {
                     const moviesByGenre = await fetchMoviesByEntity(genre, 'genre');
                     moviesByGenre.forEach((movie) => {
                         movieIds.add(movie.MovieId.S);
-                        addToGenreScores(movie, 1/3);
+                        addToGenreScores(movie, 1);
                     });
                 }
             }
