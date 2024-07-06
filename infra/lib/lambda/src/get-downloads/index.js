@@ -21,7 +21,10 @@ exports.handler = async (event) => {
     });
 
     const downloadsResponse = await dynamoDocClient.send(dynamoQueryCommand);
-    const downloadsList = downloadsResponse.Items.map((download) => download.MovieId);
+    const downloadsList = downloadsResponse.Items.map((download) => ({
+        movieId: download.MovieId,
+        downloadedAt: download.DownloadedAt,
+    }));
 
     return {
         statusCode: 200,
