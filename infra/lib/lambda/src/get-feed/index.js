@@ -33,6 +33,14 @@ exports.handler = async (event) => {
         }
     };
 
+    const getTotalGenreScore = (movie) => {
+        return movie.Genres.L.reduce((total, genreObj) => {
+            const genre = genreObj.S.toLowerCase();
+            const score = genreScores[genre] || 0;
+            return total + score;
+        }, 0);
+    };
+
     const fetchMovieDetails = async (movieId) => {
         const dynamoScanCommand = new ScanCommand({
             TableName: moviesTableName,
@@ -93,13 +101,17 @@ exports.handler = async (event) => {
         };
     };
 
+    const processEntityMovies = async (entity, weight) => {
+        const moviesByEntity = await fetchMoviesByEntity(entity.value, entity.type);
+        for (const movie of moviesByEntity) {
+                movieIds.add(movie.MovieId.S);
+                addToGenreScores(movie, weight);
+        }
+    };
+
 
     const processSubscriptions = subscriptions.map(async (sub) => {
-        const moviesByEntity = await fetchMoviesByEntity(sub.value, sub.type);
-        moviesByEntity.forEach((movie) => {
-            movieIds.add(movie.MovieId.S);
-            addToGenreScores(movie, 3);
-        });
+        await processEntityMovies(sub, 3);
     });
 
     const processRatings = ratings.map(async (rating) => {
@@ -119,13 +131,7 @@ exports.handler = async (event) => {
         if (movie.Genres && movie.Genres.L) {
             for (const genreObj of movie.Genres.L) {
                 const genre = genreObj.S.toLowerCase();
-                if (genreScores[genre] === weight) {
-                    const moviesByGenre = await fetchMoviesByEntity(genre, 'genre');
-                    moviesByGenre.forEach((movie) => {
-                        movieIds.add(movie.MovieId.S);
-                        addToGenreScores(movie, weight/2);
-                    });
-                }
+                await processEntityMovies({ value: genre, type: 'genre' }, weight / 2);
             }
         }
     });
@@ -139,13 +145,7 @@ exports.handler = async (event) => {
         if (movie.Genres && movie.Genres.L) {
             for (const genreObj of movie.Genres.L) {
                 const genre = genreObj.S.toLowerCase();
-                if (genreScores[genre] === 1) {
-                    const moviesByGenre = await fetchMoviesByEntity(genre, 'genre');
-                    moviesByGenre.forEach((movie) => {
-                        movieIds.add(movie.MovieId.S);
-                        addToGenreScores(movie, 1);
-                    });
-                }
+                await processEntityMovies({ value: genre, type: 'genre' }, 0.5);
             }
         }
     });
@@ -175,10 +175,8 @@ exports.handler = async (event) => {
     const moviesWithCoverUrls = await Promise.all(moviesDetails.map(movie => generateSignedUrls(movie, bucketName)));
 
     const personalizedFeed = moviesWithCoverUrls.sort((a, b) => {
-        const genreA = a.Genres.L[0].S;
-        const genreB = b.Genres.L[0].S;
-        const genreScoreA = genreScores[genreA] || 0;
-        const genreScoreB = genreScores[genreB] || 0;
+        const genreScoreA = getTotalGenreScore(a);
+        const genreScoreB = getTotalGenreScore(b);
 
         if (genreScoreA !== genreScoreB) {
             return genreScoreB - genreScoreA;
