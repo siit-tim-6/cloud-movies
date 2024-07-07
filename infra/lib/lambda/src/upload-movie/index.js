@@ -67,11 +67,10 @@ exports.handler = async (event) => {
   console.log(topics);
   console.log(`SQS Queue URL: ${sqsQueueUrl}`);
   for (const topic of topics) {
-
     const sqsMessage = {
       topicName: topic,
-      email: null,
-      unsubscribe: false,
+      movieId,
+      movieTitle: title,
     };
 
     const sqsParams = {
