@@ -37,7 +37,7 @@ function SubscriptionList() {
           Authorization: session.accessToken.jwtToken,
         },
       });
-      setSubscriptions(subscriptions.filter((subscription) => subscription !== item));
+      setSubscriptions(subscriptions.filter(sub => sub.type !== item.type || sub.value !== item.value));
       alert("Unsubscribed sucessfully.");
     } catch (error) {
       alert("Failed to unsubscribe.");
