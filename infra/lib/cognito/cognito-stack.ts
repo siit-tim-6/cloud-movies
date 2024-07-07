@@ -40,6 +40,7 @@ export class CognitoStack extends cdk.Stack {
         },
       },
       email: cognito.UserPoolEmail.withCognito(),
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
     const userPoolClient = this.userPool.addClient("briefCinemaFe", {
@@ -48,7 +49,7 @@ export class CognitoStack extends cdk.Stack {
 
     this.userPool.addDomain("briefCinemaCognitoDomain", {
       cognitoDomain: {
-        domainPrefix: "briefcinemausersbalsa",
+        domainPrefix: "briefcinemausers",
       },
     });
 
