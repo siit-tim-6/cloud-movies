@@ -4,15 +4,18 @@ const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { PutCommand, DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
 const { PutObjectCommand, S3Client } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");
 
 const { v4: uuidv4 } = require("uuid");
 const dynamoClient = new DynamoDBClient({});
 const dynamoDocClient = DynamoDBDocumentClient.from(dynamoClient);
 const s3Client = new S3Client({});
+const sqsClient = new SQSClient({});
 
 exports.handler = async (event) => {
   const bucketName = process.env.S3_BUCKET;
   const tableName = process.env.DYNAMODB_TABLE;
+  const sqsQueueUrl = process.env.SQS_QUEUE_URL;
   const { title, description, genres, actors, directors, coverFileName, coverFileType, videoFileName, videoFileType } = JSON.parse(event.body);
 
   const movieId = uuidv4();
@@ -59,6 +62,26 @@ exports.handler = async (event) => {
 
   const dynamoResponse = await dynamoDocClient.send(dynamoPutCommand);
   console.log(dynamoResponse);
+
+  const topics = genresLower.concat(actorsLower, directorsLower);
+  console.log(topics);
+  console.log(`SQS Queue URL: ${sqsQueueUrl}`);
+  for (const topic of topics) {
+
+    const sqsMessage = {
+      topicName: topic,
+      email: null,
+      unsubscribe: false,
+    };
+
+    const sqsParams = {
+      QueueUrl: sqsQueueUrl,
+      MessageBody: JSON.stringify(sqsMessage),
+    };
+
+    const sqsCommand = new SendMessageCommand(sqsParams);
+    await sqsClient.send(sqsCommand);
+  }
 
   return {
     statusCode: 200,

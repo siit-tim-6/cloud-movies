@@ -1,12 +1,16 @@
 import * as cdk from "aws-cdk-lib";
-import { Construct } from "constructs";
+import {Construct} from "constructs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as stepfunctions from 'aws-cdk-lib/aws-stepfunctions';
 import * as tasks from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as cognito from "aws-cdk-lib/aws-cognito";
+import * as sqs from "aws-cdk-lib/aws-sqs";
+import {Effect} from "aws-cdk-lib/aws-iam";
 import path = require("path");
+import {SqsEventSource} from "aws-cdk-lib/aws-lambda-event-sources";
 
 export interface LambdaStackProps extends cdk.StackProps {
   moviesDataTable: dynamodb.Table;
@@ -14,6 +18,8 @@ export interface LambdaStackProps extends cdk.StackProps {
   moviesBucket: s3.Bucket;
   movieRatingsTable: dynamodb.Table;
   downloadsDataTable: dynamodb.Table;
+  cognitoUserPool: cognito.UserPool;
+  sqsQueue: sqs.Queue;
 }
 
 export class LambdaStack extends cdk.Stack {
@@ -31,11 +37,12 @@ export class LambdaStack extends cdk.Stack {
   public readonly getDownloadsFn: lambda.Function;
   public readonly generateFeedFn: lambda.Function;
   public readonly startAndPollStepFunctionFn: lambda.Function;
+  public readonly handleTopicMessageFn: lambda.Function;
 
   constructor(scope: Construct, id: string, props?: LambdaStackProps) {
     super(scope, id, props);
 
-    const { moviesBucket, moviesDataTable, subscriptionsDataTable, movieRatingsTable, downloadsDataTable  } = props!;
+    const { moviesBucket, moviesDataTable, subscriptionsDataTable, movieRatingsTable, downloadsDataTable, cognitoUserPool, sqsQueue } = props!;
 
     this.uploadMovieFn = new lambda.Function(this, "uploadMovieFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
@@ -44,6 +51,7 @@ export class LambdaStack extends cdk.Stack {
       environment: {
         S3_BUCKET: moviesBucket.bucketName,
         DYNAMODB_TABLE: moviesDataTable.tableName,
+        SQS_QUEUE_URL: sqsQueue.queueUrl,
       },
     });
 
@@ -96,6 +104,7 @@ export class LambdaStack extends cdk.Stack {
       code: lambda.Code.fromAsset(path.join(__dirname, "./src/subscribe")),
       environment: {
         DYNAMODB_TABLE: subscriptionsDataTable.tableName,
+        COGNITO_USER_POOL_ID: cognitoUserPool.userPoolId,
       },
     });
 
@@ -114,6 +123,7 @@ export class LambdaStack extends cdk.Stack {
       code: lambda.Code.fromAsset(path.join(__dirname, "./src/unsubscribe")),
       environment: {
         DYNAMODB_TABLE: subscriptionsDataTable.tableName,
+        COGNITO_USER_POOL_ID: cognitoUserPool.userPoolId,
       },
     });
 
@@ -264,6 +274,46 @@ export class LambdaStack extends cdk.Stack {
       actions: ['states:StartExecution','states:DescribeExecution'],
       resources: [executionArn],
     }));
+
+    this.handleTopicMessageFn = new lambda.Function(this, "handleTopicMessageFn", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: "index.handler",
+      code: lambda.Code.fromAsset(path.join(__dirname, "./src/handle-topic-message")),
+    });
+
+    this.uploadMovieFn.addToRolePolicy(new iam.PolicyStatement({
+      actions: [
+        'sqs:SendMessage',
+      ],
+      resources: ['*'], // Adjust as needed for more specific permissions
+    }));
+
+    this.subscribeFn.addToRolePolicy(new iam.PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: [
+            'cognito-idp:AdminGetUser',
+            'sns:*',
+        ],
+        resources: ['*'],
+    }));
+
+    this.unsubscribeFn.addToRolePolicy(new iam.PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: [
+            'cognito-idp:AdminGetUser',
+            'sns:*',
+        ],
+        resources: ['*'],
+    }));
+
+    this.handleTopicMessageFn.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['sns:*'],
+      resources: ['*'],
+    }));
+
+    this.handleTopicMessageFn.addEventSource(new SqsEventSource(sqsQueue));
+
+    sqsQueue.grantConsumeMessages(this.handleTopicMessageFn);
 
     moviesBucket.grantRead(this.downloadMovieFn);
     moviesBucket.grantRead(this.getMoviesFn);
