@@ -97,7 +97,6 @@ export class LambdaStack extends cdk.Stack {
       environment: {
         DYNAMODB_TABLE: subscriptionsDataTable.tableName,
         COGNITO_USER_POOL_ID: cognitoUserPool.userPoolId,
-        SQS_QUEUE_URL: sqsQueue.queueUrl,
       },
     });
 
@@ -116,6 +115,7 @@ export class LambdaStack extends cdk.Stack {
       code: lambda.Code.fromAsset(path.join(__dirname, "./src/unsubscribe")),
       environment: {
         DYNAMODB_TABLE: subscriptionsDataTable.tableName,
+        COGNITO_USER_POOL_ID: cognitoUserPool.userPoolId,
       },
     });
 
@@ -155,7 +155,16 @@ export class LambdaStack extends cdk.Stack {
         effect: Effect.ALLOW,
         actions: [
             'cognito-idp:AdminGetUser',
-            'sqs:SendMessage',
+            'sns:*',
+        ],
+        resources: ['*'],
+    }));
+
+    this.unsubscribeFn.addToRolePolicy(new iam.PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: [
+            'cognito-idp:AdminGetUser',
+            'sns:*',
         ],
         resources: ['*'],
     }));

@@ -6,7 +6,6 @@ import { ApiGwStack } from "../lib/api-gw/api-gw-stack";
 import { FrontDeploymentStack } from "../lib/front-deployment/front-deployment-stack";
 import { DataStack } from "../lib/data/data-stack";
 import { LambdaStack } from "../lib/lambda/lambda-stack";
-import { SnsStack } from "../lib/sns/sns-stack";
 import {SqsStack} from "../lib/sqs/sqs-stack";
 
 const app = new cdk.App();
@@ -40,7 +39,5 @@ new ApiGwStack(app, "ApiGwStack", {
 });
 
 new FrontDeploymentStack(app, "FrontDeploymentStack", {});
-
-new SnsStack(app, "SnsStack", {});
 
 app.synth();

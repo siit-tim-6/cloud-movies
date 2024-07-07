@@ -71,6 +71,7 @@ exports.handler = async (event) => {
     const sqsMessage = {
       topicName: topic,
       email: null,
+      unsubscribe: false,
     };
 
     const sqsParams = {
