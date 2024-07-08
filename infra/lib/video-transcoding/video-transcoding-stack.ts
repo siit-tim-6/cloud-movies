@@ -91,12 +91,19 @@ export class VideoTranscodingStack extends cdk.Stack {
       },
     });
 
+    const videoDistribution = new cloudfront.Distribution(this, "videoDistribution", {
+      defaultBehavior: {
+        origin: new origins.S3Origin(transcodedVideosBucket),
+      },
+    });
+
     const finalizeFn = new lambda.Function(this, "finalizeFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: "index.handler",
       code: lambda.Code.fromAsset(path.join(__dirname, "./src/finalize")),
       environment: {
         STATUS_TABLE: transcodingStatusTable.tableName,
+        DISTRIBUTION_ID: videoDistribution.distributionId,
       },
     });
 
@@ -109,6 +116,8 @@ export class VideoTranscodingStack extends cdk.Stack {
     transcodedVideosBucket.grantWrite(convertTo720pFn);
     transcodedVideosBucket.grantWrite(convertTo1080pFn);
     transcodedVideosBucket.grantWrite(createMetadataAndPlaylistFn);
+
+    videoDistribution.grantCreateInvalidation(finalizeFn);
 
     const convertTo360p = new tasks.LambdaInvoke(this, "convertTo360p", {
       lambdaFunction: convertTo360pFn,
@@ -157,11 +166,5 @@ export class VideoTranscodingStack extends cdk.Stack {
     invokePipelineFn.addEventSource(new SqsEventSource(transcodingQueue));
     transcodingStatusTable.grantWriteData(createMetadataAndPlaylistFn);
     transcodingStatusTable.grantWriteData(finalizeFn);
-
-    const videoDistribution = new cloudfront.Distribution(this, "videoDistribution", {
-      defaultBehavior: {
-        origin: new origins.S3Origin(transcodedVideosBucket),
-      },
-    });
   }
 }
