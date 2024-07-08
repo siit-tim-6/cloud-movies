@@ -6,7 +6,7 @@ const s3 = new S3({
   region: "eu-central-1",
 });
 
-const process1080p = (event) => {
+const process360p = (event) => {
   const videoKey = event.key;
   const inputBucketName = process.env.S3_INPUT_BUCKET;
   const outputBucketName = process.env.S3_OUTPUT_BUCKET;
@@ -23,7 +23,7 @@ const process1080p = (event) => {
 
   ffmpeg(downloadFile)
     .on("start", () => {
-      console.log(`transcoding ${id} to 1080p`);
+      console.log(`transcoding ${id} to 360p`);
     })
     .on("error", (err, stdout, stderr) => {
       console.log("stderr:", stderr);
@@ -35,7 +35,7 @@ const process1080p = (event) => {
         console.log(`uploading ${file} to s3`);
         return s3.putObject(params).promise();
       });
-      await Promise.all(fileUploadPromises);
+      await Promise.all(fileUploadPromises); // upload output to s3
       await fs.rmdirSync(`/tmp/${id}`, { recursive: true });
       console.log(`tmp is deleted!`);
     })
@@ -48,28 +48,28 @@ const process1080p = (event) => {
       console.log(`progress :- ${percent}%`);
     })
     .outputOptions([
-      "-vf scale=w=1920:h=1080",
+      "-vf scale=w=640:h=360",
       "-c:a aac",
       "-ar 48000",
-      "-b:a 192k",
+      "-b:a 96k",
       "-c:v h264",
       "-profile:v main",
       "-crf 20",
       "-g 48",
       "-keyint_min 48",
       "-sc_threshold 0",
-      "-b:v 5000k",
-      "-maxrate 5350k",
-      "-bufsize 7500k",
+      "-b:v 800k",
+      "-maxrate 856k",
+      "-bufsize 1200k",
       "-f hls",
       "-hls_time 4",
       "-hls_playlist_type vod",
-      `-hls_segment_filename /tmp/${id}/1080p_%d.ts`,
+      `-hls_segment_filename /tmp/${id}/360p_%d.ts`,
     ])
-    .output(`/tmp/${id}/1080p.m3u8`)
+    .output(`/tmp/${id}/360p.m3u8`) // output files are temporarily stored in tmp directory
     .run();
 };
 
 module.exports = {
-  handler: process1080p,
+  handler: process360p,
 };

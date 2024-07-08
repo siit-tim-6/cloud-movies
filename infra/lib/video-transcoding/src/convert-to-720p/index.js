@@ -6,7 +6,7 @@ const s3 = new S3({
   region: "eu-central-1",
 });
 
-const process1080p = (event) => {
+const process720p = (event) => {
   const videoKey = event.key;
   const inputBucketName = process.env.S3_INPUT_BUCKET;
   const outputBucketName = process.env.S3_OUTPUT_BUCKET;
@@ -23,7 +23,7 @@ const process1080p = (event) => {
 
   ffmpeg(downloadFile)
     .on("start", () => {
-      console.log(`transcoding ${id} to 1080p`);
+      console.log(`transcoding ${id} to 720p`);
     })
     .on("error", (err, stdout, stderr) => {
       console.log("stderr:", stderr);
@@ -48,28 +48,28 @@ const process1080p = (event) => {
       console.log(`progress :- ${percent}%`);
     })
     .outputOptions([
-      "-vf scale=w=1920:h=1080",
+      "-vf scale=w=1280:h=720",
       "-c:a aac",
       "-ar 48000",
-      "-b:a 192k",
+      "-b:a 128k",
       "-c:v h264",
       "-profile:v main",
       "-crf 20",
       "-g 48",
       "-keyint_min 48",
       "-sc_threshold 0",
-      "-b:v 5000k",
-      "-maxrate 5350k",
-      "-bufsize 7500k",
+      "-b:v 2800k",
+      "-maxrate 2996k",
+      "-bufsize 4200k",
       "-f hls",
       "-hls_time 4",
       "-hls_playlist_type vod",
-      `-hls_segment_filename /tmp/${id}/1080p_%d.ts`,
+      `-hls_segment_filename /tmp/${id}/720p_%d.ts`,
     ])
-    .output(`/tmp/${id}/1080p.m3u8`)
+    .output(`/tmp/${id}/720p.m3u8`)
     .run();
 };
 
 module.exports = {
-  handler: process1080p,
+  handler: process720p,
 };
