@@ -15,13 +15,8 @@ import "swiper/css/navigation";
 function Home() {
     const [movies, setMovies] = useState([]);
     const { getSession } = useContext(AccountContext);
-    const hasFetchedMovies = useRef(false);
 
     useEffect(() => {
-        if (hasFetchedMovies.current) {
-            return;
-        }
-        hasFetchedMovies.current = true;
         const fetchMovies = async () => {
             const session = await getSession();
 
