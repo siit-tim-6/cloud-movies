@@ -36,7 +36,11 @@ function MovieDetails() {
     const getMovie = async () => {
       const session = await getSession();
 
-      const movieResponse = await axios.get(`${import.meta.env.VITE_API_URL}/movies/${id}`);
+      const movieResponse = await axios.get(`${import.meta.env.VITE_API_URL}/movies/${id}`, {
+        headers: {
+          Authorization: session.accessToken.jwtToken,
+        }
+      });
       const subscriptionsReponse = await axios.get(`${import.meta.env.VITE_API_URL}/subscriptions`, {
         headers: {
           Authorization: session.accessToken.jwtToken,
@@ -115,7 +119,12 @@ function MovieDetails() {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`${import.meta.env.VITE_API_URL}/movies/${id}`);
+      const session = await getSession();
+      await axios.delete(`${import.meta.env.VITE_API_URL}/movies/${id}`, {
+        headers: {
+          Authorization: session.accessToken.jwtToken,
+        }
+      });
       alert("Movie deleted successfully!");
       navigate("/movies");
     } catch (error) {
