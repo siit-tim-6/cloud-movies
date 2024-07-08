@@ -21,7 +21,10 @@ exports.handler = async (event) => {
   });
 
   const subscriptionsResponse = await dynamoDocClient.send(dynamoQueryCommand);
-  const subscriptionsList = subscriptionsResponse.Items.map((subscription) => subscription.SubscribedTo);
+  const subscriptionsList = subscriptionsResponse.Items.map((subscription) => {
+    const [type, value] = subscription.SubscribedTo.split(':');
+    return { type, value };
+  });
 
   return {
     statusCode: 200,

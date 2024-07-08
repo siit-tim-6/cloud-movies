@@ -2,6 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as iam from 'aws-cdk-lib/aws-iam';
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import path = require("path");
 
@@ -16,6 +17,9 @@ export interface ApiGwStackProps extends cdk.StackProps {
   unsubscribeFn: lambda.Function;
   userPool: cognito.UserPool;
   userPoolClient: cognito.UserPoolClient;
+  editMovieFn: lambda.Function;
+  rateMovieFn: lambda.Function;
+  startAndPollStepFunctionFn: lambda.Function;
 }
 
 export class ApiGwStack extends cdk.Stack {
@@ -33,6 +37,9 @@ export class ApiGwStack extends cdk.Stack {
       unsubscribeFn,
       userPool,
       userPoolClient,
+      editMovieFn,
+      rateMovieFn,
+      startAndPollStepFunctionFn
     } = props!;
 
     const userAuthorizerFn = new lambda.Function(this, "userAuthorizerFn", {
@@ -85,6 +92,9 @@ export class ApiGwStack extends cdk.Stack {
     const subscribeLambdaIntegration = new apigateway.LambdaIntegration(subscribeFn);
     const getSubscriptionsLambdaIntegration = new apigateway.LambdaIntegration(getSubscriptionsFn);
     const unsubscribeLambdaIntegration = new apigateway.LambdaIntegration(unsubscribeFn);
+    const editMovieLambdaIntegration = new apigateway.LambdaIntegration(editMovieFn);
+    const rateMovieLambdaIntegration = new apigateway.LambdaIntegration(rateMovieFn);
+    const startAndPollStepFunctionIntegration = new apigateway.LambdaIntegration(startAndPollStepFunctionFn);
 
     const api = new apigateway.RestApi(this, "MoviesApi", {
       restApiName: "Movies Service",
@@ -102,6 +112,7 @@ export class ApiGwStack extends cdk.Stack {
       },
       authorizer: userAuth,
     });
+
     downloadMovieResource.addCorsPreflight({
       allowOrigins: ["*"],
     });
@@ -172,6 +183,18 @@ export class ApiGwStack extends cdk.Stack {
       },
       authorizer: adminAuth,
     });
+    movieResource.addMethod("PUT", editMovieLambdaIntegration, {
+      requestModels: {
+        "application/json": uploadMovieRequestBodySchema,
+      },
+      requestValidatorOptions: {
+        validateRequestBody: true,
+      },
+      requestParameters: {
+        "method.request.path.id": true,
+      },
+      authorizer: adminAuth
+    });
     movieResource.addCorsPreflight({
       allowOrigins: ["*"],
     });
@@ -212,6 +235,41 @@ export class ApiGwStack extends cdk.Stack {
         validateRequestParameters: true,
       },
       authorizer: allAuth,
+    });
+
+    const rateMovieRequestBodySchema = new apigateway.Model(this, "rateMovieRequestBodySchema", {
+      restApi: api,
+      contentType: "application/json",
+      schema: {
+        type: apigateway.JsonSchemaType.OBJECT,
+        properties: {
+          movieId: { type: apigateway.JsonSchemaType.STRING },
+          rating: { type: apigateway.JsonSchemaType.NUMBER },
+        },
+        required: ["movieId", "rating"],
+      },
+    });
+
+    const rateMovieResource = api.root.addResource("rate-movie");
+    rateMovieResource.addMethod("POST", rateMovieLambdaIntegration, {
+      requestModels: {
+        "application/json": rateMovieRequestBodySchema,
+      },
+      requestValidatorOptions: {
+        validateRequestBody: true,
+      },
+      authorizer: allAuth
+    });
+    rateMovieResource.addCorsPreflight({
+      allowOrigins: ["*"],
+    });
+
+    const generateFeedResource = api.root.addResource("generate-feed");
+    generateFeedResource.addMethod('GET', startAndPollStepFunctionIntegration, {
+      authorizer: allAuth
+    });
+    generateFeedResource.addCorsPreflight({
+      allowOrigins: ["*"],
     });
   }
 }

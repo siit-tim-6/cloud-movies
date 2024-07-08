@@ -42,9 +42,10 @@ export class CognitoStack extends cdk.Stack {
         },
       },
       email: cognito.UserPoolEmail.withCognito(),
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    this.userPoolClient = this.userPool.addClient("briefCinemaFe", {
+    this.userPool.addClient("briefCinemaFe", {
       preventUserExistenceErrors: true,
     });
 
