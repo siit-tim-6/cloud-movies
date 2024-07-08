@@ -38,6 +38,8 @@ new ApiGwStack(app, "ApiGwStack", {
   getSubscriptionsFn: lambdaStack.getSubscriptionsFn,
   subscribeFn: lambdaStack.subscribeFn,
   unsubscribeFn: lambdaStack.unsubscribeFn,
+  userPool: cognitoStack.userPool,
+  userPoolClient: cognitoStack.userPoolClient,
   editMovieFn: lambdaStack.editMovieFn,
   rateMovieFn: lambdaStack.rateMovieFn,
   startAndPollStepFunctionFn: lambdaStack.startAndPollStepFunctionFn,

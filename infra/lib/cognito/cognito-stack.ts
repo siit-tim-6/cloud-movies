@@ -7,6 +7,8 @@ import path = require("path");
 
 export class CognitoStack extends cdk.Stack {
   public readonly userPool: cognito.UserPool;
+  public readonly userPoolClient: cognito.UserPoolClient;
+
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -43,7 +45,7 @@ export class CognitoStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    const userPoolClient = this.userPool.addClient("briefCinemaFe", {
+    this.userPoolClient = this.userPool.addClient("briefCinemaFe", {
       preventUserExistenceErrors: true,
     });
 

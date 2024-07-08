@@ -43,7 +43,11 @@ function MovieDetails() {
     const getMovie = async () => {
       const session = await getSession();
 
-      const movieResponse = await axios.get(`${import.meta.env.VITE_API_URL}/movies/${id}`);
+      const movieResponse = await axios.get(`${import.meta.env.VITE_API_URL}/movies/${id}`, {
+        headers: {
+          Authorization: session.accessToken.jwtToken,
+        }
+      });
       const subscriptionsReponse = await axios.get(`${import.meta.env.VITE_API_URL}/subscriptions`, {
         headers: {
           Authorization: session.accessToken.jwtToken,
@@ -98,20 +102,16 @@ function MovieDetails() {
   };
 
   const handleDownload = async () => {
-    const session = await getSession();
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/download-movie?movieId=${id}`, {
+      const session = await getSession();
+
+      const downloadUrlResponse = await axios.get(`${import.meta.env.VITE_API_URL}/download-movie?movieId=${id}`, {
         headers: {
           Authorization: session.accessToken.jwtToken,
         },
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const downloadUrl = data.downloadUrl;
+      const downloadUrl = downloadUrlResponse.data.downloadUrl;
 
       if (!downloadUrl) {
         throw new Error("Download URL is undefined");
@@ -131,7 +131,12 @@ function MovieDetails() {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`${import.meta.env.VITE_API_URL}/movies/${id}`);
+      const session = await getSession();
+      await axios.delete(`${import.meta.env.VITE_API_URL}/movies/${id}`, {
+        headers: {
+          Authorization: session.accessToken.jwtToken,
+        }
+      });
       alert("Movie deleted successfully!");
       navigate("/movies");
     } catch (error) {

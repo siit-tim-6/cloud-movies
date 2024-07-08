@@ -23,20 +23,20 @@ function Home() {
         }
         hasFetchedMovies.current = true;
         const fetchMovies = async () => {
-            const session = await getSession();
-
             try {
-                const response = await axios.get(`${import.meta.env.VITE_API_URL}/generate-feed`, {
-                    headers: {
-                        Authorization: session.accessToken.jwtToken,
-                    },
-                });
+              const session = await getSession();
 
-                console.log(response.data.feedResult.Payload.body);
-                const parsedMovies = JSON.parse(response.data.feedResult.Payload.body);
-                setMovies(parsedMovies);
+              const response = await axios.get(`${import.meta.env.VITE_API_URL}/generate-feed`, {
+                headers: {
+                    Authorization: session.accessToken.jwtToken,
+                },
+              });
+
+              console.log(response.data.feedResult.Payload.body);
+              const parsedMovies = JSON.parse(response.data.feedResult.Payload.body);
+              setMovies(parsedMovies);
             } catch (error) {
-                console.error("Error fetching movies:", error);
+              console.error("Error fetching movies:", error);
             }
         };
 
