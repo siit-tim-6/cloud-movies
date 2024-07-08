@@ -86,6 +86,7 @@ export class LambdaStack extends cdk.Stack {
         S3_BUCKET: moviesBucket.bucketName,
         DYNAMODB_TABLE: moviesDataTable.tableName,
         RATINGS_TABLE: movieRatingsTable.tableName,
+        TRANSCODING_STATUS_TABLE: transcodingStatusTable.tableName,
       },
     });
 
@@ -360,5 +361,6 @@ export class LambdaStack extends cdk.Stack {
     transcodedVideosBucket.grantReadWrite(this.deleteMovieFn);
 
     transcodingStatusTable.grantReadWriteData(this.deleteMovieFn);
+    transcodingStatusTable.grantReadData(this.getSingleMovieFn);
   }
 }
