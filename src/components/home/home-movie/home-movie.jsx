@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import "./home-movie.css";
-import { PlayIcon, ArrowRightIcon } from "@radix-ui/react-icons";
+import { ArrowRightIcon } from "@radix-ui/react-icons";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 

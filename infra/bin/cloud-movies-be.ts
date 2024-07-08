@@ -6,7 +6,8 @@ import { ApiGwStack } from "../lib/api-gw/api-gw-stack";
 import { FrontDeploymentStack } from "../lib/front-deployment/front-deployment-stack";
 import { DataStack } from "../lib/data/data-stack";
 import { LambdaStack } from "../lib/lambda/lambda-stack";
-import {SqsStack} from "../lib/sqs/sqs-stack";
+import { SqsStack } from "../lib/sqs/sqs-stack";
+import { VideoTranscodingStack } from "../lib/video-transcoding/video-transcoding-stack";
 
 const app = new cdk.App();
 
@@ -26,6 +27,8 @@ const lambdaStack = new LambdaStack(app, "LambdaStack", {
   sqsQueue: sqsStack.queue,
   feedsDataTable: dataStack.feedsDataTable,
   feedQueue: sqsStack.feedQueue,
+  transcodedVideosBucket: dataStack.transcodedVideosBucket,
+  transcodingStatusTable: dataStack.transcodingStatusTable,
 });
 
 new ApiGwStack(app, "ApiGwStack", {
@@ -43,5 +46,12 @@ new ApiGwStack(app, "ApiGwStack", {
 });
 
 new FrontDeploymentStack(app, "FrontDeploymentStack", {});
+
+new VideoTranscodingStack(app, "VideoTranscodingStack", {
+  moviesBucket: dataStack.moviesBucket,
+  transcodedVideosBucket: dataStack.transcodedVideosBucket,
+  transcodingStatusTable: dataStack.transcodingStatusTable,
+  transcodingQueue: dataStack.transcodingQueue,
+});
 
 app.synth();
