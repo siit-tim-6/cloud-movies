@@ -2,7 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as lambda from "aws-cdk-lib/aws-lambda";
-import * as iam from 'aws-cdk-lib/aws-iam';
+import * as iam from "aws-cdk-lib/aws-iam";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import path = require("path");
 
@@ -39,7 +39,7 @@ export class ApiGwStack extends cdk.Stack {
       userPoolClient,
       editMovieFn,
       rateMovieFn,
-      startAndPollStepFunctionFn
+      startAndPollStepFunctionFn,
     } = props!;
 
     const userAuthorizerFn = new lambda.Function(this, "userAuthorizerFn", {
@@ -64,10 +64,12 @@ export class ApiGwStack extends cdk.Stack {
 
     const userAuth = new apigateway.TokenAuthorizer(this, "userAuthorizer", {
       handler: userAuthorizerFn,
+      resultsCacheTtl: cdk.Duration.seconds(0),
     });
 
     const adminAuth = new apigateway.TokenAuthorizer(this, "adminAuthorizer", {
       handler: adminAuthorizerFn,
+      resultsCacheTtl: cdk.Duration.seconds(0),
     });
 
     const uploadMovieLambdaIntegration = new apigateway.LambdaIntegration(uploadMovieFn);
@@ -179,7 +181,7 @@ export class ApiGwStack extends cdk.Stack {
       requestParameters: {
         "method.request.path.id": true,
       },
-      authorizer: adminAuth
+      authorizer: adminAuth,
     });
     movieResource.addCorsPreflight({
       allowOrigins: ["*"],
@@ -244,15 +246,15 @@ export class ApiGwStack extends cdk.Stack {
       requestValidatorOptions: {
         validateRequestBody: true,
       },
-      authorizer: userAuth
+      authorizer: userAuth,
     });
     rateMovieResource.addCorsPreflight({
       allowOrigins: ["*"],
     });
 
     const generateFeedResource = api.root.addResource("generate-feed");
-    generateFeedResource.addMethod('GET', startAndPollStepFunctionIntegration, {
-      authorizer: userAuth
+    generateFeedResource.addMethod("GET", startAndPollStepFunctionIntegration, {
+      authorizer: userAuth,
     });
     generateFeedResource.addCorsPreflight({
       allowOrigins: ["*"],
