@@ -115,55 +115,96 @@ function UploadMovie({ isEditMode = false }) {
 
     const session = await getSession();
     const apiUrl = isEditMode ? `${import.meta.env.VITE_API_URL}/movies/${id}` : `${import.meta.env.VITE_API_URL}/movies`;
+    let metadataResponse;
+    let retryCounter = 0;
 
-    try {
-      const metadataResponse = await axios({
-        method: isEditMode ? "put" : "post",
-        url: apiUrl,
-        data: {
-          title: movieDetails.title,
-          description: movieDetails.description,
-          genres: movieDetails.genres,
-          actors: movieDetails.actors,
-          directors: movieDetails.directors,
-          coverFileName: cover ? cover.name : movieDetails.coverFileName,
-          coverFileType: cover ? cover.type : movieDetails.coverFileType,
-          videoFileName: video ? video.name : movieDetails.videoFileName,
-          videoFileType: video ? video.type : movieDetails.videoFileType,
-        },
-        headers: {
-          Authorization: session.accessToken.jwtToken,
-        },
-      });
-
-      const { coverUploadURL, videoUploadURL } = metadataResponse.data;
-
-      if (cover && coverUploadURL) {
-        await axios.put(coverUploadURL, cover, {
+    while (retryCounter < 3) {
+      try {
+        metadataResponse = await axios({
+          method: isEditMode ? "put" : "post",
+          url: apiUrl,
+          data: {
+            title: movieDetails.title,
+            description: movieDetails.description,
+            genres: movieDetails.genres,
+            actors: movieDetails.actors,
+            directors: movieDetails.directors,
+            coverFileName: cover ? cover.name : movieDetails.coverFileName,
+            coverFileType: cover ? cover.type : movieDetails.coverFileType,
+            videoFileName: video ? video.name : movieDetails.videoFileName,
+            videoFileType: video ? video.type : movieDetails.videoFileType,
+          },
           headers: {
-            "Content-Type": cover.type,
+            Authorization: session.accessToken.jwtToken,
           },
         });
-      }
-
-      if (video && videoUploadURL) {
-        await axios.put(videoUploadURL, video, {
-          headers: {
-            "Content-Type": video.type,
-          },
-        });
-      }
-
-      alert(`Movie ${isEditMode ? "updated" : "uploaded"} successfully!`);
-      navigate("/movies");
-    } catch (error) {
-      console.error(`Error ${isEditMode ? "updating" : "uploading"} movie:`, error);
-      if (isEditMode && error.response && error.response.status === 425) {
-        alert("Movie not yet transcoded, try again in a few minutes.");
-      } else {
-        alert(`Failed to ${isEditMode ? "update" : "upload"} movie.`);
+        break;
+      } catch (error) {
+        console.error(`Error ${isEditMode ? "updating" : "uploading"} movie:`, error);
+        if (isEditMode && error.response && error.response.status === 425) {
+          alert("Movie not yet transcoded, try again in a few minutes.");
+          return;
+        } else {
+          alert(`Failed to ${isEditMode ? "update" : "upload"} movie.`);
+          retryCounter++;
+        }
       }
     }
+
+    if (retryCounter == 3) {
+      alert("Error while uploading, aborting.");
+      return;
+    }
+
+    retryCounter = 0;
+    const { coverUploadURL, videoUploadURL } = metadataResponse.data;
+
+    if (cover && coverUploadURL) {
+      while (retryCounter < 3) {
+        try {
+          await axios.put(coverUploadURL, cover, {
+            headers: {
+              "Content-Type": cover.type,
+            },
+          });
+          break;
+        } catch (error) {
+          console.log("Error while uploading image to S3", error);
+          retryCounter++;
+        }
+      }
+    }
+
+    if (retryCounter == 3) {
+      alert("Error while uploading, aborting.");
+      return;
+    }
+
+    retryCounter = 0;
+
+    if (video && videoUploadURL) {
+      while (retryCounter < 3) {
+        try {
+          await axios.put(videoUploadURL, video, {
+            headers: {
+              "Content-Type": video.type,
+            },
+          });
+          break;
+        } catch (error) {
+          console.log("Error while uploading video to S3", error);
+          retryCounter++;
+        }
+      }
+    }
+
+    if (retryCounter == 3) {
+      alert("Error while uploading, aborting.");
+      return;
+    }
+
+    alert(`Movie ${isEditMode ? "updated" : "uploaded"} successfully!`);
+    navigate("/movies");
   };
 
   return (
