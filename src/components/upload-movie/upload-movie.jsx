@@ -110,6 +110,10 @@ function UploadMovie({ isEditMode = false }) {
     }));
   };
 
+  const timeout = async (milliseconds) => {
+    return new Promise((resolve) => setTimeout(() => resolve("timeout finished"), milliseconds));
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -119,6 +123,7 @@ function UploadMovie({ isEditMode = false }) {
     let retryCounter = 0;
 
     while (retryCounter < 3) {
+      if (retryCounter >= 1) await timeout(3000);
       try {
         metadataResponse = await axios({
           method: isEditMode ? "put" : "post",
@@ -161,6 +166,7 @@ function UploadMovie({ isEditMode = false }) {
 
     if (cover && coverUploadURL) {
       while (retryCounter < 3) {
+        if (retryCounter >= 1) await timeout(3000);
         try {
           await axios.put(coverUploadURL, cover, {
             headers: {
@@ -184,6 +190,7 @@ function UploadMovie({ isEditMode = false }) {
 
     if (video && videoUploadURL) {
       while (retryCounter < 3) {
+        if (retryCounter >= 1) await timeout(3000);
         try {
           await axios.put(videoUploadURL, video, {
             headers: {
