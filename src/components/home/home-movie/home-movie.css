@@ -50,3 +50,7 @@
 .details-buttons > * {
   margin-right: 16px;
 }
+
+.uppercase {
+  text-transform: capitalize;
+}
