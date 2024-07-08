@@ -34,6 +34,10 @@ function MovieDetails() {
   const [userRating, setUserRating] = useState(0);
   const [averageRating, setAverageRating] = useState(0);
   const [transcoded, setTranscoded] = useState(false);
+  const [fileLastModified, setFileLastModified] = useState("");
+  const [fileLength, setFileLength] = useState(0);
+  const [fileType, setFileType] = useState("");
+  const [fileName, setFileName] = useState("");
 
   useEffect(() => {
     const getMovie = async () => {
@@ -55,6 +59,10 @@ function MovieDetails() {
       setSubscriptions(subscriptionsReponse.data);
       setAverageRating(movieResponse.data.AverageRating || 0);
       setTranscoded(movieResponse.data.Status === "FINISHED" ? true : false);
+      setFileLastModified(new Date(movieResponse.data.LastModified));
+      setFileLength(niceBytes(movieResponse.data.ContentLength));
+      setFileName(movieResponse.data.FileName);
+      setFileType(movieResponse.data.ContentType);
       console.log(subscriptionsReponse.data);
       const userRole = await getRole();
       setRole(userRole);
@@ -210,6 +218,19 @@ function MovieDetails() {
     });
   };
 
+  const units = ["bytes", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"];
+
+  const niceBytes = (x) => {
+    let l = 0,
+      n = parseInt(x, 10) || 0;
+
+    while (n >= 1024 && ++l) {
+      n = n / 1024;
+    }
+
+    return n.toFixed(n < 10 && l > 0 ? 1 : 0) + " " + units[l];
+  };
+
   return (
     <>
       <Navbar />
@@ -316,6 +337,22 @@ function MovieDetails() {
                       </div>
                     ))}
                   </div>
+                </div>
+                <div className="meta-item">
+                  <strong>Filename</strong>
+                  <p>{fileName}</p>
+                </div>
+                <div className="meta-item">
+                  <strong>File Type</strong>
+                  <p>{fileType}</p>
+                </div>
+                <div className="meta-item">
+                  <strong>File Size</strong>
+                  <p>{fileLength}</p>
+                </div>
+                <div className="meta-item">
+                  <strong>Last Modified</strong>
+                  <p>{fileLastModified.toLocaleString()}</p>
                 </div>
               </div>
             </div>
