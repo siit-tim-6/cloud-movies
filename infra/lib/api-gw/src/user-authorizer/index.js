@@ -36,7 +36,7 @@ exports.handler = async (event) => {
 
   console.log(payload);
 
-  if (payload["cognito:groups"].includes("RegularUsers")) return getAuthorizationResponse(payload.sub, event.methodArn);
+  if (payload["cognito:groups"].includes("RegularUsers") || payload["cognito:groups"].includes("Admins")) return getAuthorizationResponse(payload.sub, event.methodArn);
 
   throw Error("Unauthorized");
 };
