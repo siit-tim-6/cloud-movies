@@ -22,6 +22,7 @@ const lambdaStack = new LambdaStack(app, "LambdaStack", {
   moviesDataTable: dataStack.moviesDataTable,
   subscriptionsDataTable: dataStack.subscriptionsDataTable,
   movieRatingsTable: dataStack.movieRatingsTable,
+  downloadsDataTable: dataStack.downloadsDataTable,
   cognitoUserPool: cognitoStack.userPool,
   sqsQueue: sqsStack.queue,
 });
@@ -37,6 +38,7 @@ new ApiGwStack(app, "ApiGwStack", {
   unsubscribeFn: lambdaStack.unsubscribeFn,
   editMovieFn: lambdaStack.editMovieFn,
   rateMovieFn: lambdaStack.rateMovieFn,
+  startAndPollStepFunctionFn: lambdaStack.startAndPollStepFunctionFn
 });
 
 new FrontDeploymentStack(app, "FrontDeploymentStack", {});

@@ -13,6 +13,7 @@ export class DataStack extends cdk.Stack {
   public readonly transcodedVideosBucket: s3.Bucket;
   public readonly transcodingStatusTable: dynamodb.Table;
   public readonly transcodingQueue: sqs.Queue;
+  public readonly downloadsDataTable: dynamodb.Table;
 
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -88,9 +89,13 @@ export class DataStack extends cdk.Stack {
 
     this.transcodingStatusTable = new dynamodb.Table(this, "TrancodingStatus", {
       partitionKey: { name: "MovieId", type: dynamodb.AttributeType.STRING },
+    this.movieRatingsTable.addGlobalSecondaryIndex({
+      indexName: 'UserIdIndex',
+      partitionKey: { name: 'UserId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'MovieId', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
       readCapacity: 1,
       writeCapacity: 1,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
     this.transcodingQueue = new sqs.Queue(this, "transcodingQueue", {
@@ -98,5 +103,22 @@ export class DataStack extends cdk.Stack {
     });
 
     this.moviesBucket.addEventNotification(s3.EventType.OBJECT_CREATED_PUT, new s3n.SqsDestination(this.transcodingQueue));
+
+    this.downloadsDataTable = new dynamodb.Table(this, "DownloadsData", {
+      partitionKey: { name: "UserId", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "MovieId", type: dynamodb.AttributeType.STRING },
+      readCapacity: 1,
+      writeCapacity: 1,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
+    this.downloadsDataTable.addGlobalSecondaryIndex({
+      indexName: "MovieId-index",
+      partitionKey: { name: "MovieId", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "UserId", type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+      readCapacity: 1,
+      writeCapacity: 1,
+    });
   }
 }

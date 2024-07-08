@@ -7,6 +7,9 @@
   justify-content: end;
   padding: 64px;
   padding-bottom: 86px;
+  background-position: center;
+  background-repeat: no-repeat;
+  aspect-ratio: 16 / 9;
 }
 
 .home-movie::before {
