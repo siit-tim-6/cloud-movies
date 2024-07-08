@@ -99,7 +99,8 @@ export const VideoPlayer = (props) => {
               let current = player.tech({ IWillNotUseThisInPlugins: true })?.vhs?.playlists.media_.uri.split(".")[0];
               console.log(current);
 
-              document.querySelector("#auto").innerHTML = auto.classList.contains("selected") ? `Auto <span class='current'>${current}</span>` : "Auto";
+              if (auto && current !== undefined)
+                document.querySelector("#auto").innerHTML = auto.classList.contains("selected") ? `Auto <span class='current'>${current}</span>` : "Auto";
             }, 1000);
           }
 
