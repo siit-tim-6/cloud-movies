@@ -2,14 +2,17 @@
 
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { PutCommand, QueryCommand, UpdateCommand, DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
+const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");
 
 const dynamoClient = new DynamoDBClient({});
 const dynamoDocClient = DynamoDBDocumentClient.from(dynamoClient);
+const sqsClient = new SQSClient({});
 
 exports.handler = async (event) => {
     const tableName = process.env.MOVIE_RATINGS_TABLE;
     const { movieId, rating } = JSON.parse(event.body);
     const { Authorization } = event.headers;
+    const queueUrl = process.env.FEED_UPDATE_QUEUE_URL;
 
     const userId = JSON.parse(Buffer.from(Authorization.split(".")[1], "base64").toString()).sub;
 
@@ -62,6 +65,18 @@ exports.handler = async (event) => {
     const totalRatings = allRatingsResult.Items.length;
     const sumRatings = allRatingsResult.Items.reduce((sum, item) => sum + item.Rating, 0);
     const averageRating = sumRatings / totalRatings;
+
+    const sqsMessage = {
+        userId: userId,
+        eventType: "rating",
+    };
+
+    const sqsParams = {
+        QueueUrl: queueUrl,
+        MessageBody: JSON.stringify(sqsMessage),
+    };
+
+    await sqsClient.send(new SendMessageCommand(sqsParams));
 
     return {
         statusCode: 200,

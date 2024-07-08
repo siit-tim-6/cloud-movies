@@ -4,10 +4,12 @@ const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { PutCommand, GetCommand, DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
 const { GetObjectCommand, S3Client } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");
 
 const dynamoClient = new DynamoDBClient({});
 const dynamoDocClient = DynamoDBDocumentClient.from(dynamoClient);
 const s3Client = new S3Client({});
+const sqsClient = new SQSClient({});
 
 exports.handler = async (event) => {
   const bucketName = process.env.S3_BUCKET;
@@ -15,6 +17,7 @@ exports.handler = async (event) => {
   const movieId = event.queryStringParameters.movieId;
   const downloadsTableName = process.env.DOWNLOADS_TABLE;
   const userId = JSON.parse(Buffer.from(event.headers.Authorization.split('.')[1], 'base64').toString()).sub;
+  const queueUrl = process.env.FEED_UPDATE_QUEUE_URL;
 
   // // get item from DynamoDB
 
@@ -64,6 +67,18 @@ exports.handler = async (event) => {
   });
 
   await dynamoDocClient.send(dynamoPutCommand);
+
+  const sqsMessage = {
+    userId: userId,
+    eventType: "download",
+  };
+
+  const sqsParams = {
+    QueueUrl: queueUrl,
+    MessageBody: JSON.stringify(sqsMessage),
+  };
+
+  await sqsClient.send(new SendMessageCommand(sqsParams));
 
   return {
     statusCode: 200,

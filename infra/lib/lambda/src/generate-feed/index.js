@@ -1,8 +1,7 @@
 "use strict";
 
-const { DynamoDBClient, ScanCommand, PutCommand  } = require("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
-const { S3Client } = require("@aws-sdk/client-s3");
+const { DynamoDBClient, ScanCommand } = require("@aws-sdk/client-dynamodb");
+const { DynamoDBDocumentClient, PutCommand  } = require("@aws-sdk/lib-dynamodb");
 
 const dynamoClient = new DynamoDBClient({});
 const dynamoDocClient = DynamoDBDocumentClient.from(dynamoClient);

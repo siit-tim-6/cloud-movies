@@ -16,6 +16,7 @@ exports.handler = async (event) => {
   const bucketName = process.env.S3_BUCKET;
   const tableName = process.env.DYNAMODB_TABLE;
   const sqsQueueUrl = process.env.SQS_QUEUE_URL;
+  const feedUpdateQueueUrl = process.env.FEED_UPDATE_QUEUE_URL;
   const { title, description, genres, actors, directors, coverFileName, coverFileType, videoFileName, videoFileType } = JSON.parse(event.body);
 
   const movieId = uuidv4();
@@ -81,6 +82,17 @@ exports.handler = async (event) => {
     const sqsCommand = new SendMessageCommand(sqsParams);
     await sqsClient.send(sqsCommand);
   }
+
+  const feedUpdateMessage = {
+    eventType: "add",
+  };
+
+  const feedUpdateParams = {
+    QueueUrl: feedUpdateQueueUrl,
+    MessageBody: JSON.stringify(feedUpdateMessage),
+  };
+
+  await sqsClient.send(new SendMessageCommand(feedUpdateParams));
 
   return {
     statusCode: 200,

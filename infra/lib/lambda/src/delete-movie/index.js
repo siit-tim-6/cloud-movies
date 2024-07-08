@@ -3,10 +3,12 @@
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { DynamoDBDocumentClient, GetCommand, DeleteCommand, QueryCommand  } = require("@aws-sdk/lib-dynamodb");
 const { S3Client, DeleteObjectCommand } = require("@aws-sdk/client-s3");
+const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");
 
 const dynamoClient = new DynamoDBClient({});
 const dynamoDocClient = DynamoDBDocumentClient.from(dynamoClient);
 const s3Client = new S3Client({});
+const sqsClient = new SQSClient({});
 
 exports.handler = async (event) => {
   const { id } = event.pathParameters;
@@ -14,6 +16,7 @@ exports.handler = async (event) => {
   const bucketName = process.env.S3_BUCKET;
   const ratingsTableName = process.env.MOVIE_RATINGS_TABLE;
   const downloadsTableName = process.env.DOWNLOADS_TABLE;
+  const queueUrl = process.env.FEED_UPDATE_QUEUE_URL;
 
   // Fetch movie details from DynamoDB to get the S3 keys
   const getParams = {
@@ -108,6 +111,17 @@ exports.handler = async (event) => {
   });
 
   await Promise.all(deleteDownloadsPromises);
+
+  const sqsMessage = {
+    eventType: "delete",
+  };
+
+  const sqsParams = {
+    QueueUrl: queueUrl,
+    MessageBody: JSON.stringify(sqsMessage),
+  };
+
+  await sqsClient.send(new SendMessageCommand(sqsParams));
 
   return {
     statusCode: 200,

@@ -4,17 +4,20 @@ const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { DeleteCommand, DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
 const { CognitoIdentityProviderClient, AdminGetUserCommand } = require("@aws-sdk/client-cognito-identity-provider");
 const { SNSClient, UnsubscribeCommand, ListTopicsCommand, CreateTopicCommand, ListSubscriptionsByTopicCommand, DeleteSubscriptionCommand } = require("@aws-sdk/client-sns");
+const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");
 
 const dynamoClient = new DynamoDBClient({});
 const dynamoDocClient = DynamoDBDocumentClient.from(dynamoClient);
 const cognitoClient = new CognitoIdentityProviderClient({});
 const snsClient = new SNSClient({});
+const sqsClient = new SQSClient({});
 
 exports.handler = async (event) => {
   const tableName = process.env.DYNAMODB_TABLE;
   const userPoolId = process.env.COGNITO_USER_POOL_ID.split("/").pop();
   const { subscribedTo } = event.queryStringParameters;
   const { Authorization } = event.headers;
+  const queueUrl = process.env.FEED_UPDATE_QUEUE_URL;
 
   const userId = JSON.parse(Buffer.from(Authorization.split(".")[1], "base64").toString()).sub;
   const username = JSON.parse(Buffer.from(Authorization.split(".")[1], "base64").toString()).username;
@@ -59,6 +62,18 @@ exports.handler = async (event) => {
   }
 
   await unsubscribeFromTopic(topicArn, userEmail);
+
+  const sqsMessage = {
+    userId: userId,
+    eventType: "unsubscribe",
+  };
+
+  const sqsParams = {
+    QueueUrl: queueUrl,
+    MessageBody: JSON.stringify(sqsMessage),
+  };
+
+  await sqsClient.send(new SendMessageCommand(sqsParams));
 
   return {
     statusCode: 200,
