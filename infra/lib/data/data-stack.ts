@@ -86,5 +86,14 @@ export class DataStack extends cdk.Stack {
       writeCapacity: 1,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
+
+    this.downloadsDataTable.addGlobalSecondaryIndex({
+      indexName: "MovieId-index",
+      partitionKey: { name: "MovieId", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "UserId", type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+      readCapacity: 1,
+      writeCapacity: 1,
+    });
   }
 }
