@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "@/components/navbar/navbar.jsx";
 import { Badge } from "@/components/ui/badge.jsx";
@@ -11,6 +11,8 @@ import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
 import ReactLoading from "react-loading";
 import { AccountContext } from "../auth/accountContext";
+import VideoPlayer from "../ui/hls-player";
+import videojs from "video.js";
 
 function MovieDetails() {
   const { id } = useParams();
@@ -162,6 +164,33 @@ function MovieDetails() {
     }
   };
 
+  const videoSrc = `https://d3qd3s4bwsif3i.cloudfront.net/${id}/index.m3u8`;
+  const playerRef = useRef(null);
+  const videoJsOptions = {
+    autoplay: true,
+    controls: true,
+    responsive: true,
+    fluid: true,
+    sources: [
+      {
+        src: videoSrc,
+        type: "application/x-mpegURL",
+      },
+    ],
+  };
+  const handlePlayerReady = (player) => {
+    playerRef.current = player;
+
+    // You can handle player events here, for example:
+    player.on("waiting", () => {
+      videojs.log("player is waiting");
+    });
+
+    player.on("dispose", () => {
+      videojs.log("player will dispose");
+    });
+  };
+
   return (
     <>
       <Navbar />
@@ -264,6 +293,7 @@ function MovieDetails() {
                   </div>
                 </div>
               </div>
+              <VideoPlayer options={videoJsOptions} onReady={handlePlayerReady} />
             </div>
           </>
         )}
