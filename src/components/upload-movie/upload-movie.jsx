@@ -37,7 +37,7 @@ function UploadMovie({ isEditMode = false }) {
         if (extractedRole !== "ADMIN") navigate("/");
       })
       .catch((err) => {
-        navigate("/");
+        navigate("/login");
       });
 
     if (isEditMode) {
