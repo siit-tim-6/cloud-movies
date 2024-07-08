@@ -26,6 +26,7 @@ exports.handler = async (event) => {
 
         const feedResponse = await dynamoDocClient.send(getFeedCommand);
 
+        console.log(feedResponse);
         if (!feedResponse.Item || !feedResponse.Item.Feed) {
             const sqsMessage = {
                 userId: userId,
@@ -46,6 +47,12 @@ exports.handler = async (event) => {
 
             return {
                 statusCode: 200,
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "GET,OPTIONS",
+                    "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
+                },
                 body: JSON.stringify([]),
             };
         }
@@ -91,6 +98,12 @@ exports.handler = async (event) => {
         console.error("Error fetching movies:", error);
         return {
             statusCode: 500,
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET,OPTIONS",
+                "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
+            },
             body: JSON.stringify({ message: "Internal Server Error" }),
         };
     }
