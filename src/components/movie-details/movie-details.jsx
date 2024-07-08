@@ -4,15 +4,7 @@ import Navbar from "@/components/navbar/navbar.jsx";
 import { Badge } from "@/components/ui/badge.jsx";
 import "./movie-details.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faDownload,
-  faHeart,
-  faPlay,
-  faTrash,
-  faEdit,
-  faTimes,
-  faThumbsUp
-} from "@fortawesome/free-solid-svg-icons";
+import { faDownload, faHeart, faPlay, faTrash, faEdit, faTimes, faThumbsUp } from "@fortawesome/free-solid-svg-icons";
 import Rating from "react-rating-stars-component";
 import axios from "axios";
 import { confirmAlert } from "react-confirm-alert";
@@ -67,15 +59,15 @@ function MovieDetails() {
     };
 
     getMovie();
-  }, [id, getSession]);
+  }, []);
 
   const handleRatingSubmit = async () => {
     const session = await getSession();
     try {
       const response = await axios.post(
-          `${import.meta.env.VITE_API_URL}/rate-movie`,
-          { movieId: id, rating: userRating },
-          { headers: { Authorization: session.accessToken.jwtToken } }
+        `${import.meta.env.VITE_API_URL}/rate-movie`,
+        { movieId: id, rating: userRating },
+        { headers: { Authorization: session.accessToken.jwtToken } }
       );
 
       setAverageRating(response.data.averageRating);
@@ -88,7 +80,6 @@ function MovieDetails() {
       alert("Failed to rate the movie.");
     }
   };
-
 
   const ratingChanged = (newRating) => {
     setUserRating(newRating);
@@ -284,27 +275,27 @@ function MovieDetails() {
                       </div>
                     </div>
                   </div>
-                </div>
-              </>
-          )}
-        </div>
-        {showRatingModal && (
-            <div className="custom-modal">
-              <div className="custom-modal-content">
-                <button className="close-modal-button" onClick={() => setShowRatingModal(false)}>
-                  <FontAwesomeIcon icon={faTimes} />
-                </button>
-                <h2>Rate Movie</h2>
-                <div className="rating-wrapper">
-                  <Rating count={5} value={userRating} onChange={ratingChanged} size={36} activeColor="#ffd700" />
-                </div>
-                <button className="submit-button" onClick={handleRatingSubmit}>
-                  Submit Rating
-                </button>
-              </div>
             </div>
+          </>
         )}
-      </>
+      </div>
+      {showRatingModal && (
+        <div className="custom-modal">
+          <div className="custom-modal-content">
+            <button className="close-modal-button" onClick={() => setShowRatingModal(false)}>
+              <FontAwesomeIcon icon={faTimes} />
+            </button>
+            <h2>Rate Movie</h2>
+            <div className="rating-wrapper">
+              <Rating count={5} value={userRating} onChange={ratingChanged} size={36} activeColor="#ffd700" />
+            </div>
+            <button className="submit-button" onClick={handleRatingSubmit}>
+              Submit Rating
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
