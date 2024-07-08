@@ -25,6 +25,8 @@ const lambdaStack = new LambdaStack(app, "LambdaStack", {
   downloadsDataTable: dataStack.downloadsDataTable,
   cognitoUserPool: cognitoStack.userPool,
   sqsQueue: sqsStack.queue,
+  transcodedVideosBucket: dataStack.transcodedVideosBucket,
+  transcodingStatusTable: dataStack.transcodingStatusTable,
 });
 
 new ApiGwStack(app, "ApiGwStack", {
@@ -38,7 +40,7 @@ new ApiGwStack(app, "ApiGwStack", {
   unsubscribeFn: lambdaStack.unsubscribeFn,
   editMovieFn: lambdaStack.editMovieFn,
   rateMovieFn: lambdaStack.rateMovieFn,
-  startAndPollStepFunctionFn: lambdaStack.startAndPollStepFunctionFn
+  startAndPollStepFunctionFn: lambdaStack.startAndPollStepFunctionFn,
 });
 
 new FrontDeploymentStack(app, "FrontDeploymentStack", {});
