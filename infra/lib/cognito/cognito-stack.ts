@@ -45,7 +45,7 @@ export class CognitoStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    this.userPool.addClient("briefCinemaFe", {
+    this.userPoolClient = this.userPool.addClient("briefCinemaFe", {
       preventUserExistenceErrors: true,
     });
 
