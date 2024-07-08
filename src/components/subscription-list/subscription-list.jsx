@@ -38,9 +38,12 @@ function SubscriptionList() {
         },
       });
       setSubscriptions(subscriptions.filter(sub => sub.type !== item.type || sub.value !== item.value));
-      alert("Unsubscribed sucessfully.");
+      alert("Unsubscribed successfully.");
     } catch (error) {
-      alert("Failed to unsubscribe.");
+      if (error.response.status === 412)
+        alert("Failed to unsubscribe. Please confirm the unsubscription in your email.");
+      else
+        alert("Failed to unsubscribe.");
     }
   };
 
