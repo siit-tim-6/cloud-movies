@@ -94,6 +94,8 @@ export class LambdaStack extends cdk.Stack {
       environment: {
         S3_BUCKET: moviesBucket.bucketName,
         DYNAMODB_TABLE: moviesDataTable.tableName,
+        MOVIE_RATINGS_TABLE: movieRatingsTable.tableName,
+        DOWNLOADS_TABLE: downloadsDataTable.tableName,
       },
       timeout: cdk.Duration.seconds(10),
     });
@@ -338,8 +340,10 @@ export class LambdaStack extends cdk.Stack {
     movieRatingsTable.grantReadWriteData(this.rateMovieFn);
     movieRatingsTable.grantReadData(this.getSingleMovieFn);
     movieRatingsTable.grantReadData(this.getRatingsFn);
+    movieRatingsTable.grantReadWriteData(this.deleteMovieFn);
 
     downloadsDataTable.grantReadWriteData(this.downloadMovieFn);
     downloadsDataTable.grantReadData(this.getDownloadsFn);
+    downloadsDataTable.grantReadWriteData(this.deleteMovieFn);
   }
 }

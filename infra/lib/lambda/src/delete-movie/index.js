@@ -1,7 +1,7 @@
 "use strict";
 
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient, GetCommand, DeleteCommand } = require("@aws-sdk/lib-dynamodb");
+const { DynamoDBDocumentClient, GetCommand, DeleteCommand, QueryCommand  } = require("@aws-sdk/lib-dynamodb");
 const { S3Client, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 
 const dynamoClient = new DynamoDBClient({});
@@ -12,6 +12,8 @@ exports.handler = async (event) => {
   const { id } = event.pathParameters;
   const tableName = process.env.DYNAMODB_TABLE;
   const bucketName = process.env.S3_BUCKET;
+  const ratingsTableName = process.env.MOVIE_RATINGS_TABLE;
+  const downloadsTableName = process.env.DOWNLOADS_TABLE;
 
   // Fetch movie details from DynamoDB to get the S3 keys
   const getParams = {
@@ -61,6 +63,51 @@ exports.handler = async (event) => {
       Key: videoKey,
     })
   );
+
+  const ratingsQueryParams = {
+    TableName: ratingsTableName,
+    KeyConditionExpression: "MovieId = :movieId",
+    ExpressionAttributeValues: {
+      ":movieId": id,
+    },
+  };
+
+  const ratings = await dynamoDocClient.send(new QueryCommand(ratingsQueryParams));
+  const deleteRatingsPromises = ratings.Items.map((item) => {
+    const deleteRatingParams = {
+      TableName: ratingsTableName,
+      Key: {
+        MovieId: item.MovieId,
+        UserId: item.UserId,
+      },
+    };
+    return dynamoDocClient.send(new DeleteCommand(deleteRatingParams));
+  });
+
+  await Promise.all(deleteRatingsPromises);
+
+  const downloadsQueryParams = {
+    TableName: downloadsTableName,
+    IndexName: "MovieId-index",
+    KeyConditionExpression: "MovieId = :movieId",
+    ExpressionAttributeValues: {
+      ":movieId": id,
+    },
+  };
+
+  const downloads = await dynamoDocClient.send(new QueryCommand(downloadsQueryParams));
+  const deleteDownloadsPromises = downloads.Items.map((item) => {
+    const deleteDownloadParams = {
+      TableName: downloadsTableName,
+      Key: {
+        MovieId: item.MovieId,
+        UserId: item.UserId,
+      },
+    };
+    return dynamoDocClient.send(new DeleteCommand(deleteDownloadParams));
+  });
+
+  await Promise.all(deleteDownloadsPromises);
 
   return {
     statusCode: 200,
