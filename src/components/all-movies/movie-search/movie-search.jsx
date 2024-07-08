@@ -2,7 +2,9 @@ import { Button } from "@/components/ui/button";
 import "./movie-search.css";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { AccountContext } from "@/components/auth/accountContext";
+import axios from "axios";
 
 function MovieSearch({ setMovies, setLoading }) {
   const [title, setTitle] = useState("");
@@ -10,19 +12,23 @@ function MovieSearch({ setMovies, setLoading }) {
   const [actor, setActor] = useState("");
   const [director, setDirector] = useState("");
   const [genre, setGenre] = useState("");
+  const { getSession } = useContext(AccountContext);
 
   const handleSearch = async () => {
-    setLoading(true);
-    let query = `title=${title}&description=${description}&actor=${actor}&director=${director}&genre=${genre}`;
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/movies?${query}`, {
-      method: "GET",
-    });
+    const session = await getSession();
 
-    if (response.ok) {
-      const data = await response.json();
-      setMovies(data);
-    } else {
-      console.error("Failed to fetch movies");
+    setLoading(true);
+    try {
+      let query = `title=${title}&description=${description}&actor=${actor}&director=${director}&genre=${genre}`;
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/movies?${query}`, {
+        headers: {
+          Authorization: session.accessToken.jwtToken,
+        },
+      });
+
+      setMovies(response.data);
+    } catch (error) {
+      console.error("Failed to fetch movies", error);
     }
     setLoading(false);
   };
