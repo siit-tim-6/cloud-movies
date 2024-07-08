@@ -9,7 +9,6 @@ const dynamoClient = new DynamoDBClient({});
 const dynamoDocClient = DynamoDBDocumentClient.from(dynamoClient);
 const cognitoClient = new CognitoIdentityProviderClient({});
 const snsClient = new SNSClient({});
-
 exports.handler = async (event) => {
   const tableName = process.env.DYNAMODB_TABLE;
   const userPoolId = process.env.COGNITO_USER_POOL_ID.split("/").pop();
@@ -19,16 +18,6 @@ exports.handler = async (event) => {
   const userId = JSON.parse(Buffer.from(Authorization.split(".")[1], "base64").toString()).sub;
   const username = JSON.parse(Buffer.from(Authorization.split(".")[1], "base64").toString()).username;
 
-  const dynamoDeleteCommand = new DeleteCommand({
-    TableName: tableName,
-    Key: {
-      UserId: userId,
-      SubscribedTo: subscribedTo,
-    },
-  });
-
-  await dynamoDocClient.send(dynamoDeleteCommand);
-
   const userCommand = new AdminGetUserCommand({
     UserPoolId: userPoolId,
     Username: username,
@@ -37,6 +26,46 @@ exports.handler = async (event) => {
   const userResponse = await cognitoClient.send(userCommand);
   const userEmail = userResponse.UserAttributes.find(attr => attr.Name === "email").Value;
 
+  try {
+    await snsUnsubscribe(subscribedTo, userEmail);
+  } catch (error) {
+    if (error.message.toLowerCase().includes('pending confirmation')) {
+      console.log("Error in unsubscribing: ", error.message);
+      return {
+        statusCode: 412,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Headers": "Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
+          "Access-Control-Allow-Methods": "POST,OPTIONS",
+          "Access-Control-Allow-Origin": "*",
+        },
+        body: JSON.stringify({ error: error.message }),
+      };
+    }
+  }
+
+  const dynamoDeleteCommand = new DeleteCommand({
+    TableName: tableName,
+    Key: {
+      UserId: userId,
+      SubscribedTo: subscribedTo,
+    },
+  });
+  await dynamoDocClient.send(dynamoDeleteCommand);
+
+  return {
+    statusCode: 200,
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Headers": "Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
+      "Access-Control-Allow-Methods": "POST,OPTIONS",
+      "Access-Control-Allow-Origin": "*",
+    },
+  };
+};
+
+
+async function snsUnsubscribe(subscribedTo, userEmail) {
   const filteredTopicName = subscribedTo.replace(/[^a-zA-Z0-9-_]/g, "-").toLowerCase().trim();
   // Check if SNS topic exists
   let topicArn;
@@ -53,23 +82,12 @@ exports.handler = async (event) => {
     console.log("Creating topic...");
     const createTopicResponse = await snsClient.send(createTopicCommand);
     topicArn = createTopicResponse.TopicArn;
-  }
-  else{
+  } else {
     topicArn = existingTopic.TopicArn;
   }
 
   await unsubscribeFromTopic(topicArn, userEmail);
-
-  return {
-    statusCode: 200,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Headers": "Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
-      "Access-Control-Allow-Methods": "POST,OPTIONS",
-      "Access-Control-Allow-Origin": "*",
-    },
-  };
-};
+}
 
 async function unsubscribeFromTopic(topicArn, userEmail) {
   console.log("Listing subscriptions for topic...");
@@ -94,11 +112,7 @@ async function unsubscribeFromTopic(topicArn, userEmail) {
   }
 
   if (subscriptionArn.includes("PendingConfirmation")) {
-    const deleteSubscriptionCommand = new DeleteSubscriptionCommand({
-      SubscriptionArn: subscriptionArn
-    });
-    await snsClient.send(deleteSubscriptionCommand);
-    return;
+    throw new Error("Subscription is pending confirmation");
   }
 
     // Subscription is confirmed, proceed with unsubscribe

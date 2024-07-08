@@ -169,7 +169,11 @@ function MovieDetails() {
         alert("Subscribed successfully.");
       }
     } catch (error) {
-      alert(`Failed to ${subscriptions.some(sub => sub.type === type && sub.value === value) ? "un" : ""}subscribe.`);
+      console.error("Error subscribing/unsubscribing:", error);
+      if (error.response.status === 412)
+        alert("Failed to unsubscribe. Please confirm the unsubscription in your email.");
+      else
+        alert(`Failed to ${subscriptions.some(sub => sub.type === type && sub.value === value) ? "un" : ""}subscribe.`);
     }
   };
 
