@@ -25,18 +25,23 @@ const getAuthorizationResponse = (sub, methodArn) => {
 };
 
 exports.handler = async (event) => {
+  console.log(event);
   const accessToken = event.authorizationToken;
+  console.log(accessToken);
 
   let payload;
   try {
     payload = await jwtVerifier.verify(accessToken);
+    console.log("prosao");
   } catch {
+    console.log("pao");
     throw Error("Unauthorized");
   }
 
   console.log(payload);
 
-  if (payload["cognito:groups"].includes("RegularUsers") || payload["cognito:groups"].includes("Admins")) return getAuthorizationResponse(payload.sub, event.methodArn);
+  if (payload["cognito:groups"].includes("RegularUsers") || payload["cognito:groups"].includes("Admins"))
+    return getAuthorizationResponse(payload.sub, event.methodArn);
 
   throw Error("Unauthorized");
 };
