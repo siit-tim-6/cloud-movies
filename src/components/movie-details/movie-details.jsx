@@ -126,7 +126,11 @@ function MovieDetails() {
       navigate("/movies");
     } catch (error) {
       console.error("Error deleting the movie:", error);
-      alert("Failed to delete the movie.");
+      if (error.response && error.response.status === 425) {
+        alert("Movie not yet transcoded, try again in a few minutes.");
+      } else {
+        alert("Failed to delete the movie.");
+      }
     }
   };
 
@@ -172,10 +176,8 @@ function MovieDetails() {
       }
     } catch (error) {
       console.error("Error subscribing/unsubscribing:", error);
-      if (error.response.status === 412)
-        alert("Failed to unsubscribe. Please confirm the unsubscription in your email.");
-      else
-        alert(`Failed to ${subscriptions.some(sub => sub.type === type && sub.value === value) ? "un" : ""}subscribe.`);
+      if (error.response.status === 412) alert("Failed to unsubscribe. Please confirm the unsubscription in your email.");
+      else alert(`Failed to ${subscriptions.some((sub) => sub.type === type && sub.value === value) ? "un" : ""}subscribe.`);
     }
   };
 
