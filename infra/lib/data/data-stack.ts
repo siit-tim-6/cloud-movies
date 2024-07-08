@@ -89,10 +89,15 @@ export class DataStack extends cdk.Stack {
 
     this.transcodingStatusTable = new dynamodb.Table(this, "TrancodingStatus", {
       partitionKey: { name: "MovieId", type: dynamodb.AttributeType.STRING },
+      readCapacity: 1,
+      writeCapacity: 1,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
     this.movieRatingsTable.addGlobalSecondaryIndex({
-      indexName: 'UserIdIndex',
-      partitionKey: { name: 'UserId', type: dynamodb.AttributeType.STRING },
-      sortKey: { name: 'MovieId', type: dynamodb.AttributeType.STRING },
+      indexName: "UserIdIndex",
+      partitionKey: { name: "UserId", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "MovieId", type: dynamodb.AttributeType.STRING },
       projectionType: dynamodb.ProjectionType.ALL,
       readCapacity: 1,
       writeCapacity: 1,
