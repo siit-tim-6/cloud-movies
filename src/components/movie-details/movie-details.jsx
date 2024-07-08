@@ -209,7 +209,7 @@ function MovieDetails() {
               </div>
             ) : (
               <div className="video-player">
-                <video src={videoUrl} controls autoPlay className="video-element" />
+                <VideoPlayer className="video-element" options={videoJsOptions} onReady={handlePlayerReady} />
                 <button className="close-button" onClick={() => setIsPlaying(false)}>
                   <FontAwesomeIcon icon={faTimes} />
                 </button>
@@ -293,7 +293,6 @@ function MovieDetails() {
                   </div>
                 </div>
               </div>
-              <VideoPlayer options={videoJsOptions} onReady={handlePlayerReady} />
             </div>
           </>
         )}
