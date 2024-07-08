@@ -1,0 +1,94 @@
+.contentMenu {
+  position: relative;
+  width: 4em;
+}
+.contentMenu .icon {
+  width: 100%;
+  bottom: 0;
+  position: absolute;
+  padding: 10px;
+  text-align: center;
+  color: white;
+}
+.contentMenu .icon:hover {
+  cursor: pointer;
+  color: gray;
+}
+.contentMenu .icon:hover + .menu {
+  transform: translate(-50%, -30px);
+  visibility: visible;
+  opacity: 1;
+}
+.contentMenu .menu {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transition: all 200ms;
+  display: flex;
+  justify-content: center;
+  flex-direction: column-reverse;
+  width: 100px;
+  transform: translate(-50%, -20px);
+  visibility: hidden;
+  opacity: 0;
+}
+.contentMenu .menu:hover {
+  transform: translate(-50%, -30px);
+  visibility: visible;
+  opacity: 1;
+}
+.contentMenu .menu:after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 0;
+  bottom: -15px;
+  left: calc(50% - 15px);
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-top: 15px solid #333;
+}
+
+#auto {
+  background: #333;
+}
+#auto .current {
+  font-size: 10px;
+  margin-left: 3px;
+}
+#auto .current:before {
+  margin-left: -3px;
+  content: "(";
+  position: absolute;
+}
+#auto .current:after {
+  content: ")";
+  position: absolute;
+}
+
+.item {
+  position: relative;
+  text-align: center;
+  border: 0;
+  padding: 10px;
+  background: #444;
+}
+.item.selected {
+  background: #333;
+  font-weight: bold;
+}
+.item.selected:before {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: 50%;
+  border-radius: 50%;
+  background: #4caf50;
+  left: 10px;
+  transform: translateY(-50%);
+}
+.item:hover {
+  background: #333;
+  cursor: pointer;
+}
