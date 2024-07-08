@@ -2,17 +2,24 @@ import Navbar from "@/components/navbar/navbar";
 import "./all-movies.css";
 import MovieCard from "./movie-card/movie-card";
 import MovieSearch from "./movie-search/movie-search";
-import { useEffect, useState } from "react";
+import {useContext, useEffect, useState} from "react";
 import axios from "axios";
 import ReactLoading from "react-loading";
+import {AccountContext} from "@/components/auth/accountContext.jsx";
 
 function AllMovies() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { getSession } = useContext(AccountContext);
 
   useEffect(() => {
     const getAllMovies = async () => {
-      const moviesResponse = await axios.get(`${import.meta.env.VITE_API_URL}/movies`);
+      const session = await getSession();
+      const moviesResponse = await axios.get(`${import.meta.env.VITE_API_URL}/movies`, {
+        headers: {
+          Authorization: session.accessToken.jwtToken,
+        }
+      });
       setMovies(moviesResponse.data);
       setLoading(false);
     };

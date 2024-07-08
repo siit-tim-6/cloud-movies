@@ -37,7 +37,7 @@ function UploadMovie({ isEditMode = false }) {
         if (extractedRole !== "ADMIN") navigate("/");
       })
       .catch((err) => {
-        navigate("/");
+        navigate("/login");
       });
 
     if (isEditMode) {
@@ -47,7 +47,12 @@ function UploadMovie({ isEditMode = false }) {
 
   const fetchMovieDetails = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/movies/${id}`);
+      const session = await getSession();
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/movies/${id}`, {
+        headers: {
+          Authorization: session.accessToken.jwtToken,
+        },
+      });
       const movie = response.data;
       console.log("Fetched movie details:", movie);
 

@@ -37,25 +37,23 @@ function SubscriptionList() {
           Authorization: session.accessToken.jwtToken,
         },
       });
-      setSubscriptions(subscriptions.filter(sub => sub.type !== item.type || sub.value !== item.value));
+      setSubscriptions(subscriptions.filter((sub) => sub.type !== item.type || sub.value !== item.value));
       alert("Unsubscribed successfully.");
     } catch (error) {
-      if (error.response.status === 412)
-        alert("Failed to unsubscribe. Please confirm the unsubscription in your email.");
-      else
-        alert("Failed to unsubscribe.");
+      if (error.response.status === 412) alert("Failed to unsubscribe. Please confirm the unsubscription in your email.");
+      else alert("Failed to unsubscribe.");
     }
   };
 
   const renderSubscriptionsByType = (type) => {
     return subscriptions
-        .filter((sub) => sub.type === type)
-        .map((sub) => (
-            <div className="subscription-line" key={sub.value}>
-              <p className="capitalized">{sub.value}</p>
-              <Button onClick={() => unsubscribe(sub)}>Unsubscribe</Button>
-            </div>
-        ));
+      .filter((sub) => sub.type === type)
+      .map((sub) => (
+        <div className="subscription-line" key={sub.value}>
+          <p className="capitalized">{sub.value}</p>
+          <Button onClick={() => unsubscribe(sub)}>Unsubscribe</Button>
+        </div>
+      ));
   };
 
   return (
@@ -67,21 +65,21 @@ function SubscriptionList() {
             <ReactLoading type="spokes" color="#ffffff" height={100} width={100} />
           </div>
         ) : (
-            <>
-              <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight mb-3">Your Subscriptions</h3>
-              <div>
-                <h4 className="text-xl font-semibold">Genres</h4>
-                {renderSubscriptionsByType("genre")}
-              </div>
-              <div>
-                <h4 className="text-xl font-semibold">Actors</h4>
-                {renderSubscriptionsByType("actor")}
-              </div>
-              <div>
-                <h4 className="text-xl font-semibold">Directors</h4>
-                {renderSubscriptionsByType("director")}
-              </div>
-            </>
+          <>
+            <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight mb-3">Your Subscriptions</h3>
+            <div>
+              <h4 className="text-xl font-semibold text-center mb-3">Genres</h4>
+              {renderSubscriptionsByType("genre")}
+            </div>
+            <div>
+              <h4 className="text-xl font-semibold text-center mb-3">Actors</h4>
+              {renderSubscriptionsByType("actor")}
+            </div>
+            <div>
+              <h4 className="text-xl font-semibold text-center mb-3">Directors</h4>
+              {renderSubscriptionsByType("director")}
+            </div>
+          </>
         )}
       </div>
     </>
