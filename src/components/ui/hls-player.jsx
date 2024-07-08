@@ -6,7 +6,7 @@ import "./hls-player.css";
 export const VideoPlayer = (props) => {
   const videoRef = useRef(null);
   const playerRef = useRef(null);
-  const { options, onReady } = props;
+  const { options, onReady, className } = props;
 
   useEffect(() => {
     // Make sure Video.js player is only initialized once
@@ -24,7 +24,7 @@ export const VideoPlayer = (props) => {
         console.log("Start");
 
         player.one("loadedmetadata", () => {
-          let qualities = player.tech({ IWillNotUseThisInPlugins: true }).vhs.representations();
+          let qualities = player.tech({ IWillNotUseThisInPlugins: true })?.vhs?.representations();
           console.log("qualities", qualities);
           createButtonsQualities({
             class: "item",
@@ -96,7 +96,7 @@ export const VideoPlayer = (props) => {
 
             setInterval(() => {
               let auto = document.querySelector("#auto");
-              let current = player.tech({ IWillNotUseThisInPlugins: true }).vhs.playlists.media_.uri.split(".")[0];
+              let current = player.tech({ IWillNotUseThisInPlugins: true })?.vhs?.playlists.media_.uri.split(".")[0];
               console.log(current);
 
               document.querySelector("#auto").innerHTML = auto.classList.contains("selected") ? `Auto <span class='current'>${current}</span>` : "Auto";
@@ -143,7 +143,7 @@ export const VideoPlayer = (props) => {
   }, [playerRef]);
 
   return (
-    <div data-vjs-player style={{ width: "600px" }}>
+    <div data-vjs-player className={className}>
       <div ref={videoRef} />
     </div>
   );
