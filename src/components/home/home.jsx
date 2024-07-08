@@ -26,15 +26,18 @@ function Home() {
             const session = await getSession();
 
             try {
-                const response = await axios.get(`${import.meta.env.VITE_API_URL}/generate-feed`, {
+                const response = await axios.get(`${import.meta.env.VITE_API_URL}/get-feed`, {
                     headers: {
                         Authorization: session.accessToken.jwtToken,
                     },
                 });
 
-                console.log(response.data.feedResult.Payload.body);
-                const parsedMovies = JSON.parse(response.data.feedResult.Payload.body);
-                setMovies(parsedMovies);
+                console.log(response.data);
+                if (response.data.length === 0) {
+                    window.alert("Feed is being generated. Please check back soon.");
+                } else {
+                    setMovies(response.data);
+                }
             } catch (error) {
                 console.error("Error fetching movies:", error);
             }
