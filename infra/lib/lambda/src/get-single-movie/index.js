@@ -2,7 +2,7 @@
 
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { QueryCommand, DynamoDBDocumentClient, GetCommand } = require("@aws-sdk/lib-dynamodb");
-const { GetObjectCommand, S3Client } = require("@aws-sdk/client-s3");
+const { GetObjectCommand, S3Client, HeadObjectCommand } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
 const dynamoClient = new DynamoDBClient({});
@@ -56,6 +56,18 @@ exports.handler = async (event) => {
   });
   const s3VideoSignedUrl = await getSignedUrl(s3Client, getVideoCommand, { expiresIn: 3600 });
   responseItem.VideoS3Url = s3VideoSignedUrl;
+
+  const { ContentType, ContentLength, LastModified } = await s3Client.send(
+    new HeadObjectCommand({
+      Bucket: bucketName,
+      Key: s3VideoUrlKey,
+    })
+  );
+
+  responseItem.FileName = s3VideoUrlKey.split("/").at(-1);
+  responseItem.ContentType = ContentType;
+  responseItem.ContentLength = ContentLength;
+  responseItem.LastModified = LastModified;
 
   const ratingsQueryCommand = new QueryCommand({
     TableName: ratingsTableName,
