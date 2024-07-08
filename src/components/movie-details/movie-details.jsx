@@ -33,6 +33,7 @@ function MovieDetails() {
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [userRating, setUserRating] = useState(0);
   const [averageRating, setAverageRating] = useState(0);
+  const [transcoded, setTranscoded] = useState(false);
 
   useEffect(() => {
     const getMovie = async () => {
@@ -53,6 +54,7 @@ function MovieDetails() {
       setVideoUrl(movieResponse.data.VideoS3Url);
       setSubscriptions(subscriptionsReponse.data);
       setAverageRating(movieResponse.data.AverageRating || 0);
+      setTranscoded(movieResponse.data.Status === "FINISHED" ? true : false);
       console.log(subscriptionsReponse.data);
       const userRole = await getRole();
       setRole(userRole);
@@ -220,7 +222,13 @@ function MovieDetails() {
           <>
             {!isPlaying ? (
               <div className="movie-cover" style={{ backgroundImage: `url(${coverUrl})` }}>
-                <div className="play-button" onClick={() => setIsPlaying(true)}>
+                <div
+                  className="play-button"
+                  onClick={() => {
+                    if (transcoded) setIsPlaying(true);
+                    else alert("Movie not yet transcoded, refresh the page and try again.");
+                  }}
+                >
                   <FontAwesomeIcon icon={faPlay} />
                 </div>
               </div>
