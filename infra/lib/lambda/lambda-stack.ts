@@ -112,7 +112,7 @@ export class LambdaStack extends cdk.Stack {
         TRANSCODED_VIDEOS_BUCKET: transcodedVideosBucket.bucketName,
         TRANSCODING_STATUS_TABLE: transcodingStatusTable.tableName,
       },
-      timeout: cdk.Duration.seconds(10),
+      timeout: cdk.Duration.minutes(5),
     });
 
     this.subscribeFn = new lambda.Function(this, "subscribeFn", {
@@ -151,7 +151,10 @@ export class LambdaStack extends cdk.Stack {
       environment: {
         S3_BUCKET: moviesBucket.bucketName,
         DYNAMODB_TABLE: moviesDataTable.tableName,
+        TRANSCODED_VIDEOS_BUCKET: transcodedVideosBucket.bucketName,
+        TRANSCODING_STATUS_TABLE: transcodingStatusTable.tableName,
       },
+      timeout: cdk.Duration.minutes(5),
     });
 
     this.rateMovieFn = new lambda.Function(this, "rateMovieFn", {
@@ -359,8 +362,10 @@ export class LambdaStack extends cdk.Stack {
     downloadsDataTable.grantReadWriteData(this.deleteMovieFn);
 
     transcodedVideosBucket.grantReadWrite(this.deleteMovieFn);
+    transcodedVideosBucket.grantReadWrite(this.editMovieFn);
 
     transcodingStatusTable.grantReadWriteData(this.deleteMovieFn);
     transcodingStatusTable.grantReadData(this.getSingleMovieFn);
+    transcodingStatusTable.grantReadData(this.editMovieFn);
   }
 }
