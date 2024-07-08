@@ -51,7 +51,7 @@ function MovieDetails() {
       setVideoUrl(movieResponse.data.VideoS3Url);
       setSubscriptions(subscriptionsReponse.data);
       setAverageRating(movieResponse.data.AverageRating || 0);
-
+      console.log(subscriptionsReponse.data);
       const userRole = await getRole();
       setRole(userRole);
 
@@ -86,8 +86,13 @@ function MovieDetails() {
   };
 
   const handleDownload = async () => {
+    const session = await getSession();
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/download-movie?movieId=${id}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/download-movie?movieId=${id}`, {
+        headers: {
+          Authorization: session.accessToken.jwtToken,
+        },
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -140,130 +145,136 @@ function MovieDetails() {
     });
   };
 
-  const subUnsubTo = async (item) => {
+  const subUnsubTo = async (type, value) => {
     const session = await getSession();
+    const item = { type, value };
+    console.log(item);
 
     try {
-      if (subscriptions.includes(item)) {
-        await axios.delete(`${import.meta.env.VITE_API_URL}/subscriptions?subscribedTo=${item}`, {
+      if (subscriptions.some(sub => sub.type === type && sub.value === value)) {
+        await axios.delete(`${import.meta.env.VITE_API_URL}/subscriptions?subscribedTo=${item.type}:${item.value}`, {
           headers: {
             Authorization: session.accessToken.jwtToken,
           },
         });
-        setSubscriptions(subscriptions.filter((subscription) => subscription !== item));
+        setSubscriptions(subscriptions.filter(sub => sub.type !== type || sub.value !== value));
         alert("Unsubscribed successfully.");
       } else {
-        await axios.post(`${import.meta.env.VITE_API_URL}/subscriptions`, { subscribedTo: item }, { headers: { Authorization: session.accessToken.jwtToken } });
+        await axios.post(
+            `${import.meta.env.VITE_API_URL}/subscriptions`,
+            { subscribedTo: `${item.type}:${item.value}` },
+            { headers: { Authorization: session.accessToken.jwtToken } }
+        );
         setSubscriptions([...subscriptions, item]);
         alert("Subscribed successfully.");
       }
     } catch (error) {
-      alert(`Failed to ${subscriptions.includes(item) ? "un" : ""}subscribe.`);
+      alert(`Failed to ${subscriptions.some(sub => sub.type === type && sub.value === value) ? "un" : ""}subscribe.`);
     }
   };
 
   return (
-    <>
-      <Navbar />
-      <div className="movie-details-page">
-        {loading ? (
-          <div className="full-page">
-            <ReactLoading type="spokes" color="#ffffff" height={100} width={100} />
-          </div>
-        ) : (
-          <>
-            {!isPlaying ? (
-              <div className="movie-cover" style={{ backgroundImage: `url(${coverUrl})` }}>
-                <div className="play-button" onClick={() => setIsPlaying(true)}>
-                  <FontAwesomeIcon icon={faPlay} />
-                </div>
+      <>
+        <Navbar />
+        <div className="movie-details-page">
+          {loading ? (
+              <div className="full-page">
+                <ReactLoading type="spokes" color="#ffffff" height={100} width={100} />
               </div>
-            ) : (
-              <div className="video-player">
-                <video src={videoUrl} controls autoPlay className="video-element" />
-                <button className="close-button" onClick={() => setIsPlaying(false)}>
-                  <FontAwesomeIcon icon={faTimes} />
-                </button>
-              </div>
-            )}
-            <div className="movie-info">
-              <div className="movie-title-favorite">
-                <h1>{title}</h1>
-                <button className="download-button" onClick={handleDownload}>
-                  <FontAwesomeIcon icon={faDownload} />
-                </button>
-                {role === "ADMIN" ? (
-                  <button className="edit-button" onClick={() => navigate(`/edit-movie/${id}`)}>
-                    <FontAwesomeIcon icon={faEdit} />
-                  </button>
-                ) : null}
-                {role === "ADMIN" ? (
-                  <button className="delete-button" onClick={confirmDelete}>
-                    <FontAwesomeIcon icon={faTrash} />
-                  </button>
-                ) : null}
-                <button className="rate-button" onClick={() => setShowRatingModal(true)}>
-                  <FontAwesomeIcon icon={faThumbsUp} />
-                </button>
-              </div>
-              <div className="movie-genre-rating">
-                {genres.map((genre, i) => (
-                  <Badge key={i} className="movie-genre uppercased">
-                    {genre}
-                  </Badge>
-                ))}
-                <div className="rating">
-                  <Rating count={5} value={averageRating} edit={false} size={24} activeColor="#ffd700" />
-                  <span className="average-rating">({averageRating.toFixed(1)})</span>
-                </div>
-              </div>
-              <p className="movie-description">{description}</p>
-              <div className="movie-meta">
-                <div className="meta-item">
-                  <strong>Actors</strong>
-                  {actors.map((actor, i) => (
-                    <div key={i} className="data-line">
-                      <p className="uppercased">{actor}</p>
-                      <FontAwesomeIcon
-                        className="icon-btn"
-                        onClick={() => subUnsubTo(actor)}
-                        icon={faHeart}
-                        color={subscriptions.includes(actor) ? "red" : "white"}
-                      />
-                    </div>
-                  ))}
-                </div>
-                <div className="meta-item">
-                  <strong>Directors</strong>
-                  {directors.map((director, i) => (
-                    <div key={i} className="data-line">
-                      <p className="uppercased">{director}</p>
-                      <FontAwesomeIcon
-                        className="icon-btn"
-                        onClick={() => subUnsubTo(director)}
-                        icon={faHeart}
-                        color={subscriptions.includes(director) ? "red" : "white"}
-                      />
-                    </div>
-                  ))}
-                </div>
-                <div className="meta-item">
-                  <strong>Genres</strong>
-                  <div className="data-list">
-                    {genres.map((genre, i) => (
-                      <div key={i} className="data-line">
-                        <p className="uppercased">{genre}</p>
-                        <FontAwesomeIcon
-                          className="icon-btn"
-                          onClick={() => subUnsubTo(genre)}
-                          icon={faHeart}
-                          color={subscriptions.includes(genre) ? "red" : "white"}
-                        />
+          ) : (
+              <>
+                {!isPlaying ? (
+                    <div className="movie-cover" style={{ backgroundImage: `url(${coverUrl})` }}>
+                      <div className="play-button" onClick={() => setIsPlaying(true)}>
+                        <FontAwesomeIcon icon={faPlay} />
                       </div>
-                    ))}
+                    </div>
+                ) : (
+                    <div className="video-player">
+                      <video src={videoUrl} controls autoPlay className="video-element" />
+                      <button className="close-button" onClick={() => setIsPlaying(false)}>
+                        <FontAwesomeIcon icon={faTimes} />
+                      </button>
+                    </div>
+                )}
+                <div className="movie-info">
+                  <div className="movie-title-favorite">
+                    <h1>{title}</h1>
+                    <button className="download-button" onClick={handleDownload}>
+                      <FontAwesomeIcon icon={faDownload} />
+                    </button>
+                    {role === "ADMIN" ? (
+                        <button className="edit-button" onClick={() => navigate(`/edit-movie/${id}`)}>
+                          <FontAwesomeIcon icon={faEdit} />
+                        </button>
+                    ) : null}
+                    {role === "ADMIN" ? (
+                        <button className="delete-button" onClick={confirmDelete}>
+                          <FontAwesomeIcon icon={faTrash} />
+                        </button>
+                    ) : null}
+                    <button className="rate-button" onClick={() => setShowRatingModal(true)}>
+                      <FontAwesomeIcon icon={faThumbsUp} />
+                    </button>
                   </div>
-                </div>
-              </div>
+                  <div className="movie-genre-rating">
+                    {genres.map((genre, i) => (
+                        <Badge key={i} className="movie-genre uppercased">
+                          {genre}
+                        </Badge>
+                    ))}
+                    <div className="rating">
+                      <Rating count={5} value={averageRating} edit={false} size={24} activeColor="#ffd700"/>
+                      <span className="average-rating">({averageRating.toFixed(1)})</span>
+                    </div>
+                  </div>
+                  <p className="movie-description">{description}</p>
+                  <div className="movie-meta">
+                    <div className="meta-item">
+                      <strong>Actors</strong>
+                      {actors.map((actor, i) => (
+                          <div key={i} className="data-line">
+                            <p className="uppercased">{actor}</p>
+                            <FontAwesomeIcon
+                                className="icon-btn"
+                                onClick={() => subUnsubTo('actor',actor)}
+                                icon={faHeart}
+                                color={subscriptions.some(sub => sub.type === "actor" && sub.value === actor) ? "red" : "white"}
+                            />
+                          </div>
+                      ))}
+                    </div>
+                    <div className="meta-item">
+                      <strong>Directors</strong>
+                      {directors.map((director, i) => (
+                          <div key={i} className="data-line">
+                            <p className="uppercased">{director}</p>
+                            <FontAwesomeIcon
+                                className="icon-btn"
+                                onClick={() => subUnsubTo('director',director)}
+                                icon={faHeart}
+                                color={subscriptions.some(sub => sub.type === "director" && sub.value === director) ? "red" : "white"}
+                            />
+                          </div>
+                      ))}
+                    </div>
+                    <div className="meta-item">
+                      <strong>Genres</strong>
+                      <div className="data-list">
+                        {genres.map((genre, i) => (
+                            <div key={i} className="data-line">
+                              <p className="uppercased">{genre}</p>
+                              <FontAwesomeIcon
+                                  className="icon-btn"
+                                  onClick={() => subUnsubTo('genre',genre)}
+                                  icon={faHeart}
+                                  color={subscriptions.some(sub => sub.type === "genre" && sub.value === genre) ? "red" : "white"}
+                              />
+                            </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
             </div>
           </>
         )}

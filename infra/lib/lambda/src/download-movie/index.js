@@ -1,7 +1,7 @@
 "use strict";
 
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const { GetCommand, DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
+const { PutCommand, GetCommand, DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
 const { GetObjectCommand, S3Client } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
@@ -13,6 +13,8 @@ exports.handler = async (event) => {
   const bucketName = process.env.S3_BUCKET;
   const tableName = process.env.DYNAMODB_TABLE;
   const movieId = event.queryStringParameters.movieId;
+  const downloadsTableName = process.env.DOWNLOADS_TABLE;
+  const userId = JSON.parse(Buffer.from(event.headers.Authorization.split('.')[1], 'base64').toString()).sub;
 
   // // get item from DynamoDB
 
@@ -51,6 +53,17 @@ exports.handler = async (event) => {
   });
 
   const s3VideoSignedUrl = await getSignedUrl(s3Client, getVideoCommand, { expiresIn: 3600 });
+
+  const dynamoPutCommand = new PutCommand({
+    TableName: downloadsTableName,
+    Item: {
+      UserId: userId,
+      MovieId: movieId,
+      DownloadedAt: new Date().toISOString(),
+    },
+  });
+
+  await dynamoDocClient.send(dynamoPutCommand);
 
   return {
     statusCode: 200,
