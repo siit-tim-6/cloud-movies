@@ -4,9 +4,10 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
 import * as lambda from "aws-cdk-lib/aws-lambda";
-import * as s3n from "aws-cdk-lib/aws-s3-notifications";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as sqs from "aws-cdk-lib/aws-sqs";
+import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
+import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
 import path = require("path");
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 
@@ -156,5 +157,11 @@ export class VideoTranscodingStack extends cdk.Stack {
     invokePipelineFn.addEventSource(new SqsEventSource(transcodingQueue));
     transcodingStatusTable.grantWriteData(createMetadataAndPlaylistFn);
     transcodingStatusTable.grantWriteData(finalizeFn);
+
+    const videoDistribution = new cloudfront.Distribution(this, "videoDistribution", {
+      defaultBehavior: {
+        origin: new origins.S3Origin(transcodedVideosBucket),
+      },
+    });
   }
 }
