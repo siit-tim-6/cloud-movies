@@ -2,7 +2,7 @@
 
 This repository contains a cloud-native web application designed to store and manage movie content using AWS cloud services. The system follows a cloud-native architecture to ensure scalability, reliability, and performance.
 
-![Architecture Diagram](readme-assets/cloud-movies-aws-diagram.png)
+![Architecture Diagram](readme-assets/image.webp)
 
 ## Table of Contents
 
