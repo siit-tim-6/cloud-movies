@@ -13,7 +13,7 @@ const process360p = async (event) => {
   const inputBucketName = process.env.S3_INPUT_BUCKET;
   const outputBucketName = process.env.S3_OUTPUT_BUCKET;
   const id = videoKey.split("/")[0];
-  const filename = videoKey.split("/")[3];
+  const filename = videoKey.split("/").at(-1);
   const params = { Bucket: inputBucketName, Key: videoKey };
   const downloadFile = `/tmp/${id}/${filename}`;
 
@@ -22,6 +22,9 @@ const process360p = async (event) => {
   const file = fs.createWriteStream(downloadFile);
   const s3Response = await s3Client.send(new GetObjectCommand(params));
   s3Response.Body.pipe(file);
+
+  console.log(filename);
+  console.log(downloadFile);
 
   await transcode(downloadFile, id, outputBucketName);
 };

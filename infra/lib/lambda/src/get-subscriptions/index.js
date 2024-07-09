@@ -8,9 +8,18 @@ const dynamoDocClient = DynamoDBDocumentClient.from(dynamoClient);
 
 exports.handler = async (event) => {
   const tableName = process.env.DYNAMODB_TABLE;
-  const { Authorization } = event.headers;
+  let userId;
 
-  const userId = JSON.parse(Buffer.from(Authorization.split(".")[1], "base64").toString()).sub;
+  if (event.headers && event.headers.Authorization) {
+    try {
+      userId = JSON.parse(Buffer.from(event.headers.Authorization.split(".")[1], "base64").toString()).sub;
+    } catch (error) {
+      console.error("Failed to parse Authorization header:", error);
+      userId = event.userId;
+    }
+  } else {
+    userId = event.userId;
+  }
 
   const dynamoQueryCommand = new QueryCommand({
     TableName: tableName,

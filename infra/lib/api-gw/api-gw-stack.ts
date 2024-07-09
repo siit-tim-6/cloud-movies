@@ -19,7 +19,7 @@ export interface ApiGwStackProps extends cdk.StackProps {
   userPoolClient: cognito.UserPoolClient;
   editMovieFn: lambda.Function;
   rateMovieFn: lambda.Function;
-  startAndPollStepFunctionFn: lambda.Function;
+  getFeedFn: lambda.Function;
 }
 
 export class ApiGwStack extends cdk.Stack {
@@ -39,7 +39,7 @@ export class ApiGwStack extends cdk.Stack {
       userPoolClient,
       editMovieFn,
       rateMovieFn,
-      startAndPollStepFunctionFn,
+      getFeedFn,
     } = props!;
 
     const userAuthorizerFn = new lambda.Function(this, "userAuthorizerFn", {
@@ -82,7 +82,7 @@ export class ApiGwStack extends cdk.Stack {
     const unsubscribeLambdaIntegration = new apigateway.LambdaIntegration(unsubscribeFn);
     const editMovieLambdaIntegration = new apigateway.LambdaIntegration(editMovieFn);
     const rateMovieLambdaIntegration = new apigateway.LambdaIntegration(rateMovieFn);
-    const startAndPollStepFunctionIntegration = new apigateway.LambdaIntegration(startAndPollStepFunctionFn);
+    const getFeedLambdaIntegration = new apigateway.LambdaIntegration(getFeedFn);
 
     const api = new apigateway.RestApi(this, "MoviesApi", {
       restApiName: "Movies Service",
@@ -252,11 +252,14 @@ export class ApiGwStack extends cdk.Stack {
       allowOrigins: ["*"],
     });
 
-    const generateFeedResource = api.root.addResource("generate-feed");
-    generateFeedResource.addMethod("GET", startAndPollStepFunctionIntegration, {
+    const getFeedResource = api.root.addResource("get-feed");
+    getFeedResource.addMethod("GET", getFeedLambdaIntegration, {
+      requestValidatorOptions: {
+        validateRequestParameters: false,
+      },
       authorizer: userAuth,
     });
-    generateFeedResource.addCorsPreflight({
+    getFeedResource.addCorsPreflight({
       allowOrigins: ["*"],
     });
   }

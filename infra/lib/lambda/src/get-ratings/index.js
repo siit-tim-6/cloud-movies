@@ -8,9 +8,7 @@ const dynamoDocClient = DynamoDBDocumentClient.from(dynamoClient);
 
 exports.handler = async (event) => {
     const tableName = process.env.RATINGS_TABLE;
-    const { Authorization } = event.headers;
-
-    const userId = JSON.parse(Buffer.from(Authorization.split(".")[1], "base64").toString()).sub;
+    const userId = event.userId;
 
     const dynamoQueryCommand = new QueryCommand({
         TableName: tableName,

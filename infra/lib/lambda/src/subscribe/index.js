@@ -4,17 +4,20 @@ const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { PutCommand, DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
 const { CognitoIdentityProviderClient, AdminGetUserCommand } = require("@aws-sdk/client-cognito-identity-provider");
 const { SNSClient, SubscribeCommand, ListTopicsCommand, CreateTopicCommand } = require("@aws-sdk/client-sns");
+const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");
 
 const dynamoClient = new DynamoDBClient({});
 const dynamoDocClient = DynamoDBDocumentClient.from(dynamoClient);
 const cognitoClient = new CognitoIdentityProviderClient({});
 const snsClient = new SNSClient({});
+const sqsClient = new SQSClient({});
 
 exports.handler = async (event) => {
   const tableName = process.env.DYNAMODB_TABLE;
   const userPoolId = process.env.COGNITO_USER_POOL_ID.split("/").pop();
   const { subscribedTo } = JSON.parse(event.body);
   const { Authorization } = event.headers;
+  const queueUrl = process.env.FEED_UPDATE_QUEUE_URL;
 
   // Decode the user ID from the Authorization header
   const userId = JSON.parse(Buffer.from(Authorization.split(".")[1], "base64").toString()).sub;
@@ -71,6 +74,18 @@ exports.handler = async (event) => {
 
   console.log("Subscribing user to topic...");
   await snsClient.send(subscribeCommand);
+
+  const sqsMessage = {
+    userId: userId,
+    eventType: "subscribe",
+  };
+
+  const sqsParams = {
+    QueueUrl: queueUrl,
+    MessageBody: JSON.stringify(sqsMessage),
+  };
+
+  await sqsClient.send(new SendMessageCommand(sqsParams));
 
   return {
     statusCode: 201,
