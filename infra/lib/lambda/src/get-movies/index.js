@@ -29,7 +29,7 @@ exports.handler = async (event) => {
     const movieSingleSearchResponse = await dynamoDocClient.send(
       new QueryCommand({
         TableName: tableName,
-        ProjectionExpression: "MovieId, Title, Genres, CoverS3Url",
+        ProjectionExpression: "MovieId, Title, EpisodeTitle, Genres, CoverS3Url",
         IndexName: "everythingSearch",
         KeyConditionExpression: "EverythingSearch = :everythingSearch",
         ExpressionAttributeValues: {
@@ -54,6 +54,7 @@ exports.handler = async (event) => {
         return {
           MovieId: item.MovieId,
           Title: item.Title,
+          EpisodeTitle: item.EpisodeTitle,
           Genres: item.Genres,
           CoverS3Url: s3CoverSignedUrl,
         };
@@ -90,7 +91,7 @@ exports.handler = async (event) => {
 
   let dynamoCommandProps = {
     TableName: tableName,
-    ProjectionExpression: "MovieId, Title, Genres, CoverS3Url",
+    ProjectionExpression: "MovieId, Title, EpisodeTitle, Genres, CoverS3Url",
   };
 
   if (title && description) {
@@ -131,6 +132,7 @@ exports.handler = async (event) => {
     return {
       MovieId: item.MovieId,
       Title: item.Title,
+      EpisodeTitle: item.EpisodeTitle,
       Genres: item.Genres,
       CoverS3Url: s3CoverSignedUrl,
     };
