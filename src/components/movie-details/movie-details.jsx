@@ -38,40 +38,47 @@ function MovieDetails() {
   const [fileLength, setFileLength] = useState(0);
   const [fileType, setFileType] = useState("");
   const [fileName, setFileName] = useState("");
+  const [episodeTitle, setEpisodeTitle] = useState("");
 
   useEffect(() => {
     const getMovie = async () => {
       const session = await getSession();
 
-      const movieResponse = await axios.get(`${import.meta.env.VITE_API_URL}/movies/${id}`, {
-        headers: {
-          Authorization: session.accessToken.jwtToken,
-        },
-      });
-      const subscriptionsReponse = await axios.get(`${import.meta.env.VITE_API_URL}/subscriptions`, {
-        headers: {
-          Authorization: session.accessToken.jwtToken,
-        },
-      });
-      setTitle(movieResponse.data.Title);
-      setGenres(movieResponse.data.Genres);
-      setDescription(movieResponse.data.Description);
-      setActors(movieResponse.data.Actors);
-      setDirectors(movieResponse.data.Directors);
-      setCoverUrl(movieResponse.data.CoverS3Url);
-      setVideoUrl(movieResponse.data.VideoS3Url);
-      setSubscriptions(subscriptionsReponse.data);
-      setAverageRating(movieResponse.data.AverageRating || 0);
-      setTranscoded(movieResponse.data.Status === "FINISHED" ? true : false);
-      setFileLastModified(new Date(movieResponse.data.LastModified));
-      setFileLength(niceBytes(movieResponse.data.ContentLength));
-      setFileName(movieResponse.data.FileName);
-      setFileType(movieResponse.data.ContentType);
-      console.log(subscriptionsReponse.data);
-      const userRole = await getRole();
-      setRole(userRole);
+      try {
+        const movieResponse = await axios.get(`${import.meta.env.VITE_API_URL}/movies/${id}`, {
+          headers: {
+            Authorization: session.accessToken.jwtToken,
+          },
+        });
+        const subscriptionsReponse = await axios.get(`${import.meta.env.VITE_API_URL}/subscriptions`, {
+          headers: {
+            Authorization: session.accessToken.jwtToken,
+          },
+        });
+        setTitle(movieResponse.data.Title);
+        setGenres(movieResponse.data.Genres);
+        setDescription(movieResponse.data.Description);
+        setActors(movieResponse.data.Actors);
+        setDirectors(movieResponse.data.Directors);
+        setCoverUrl(movieResponse.data.CoverS3Url);
+        setVideoUrl(movieResponse.data.VideoS3Url);
+        setSubscriptions(subscriptionsReponse.data);
+        setAverageRating(movieResponse.data.AverageRating || 0);
+        setTranscoded(movieResponse.data.Status === "FINISHED" ? true : false);
+        setFileLastModified(new Date(movieResponse.data.LastModified));
+        setFileLength(niceBytes(movieResponse.data.ContentLength));
+        setFileName(movieResponse.data.FileName);
+        setFileType(movieResponse.data.ContentType);
+        setEpisodeTitle(movieResponse.data.EpisodeTitle);
+        console.log(subscriptionsReponse.data);
+        const userRole = await getRole();
+        setRole(userRole);
 
-      setLoading(false);
+        setLoading(false);
+      } catch (error) {
+        alert("Movie not found.");
+        navigate("/movies");
+      }
     };
 
     getMovie();
@@ -299,6 +306,14 @@ function MovieDetails() {
               </div>
               <p className="movie-description">{description}</p>
               <div className="movie-meta">
+                {episodeTitle ? (
+                  <div className="meta-item">
+                    <strong>Episode</strong>
+                    <p>{episodeTitle}</p>
+                  </div>
+                ) : (
+                  ""
+                )}
                 <div className="meta-item">
                   <strong>Actors</strong>
                   {actors.map((actor, i) => (
