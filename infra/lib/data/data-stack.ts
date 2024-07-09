@@ -14,6 +14,7 @@ export class DataStack extends cdk.Stack {
   public readonly transcodingStatusTable: dynamodb.Table;
   public readonly transcodingQueue: sqs.Queue;
   public readonly downloadsDataTable: dynamodb.Table;
+  public readonly feedsDataTable: dynamodb.Table;
 
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -131,6 +132,13 @@ export class DataStack extends cdk.Stack {
       projectionType: dynamodb.ProjectionType.ALL,
       readCapacity: 1,
       writeCapacity: 1,
+    });
+
+    this.feedsDataTable = new dynamodb.Table(this, 'FeedsData', {
+      partitionKey: { name: 'UserId', type: dynamodb.AttributeType.STRING },
+      readCapacity: 1,
+      writeCapacity: 1,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
   }
 }

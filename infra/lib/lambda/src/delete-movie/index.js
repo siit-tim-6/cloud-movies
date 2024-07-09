@@ -1,12 +1,14 @@
 "use strict";
 
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
+const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");
 const { DynamoDBDocumentClient, GetCommand, DeleteCommand, QueryCommand } = require("@aws-sdk/lib-dynamodb");
 const { S3Client, DeleteObjectCommand, ListObjectsCommand } = require("@aws-sdk/client-s3");
 
 const dynamoClient = new DynamoDBClient({});
 const dynamoDocClient = DynamoDBDocumentClient.from(dynamoClient);
 const s3Client = new S3Client({});
+const sqsClient = new SQSClient({});
 
 exports.handler = async (event) => {
   const { id } = event.pathParameters;
@@ -14,6 +16,7 @@ exports.handler = async (event) => {
   const bucketName = process.env.S3_BUCKET;
   const ratingsTableName = process.env.MOVIE_RATINGS_TABLE;
   const downloadsTableName = process.env.DOWNLOADS_TABLE;
+  const queueUrl = process.env.FEED_UPDATE_QUEUE_URL;
   const transcodedVideosBucketName = process.env.TRANSCODED_VIDEOS_BUCKET;
   const transcodingStatusTableName = process.env.TRANSCODING_STATUS_TABLE;
 
@@ -131,6 +134,17 @@ exports.handler = async (event) => {
   });
 
   await Promise.all(deleteDownloadsPromises);
+
+  const sqsMessage = {
+    eventType: "delete",
+  };
+
+  const sqsParams = {
+    QueueUrl: queueUrl,
+    MessageBody: JSON.stringify(sqsMessage),
+  };
+
+  await sqsClient.send(new SendMessageCommand(sqsParams));
 
   const { Contents } = await s3Client.send(
     new ListObjectsCommand({
