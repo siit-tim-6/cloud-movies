@@ -46,7 +46,7 @@ function MovieDetails() {
       const movieResponse = await axios.get(`${import.meta.env.VITE_API_URL}/movies/${id}`, {
         headers: {
           Authorization: session.accessToken.jwtToken,
-        }
+        },
       });
       const subscriptionsReponse = await axios.get(`${import.meta.env.VITE_API_URL}/subscriptions`, {
         headers: {
@@ -135,7 +135,7 @@ function MovieDetails() {
       await axios.delete(`${import.meta.env.VITE_API_URL}/movies/${id}`, {
         headers: {
           Authorization: session.accessToken.jwtToken,
-        }
+        },
       });
       alert("Movie deleted successfully!");
       navigate("/movies");
@@ -196,7 +196,7 @@ function MovieDetails() {
     }
   };
 
-  const videoSrc = `https://d3qd3s4bwsif3i.cloudfront.net/${id}/index.m3u8`;
+  const videoSrc = `${import.meta.env.VITE_VIDEO_DISTRIBUTION_URL}/${id}/index.m3u8`;
   const playerRef = useRef(null);
   const videoJsOptions = {
     autoplay: true,

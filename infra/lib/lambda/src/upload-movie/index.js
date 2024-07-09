@@ -42,6 +42,7 @@ exports.handler = async (event) => {
   const genresLower = genres.map((genre) => genre.toLowerCase());
   const actorsLower = actors.map((actor) => actor.toLowerCase());
   const directorsLower = directors.map((director) => director.toLowerCase());
+  const everythingSearch = [title.toLowerCase(), description.toLowerCase(), actorsLower.join(","), directorsLower.join(","), genresLower.join(",")].join("#");
 
   const dynamoPutCommand = new PutCommand({
     TableName: tableName,
@@ -54,6 +55,7 @@ exports.handler = async (event) => {
       Genres: genresLower,
       Actors: actorsLower,
       Directors: directorsLower,
+      EverythingSearch: everythingSearch,
       CoverS3Url: `https://${bucketName}.s3.amazonaws.com/${movieId}/cover/${coverFileName}`,
       VideoS3Url: `https://${bucketName}.s3.amazonaws.com/${movieId}/video/${videoFileName}`,
       CreatedAt: new Date().toISOString(),

@@ -42,24 +42,31 @@ exports.handler = async (event) => {
     expressionAttributeValues[":description"] = description;
     expressionAttributeValues[":lowerDescription"] = description.toLowerCase();
   }
+
+  let genresLower, directorsLower, actorsLower;
   if (genres) {
-    const genresLower = genres.map((genre) => genre.toLowerCase());
+    genresLower = genres.map((genre) => genre.toLowerCase());
     updateExpressions.push("#genres = :genres");
     expressionAttributeNames["#genres"] = "Genres";
     expressionAttributeValues[":genres"] = genresLower;
   }
   if (actors) {
-    const actorsLower = actors.map((actor) => actor.toLowerCase());
+    actorsLower = actors.map((actor) => actor.toLowerCase());
     updateExpressions.push("#actors = :actors");
     expressionAttributeNames["#actors"] = "Actors";
     expressionAttributeValues[":actors"] = actorsLower;
   }
   if (directors) {
-    const directorsLower = directors.map((director) => director.toLowerCase());
+    directorsLower = directors.map((director) => director.toLowerCase());
     updateExpressions.push("#directors = :directors");
     expressionAttributeNames["#directors"] = "Directors";
     expressionAttributeValues[":directors"] = directorsLower;
   }
+
+  const everythingSearch = [title.toLowerCase(), description.toLowerCase(), actorsLower.join(","), directorsLower.join(","), genresLower.join(",")].join("#");
+  updateExpressions.push("#everythingSearch = :everythingSearch");
+  expressionAttributeNames["#everythingSearch"] = "EverythingSearch";
+  expressionAttributeValues[":everythingSearch"] = everythingSearch;
 
   let s3CoverSignedUrl, s3VideoSignedUrl;
   if (videoFileName && videoFileType) {

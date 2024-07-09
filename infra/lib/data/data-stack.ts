@@ -40,6 +40,13 @@ export class DataStack extends cdk.Stack {
       writeCapacity: 1,
     });
 
+    this.moviesDataTable.addGlobalSecondaryIndex({
+      indexName: "everythingSearch",
+      partitionKey: { name: "EverythingSearch", type: dynamodb.AttributeType.STRING },
+      readCapacity: 1,
+      writeCapacity: 1,
+    });
+
     this.subscriptionsDataTable = new dynamodb.Table(this, "SubscriptionsData", {
       partitionKey: { name: "UserId", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "SubscribedTo", type: dynamodb.AttributeType.STRING },
