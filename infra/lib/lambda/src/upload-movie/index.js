@@ -17,7 +17,7 @@ exports.handler = async (event) => {
   const tableName = process.env.DYNAMODB_TABLE;
   const sqsQueueUrl = process.env.SQS_QUEUE_URL;
   const feedUpdateQueueUrl = process.env.FEED_UPDATE_QUEUE_URL;
-  const { title, description, genres, actors, directors, coverFileName, coverFileType, videoFileName, videoFileType } = JSON.parse(event.body);
+  const { title, episodeTitle, description, genres, actors, directors, coverFileName, coverFileType, videoFileName, videoFileType } = JSON.parse(event.body);
 
   const movieId = uuidv4();
 
@@ -50,6 +50,7 @@ exports.handler = async (event) => {
     Item: {
       MovieId: movieId,
       Title: title,
+      EpisodeTitle: episodeTitle,
       LowerTitle: title.toLowerCase(),
       Description: description,
       LowerDescription: description.toLowerCase(),
