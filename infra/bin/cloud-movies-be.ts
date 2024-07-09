@@ -29,6 +29,7 @@ const lambdaStack = new LambdaStack(app, "LambdaStack", {
   feedQueue: sqsStack.feedQueue,
   transcodedVideosBucket: dataStack.transcodedVideosBucket,
   transcodingStatusTable: dataStack.transcodingStatusTable,
+  userFeedQueue: sqsStack.userFeedQueue,
 });
 
 new ApiGwStack(app, "ApiGwStack", {
