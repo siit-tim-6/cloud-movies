@@ -44,7 +44,7 @@ exports.handler = async (event) => {
           };
 
           await sqsClient.send(new SendMessageCommand(sqsParams));
-          delay += 15;
+          delay += 9;
         }
       } catch (err) {
         console.error(`Failed to update feedsTable for ${eventType} event: ${err}`);
