@@ -12,6 +12,7 @@ import ProtectedRoutes from "./routes/protectedRoutes";
 import MovieDetails from "@/components/movie-details/movie-details.jsx";
 import UploadMovie from "@/components/upload-movie/upload-movie.jsx";
 import SubscriptionList from "./components/subscription-list/subscription-list";
+import SeriesDetails from "./components/series-details/series-details";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -22,8 +23,9 @@ const router = createBrowserRouter(
         <Route path="/" element={<Home />} />
         <Route path="/movies" element={<AllMovies />} />
         <Route path="/movies/:id" element={<MovieDetails />} />
+        <Route path="/series/:title" element={<SeriesDetails />} />
         <Route path="/upload-movie" element={<UploadMovie />} />
-          <Route path="/edit-movie/:id" element={<UploadMovie isEditMode={true} />} />
+        <Route path="/edit-movie/:id" element={<UploadMovie isEditMode={true} />} />
         <Route path="/subscriptions" element={<SubscriptionList />} />
       </Route>
     </>
