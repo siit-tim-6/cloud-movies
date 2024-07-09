@@ -1,0 +1,306 @@
+.movie-details-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 32px 64px;
+    gap: 16px;
+    color: white;
+    width: 100vw;
+    background-color: black;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+.movie-cover {
+    position: relative;
+    width: 70%;
+    height: 50vh;
+    background-size: cover;
+    background-position: center;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.movie-cover::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+}
+
+.play-button {
+    position: relative;
+    z-index: 1;
+    color: white;
+    font-size: 3rem;
+    cursor: pointer;
+}
+
+.movie-info {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 70%;
+}
+
+.movie-title-favorite {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.movie-title-favorite h1 {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.favorite-button, .download-button, .delete-button, .edit-button, .rate-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 2rem;
+    color: white;
+    padding-left: 16px;
+    transition: color 0.5s;
+}
+
+.favorite-button:hover, .download-button:hover, edit-button:hover, .rate-button:hover {
+    color: #ffd700;
+}
+
+.movie-genre-rating {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.movie-genre {
+    font-size: 1.25rem;
+    background-color: #444;
+    padding: 4px 12px;
+    border-radius: 12px;
+    display: inline-block;
+    color: white;
+    font-weight: bold;
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+}
+
+.movie-description {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 16px;
+    text-align: justify;
+}
+
+.movie-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 1rem;
+}
+
+.meta-item {
+    font-size: 1rem;
+}
+
+.meta-item strong {
+    font-weight: bold;
+}
+
+.movie-card {
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition-duration: 500ms;
+}
+
+.movie-card:hover {
+    opacity: 0.6;
+}
+
+.movie-image {
+    width: 270px;
+    height: 150px;
+    background-size: cover;
+    padding: 8px;
+    border-radius: 0.8rem;
+}
+
+.movie-title {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+}
+
+.movie-title h3 {
+    margin: 0;
+}
+
+.data-line {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.full-page {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.icon-btn {
+    cursor: pointer;
+}
+
+.icon-btn:hover {
+    color: grey;
+}
+
+.uppercased {
+    text-transform: capitalize;
+}
+
+.video-player {
+    position: relative;
+    width: 70%;
+    margin: 0 auto;
+}
+
+.video-element {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    z-index: 999;
+}
+
+.close-button:hover {
+    background-color: rgb(76, 76, 76);
+}
+
+.close-button svg {
+    color: #ffffff;
+    font-size: 24px;
+}
+
+.custom-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.custom-modal-content {
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    width: 100%;
+    animation: slideIn 0.3s ease-out;
+    position: relative; /* Add this line to position the close button */
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.custom-modal h2 {
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.custom-modal .rating-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.custom-modal .button-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.custom-modal .submit-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    background-color: #000;
+    color: white;
+    transition: background 0.3s ease;
+}
+
+.custom-modal .submit-button:hover {
+    background-color: #333;
+}
+
+.custom-modal .close-modal-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #000;
+}
+
+.average-rating {
+    margin-left: 10px;
+    font-size: 1rem;
+    color: #ffffff;
+}
+
+
+
