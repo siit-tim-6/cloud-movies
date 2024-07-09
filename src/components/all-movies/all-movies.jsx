@@ -2,10 +2,10 @@ import Navbar from "@/components/navbar/navbar";
 import "./all-movies.css";
 import MovieCard from "./movie-card/movie-card";
 import MovieSearch from "./movie-search/movie-search";
-import {useContext, useEffect, useState} from "react";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import ReactLoading from "react-loading";
-import {AccountContext} from "@/components/auth/accountContext.jsx";
+import { AccountContext } from "@/components/auth/accountContext.jsx";
 
 function AllMovies() {
   const [movies, setMovies] = useState([]);
@@ -18,9 +18,21 @@ function AllMovies() {
       const moviesResponse = await axios.get(`${import.meta.env.VITE_API_URL}/movies`, {
         headers: {
           Authorization: session.accessToken.jwtToken,
-        }
+        },
       });
-      setMovies(moviesResponse.data);
+
+      const groupedData = moviesResponse.data.reduce((acc, item) => {
+        const groupKey = item.Title;
+        if (!acc[groupKey]) {
+          acc[groupKey] = [];
+        }
+        acc[groupKey].push(item);
+        return acc;
+      }, {});
+
+      // console.log(Object.entries(groupedData).forEach((key, value)));
+      setMovies(groupedData);
+
       setLoading(false);
     };
 
@@ -38,8 +50,15 @@ function AllMovies() {
           </div>
         ) : (
           <div className="all-movies-grid">
-            {movies.map((movie) => (
-              <MovieCard Genre={movie.Genres[0]} MovieId={movie.MovieId} Title={movie.Title} CoverS3Url={movie.CoverS3Url} key={movie.MovieId} />
+            {Object.entries(movies).map(([key, movie]) => (
+              <MovieCard
+                Genre={movie[0].Genres[0]}
+                MovieId={movie[0].MovieId}
+                Title={movie[0].Title}
+                CoverS3Url={movie[0].CoverS3Url}
+                Series={movie.length > 1}
+                key={movie[0].MovieId}
+              />
             ))}
           </div>
         )}

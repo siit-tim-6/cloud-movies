@@ -112,6 +112,7 @@ export class ApiGwStack extends cdk.Stack {
         type: apigateway.JsonSchemaType.OBJECT,
         properties: {
           title: { type: apigateway.JsonSchemaType.STRING },
+          episodeTitle: { type: apigateway.JsonSchemaType.STRING },
           description: { type: apigateway.JsonSchemaType.STRING },
           genres: { type: apigateway.JsonSchemaType.ARRAY },
           actors: { type: apigateway.JsonSchemaType.ARRAY },
@@ -121,7 +122,7 @@ export class ApiGwStack extends cdk.Stack {
           videoFileName: { type: apigateway.JsonSchemaType.STRING },
           videoFileType: { type: apigateway.JsonSchemaType.STRING },
         },
-        required: ["title", "description", "genres", "actors", "directors", "coverFileName", "coverFileType", "videoFileName", "videoFileType"],
+        required: ["title", "episodeTitle", "description", "genres", "actors", "directors", "coverFileName", "coverFileType", "videoFileName", "videoFileType"],
       },
     });
 

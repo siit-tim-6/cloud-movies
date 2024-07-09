@@ -10,6 +10,7 @@ import { MinusIcon, PlusIcon } from "@radix-ui/react-icons";
 function UploadMovie({ isEditMode = false }) {
   const [movieDetails, setMovieDetails] = useState({
     title: "",
+    episodeTitle: "",
     description: "",
     genres: [""],
     actors: [""],
@@ -135,6 +136,7 @@ function UploadMovie({ isEditMode = false }) {
           url: apiUrl,
           data: {
             title: movieDetails.title,
+            episodeTitle: movieDetails.episodeTitle,
             description: movieDetails.description,
             genres: movieDetails.genres,
             actors: movieDetails.actors,
@@ -230,6 +232,15 @@ function UploadMovie({ isEditMode = false }) {
               <div className="form-group">
                 <label htmlFor="title">Title</label>
                 <input type="text" id="title" value={movieDetails.title} onChange={(e) => setMovieDetails({ ...movieDetails, title: e.target.value })} required />
+              </div>
+              <div className="form-group">
+                <label htmlFor="episode">Episode Title (In case of a Series, leave blank otherwise)</label>
+                <input
+                  type="text"
+                  id="episode"
+                  value={movieDetails.episodeTitle}
+                  onChange={(e) => setMovieDetails({ ...movieDetails, episodeTitle: e.target.value })}
+                />
               </div>
               <div className="form-group">
                 <label htmlFor="description">Description</label>
