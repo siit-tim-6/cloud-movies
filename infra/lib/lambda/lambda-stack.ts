@@ -24,6 +24,7 @@ export interface LambdaStackProps extends cdk.StackProps {
   feedQueue: sqs.Queue;
   transcodedVideosBucket: s3.Bucket;
   transcodingStatusTable: dynamodb.Table;
+  userFeedQueue: sqs.Queue;
 }
 
 export class LambdaStack extends cdk.Stack {
@@ -41,8 +42,9 @@ export class LambdaStack extends cdk.Stack {
   public readonly getDownloadsFn: lambda.Function;
   public readonly generateFeedFn: lambda.Function;
   public readonly handleTopicMessageFn: lambda.Function;
-  public readonly startStepFunctionFn: lambda.Function;
+  public readonly postUserFeedFn: lambda.Function;
   public readonly getFeedFn: lambda.Function;
+  public readonly handleUserFeedMessageFn: lambda.Function;
 
   constructor(scope: Construct, id: string, props?: LambdaStackProps) {
     super(scope, id, props);
@@ -55,10 +57,11 @@ export class LambdaStack extends cdk.Stack {
       downloadsDataTable,
       cognitoUserPool,
       sqsQueue,
-        feedsDataTable,
-        feedQueue,
+      feedsDataTable,
+      feedQueue,
       transcodedVideosBucket,
       transcodingStatusTable,
+      userFeedQueue,
     } = props!;
 
     this.uploadMovieFn = new lambda.Function(this, "uploadMovieFn", {
@@ -177,6 +180,8 @@ export class LambdaStack extends cdk.Stack {
       },
     });
 
+    // FEED STUFF
+
     this.getRatingsFn = new lambda.Function(this, "getRatingsFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: "index.handler",
@@ -197,8 +202,8 @@ export class LambdaStack extends cdk.Stack {
 
     this.generateFeedFn = new lambda.Function(this, "generateFeedFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
-      handler: 'index.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, './src/generate-feed')),
+      handler: "index.handler",
+      code: lambda.Code.fromAsset(path.join(__dirname, "./src/generate-feed")),
       environment: {
         MOVIES_TABLE: moviesDataTable.tableName,
         FEEDS_TABLE: feedsDataTable.tableName,
@@ -220,7 +225,7 @@ export class LambdaStack extends cdk.Stack {
     const getSubscriptionsTask = new tasks.LambdaInvoke(this, "GetSubscriptions", {
       lambdaFunction: this.getSubscriptionsFn,
       payload: stepfunctions.TaskInput.fromObject({
-        userId: stepfunctions.JsonPath.stringAt('$.userId'),
+        userId: stepfunctions.JsonPath.stringAt("$.userId"),
       }),
       resultPath: "$.subscriptionsResult",
     });
@@ -228,7 +233,7 @@ export class LambdaStack extends cdk.Stack {
     const getRatingsTask = new tasks.LambdaInvoke(this, "GetRatings", {
       lambdaFunction: this.getRatingsFn,
       payload: stepfunctions.TaskInput.fromObject({
-        userId: stepfunctions.JsonPath.stringAt('$.userId'),
+        userId: stepfunctions.JsonPath.stringAt("$.userId"),
       }),
       resultPath: "$.ratingsResult",
     });
@@ -236,7 +241,7 @@ export class LambdaStack extends cdk.Stack {
     const getDownloadsTask = new tasks.LambdaInvoke(this, "GetDownloads", {
       lambdaFunction: this.getDownloadsFn,
       payload: stepfunctions.TaskInput.fromObject({
-        userId: stepfunctions.JsonPath.stringAt('$.userId'),
+        userId: stepfunctions.JsonPath.stringAt("$.userId"),
       }),
       resultPath: "$.downloadsResult",
     });
@@ -252,10 +257,10 @@ export class LambdaStack extends cdk.Stack {
     const generateFeedTask = new tasks.LambdaInvoke(this, "GenerateFeed", {
       lambdaFunction: this.generateFeedFn,
       payload: stepfunctions.TaskInput.fromObject({
-        subscriptions: stepfunctions.JsonPath.stringAt('$.parallelResults[0].subscriptionsResult.Payload.body'),
-        ratings: stepfunctions.JsonPath.stringAt('$.parallelResults[1].ratingsResult.Payload.body'),
-        downloads: stepfunctions.JsonPath.stringAt('$.parallelResults[2].downloadsResult.Payload.body'),
-        userId: stepfunctions.JsonPath.stringAt('$.userId'),
+        subscriptions: stepfunctions.JsonPath.stringAt("$.parallelResults[0].subscriptionsResult.Payload.body"),
+        ratings: stepfunctions.JsonPath.stringAt("$.parallelResults[1].ratingsResult.Payload.body"),
+        downloads: stepfunctions.JsonPath.stringAt("$.parallelResults[2].downloadsResult.Payload.body"),
+        userId: stepfunctions.JsonPath.stringAt("$.userId"),
       }),
       resultPath: "$.feedResult",
     });
@@ -270,34 +275,46 @@ export class LambdaStack extends cdk.Stack {
     const arnParts = cdk.Arn.split(stateMachine.stateMachineArn, cdk.ArnFormat.COLON_RESOURCE_NAME);
     const executionArn = `arn:aws:states:${arnParts.region}:${arnParts.account}:execution:${arnParts.resourceName}:*`;
 
-    stateMachine.addToRolePolicy(new iam.PolicyStatement({
-      actions: ['lambda:InvokeFunction'],
-      resources: [
-        this.getSubscriptionsFn.functionArn,
-        this.getRatingsFn.functionArn,
-        this.getDownloadsFn.functionArn,
-        this.generateFeedFn.functionArn,
-      ],
-    }));
+    stateMachine.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["lambda:InvokeFunction"],
+        resources: [this.getSubscriptionsFn.functionArn, this.getRatingsFn.functionArn, this.getDownloadsFn.functionArn, this.generateFeedFn.functionArn],
+      })
+    );
 
-    this.startStepFunctionFn = new lambda.Function(this, "startStepFunctionFn", {
+    this.postUserFeedFn = new lambda.Function(this, "postUserFeedFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: "index.handler",
       code: lambda.Code.fromAsset(path.join(__dirname, "./src/handle-feed-message")),
       environment: {
-        STATE_MACHINE_ARN: stateMachine.stateMachineArn,
         FEEDS_TABLE: feedsDataTable.tableName,
+        SQS_URL: userFeedQueue.queueUrl,
       },
     });
 
-    this.startStepFunctionFn.addEventSource(new SqsEventSource(feedQueue));
+    this.handleUserFeedMessageFn = new lambda.Function(this, "handleUserFeedMessageFn", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: "index.handler",
+      code: lambda.Code.fromAsset(path.join(__dirname, "./src/handle-user-feed-message")),
+      environment: {
+        STATE_MACHINE_ARN: stateMachine.stateMachineArn,
+        SQS_URL: userFeedQueue.queueUrl,
+      },
+    });
 
-    feedQueue.grantConsumeMessages(this.startStepFunctionFn);
+    this.postUserFeedFn.addEventSource(new SqsEventSource(feedQueue));
+    this.handleUserFeedMessageFn.addEventSource(new SqsEventSource(userFeedQueue));
 
-    this.startStepFunctionFn.addToRolePolicy(new iam.PolicyStatement({
-      actions: ["states:StartExecution"],
-      resources: [stateMachine.stateMachineArn],
-    }));
+    feedQueue.grantConsumeMessages(this.postUserFeedFn);
+    userFeedQueue.grantSendMessages(this.postUserFeedFn);
+    userFeedQueue.grantConsumeMessages(this.handleUserFeedMessageFn);
+
+    this.handleUserFeedMessageFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["states:StartExecution"],
+        resources: [stateMachine.stateMachineArn],
+      })
+    );
 
     this.handleTopicMessageFn = new lambda.Function(this, "handleTopicMessageFn", {
       runtime: lambda.Runtime.NODEJS_20_X,
@@ -338,7 +355,7 @@ export class LambdaStack extends cdk.Stack {
     this.handleTopicMessageFn.addEventSource(new SqsEventSource(sqsQueue));
 
     const sqsSendMessagePolicy = new iam.PolicyStatement({
-      actions: ['sqs:SendMessage'],
+      actions: ["sqs:SendMessage"],
       resources: [feedQueue.queueArn],
     });
 
@@ -383,10 +400,9 @@ export class LambdaStack extends cdk.Stack {
     downloadsDataTable.grantReadData(this.getDownloadsFn);
     downloadsDataTable.grantReadWriteData(this.deleteMovieFn);
 
-
     feedsDataTable.grantReadWriteData(this.generateFeedFn);
     feedsDataTable.grantReadData(this.getFeedFn);
-    feedsDataTable.grantReadData(this.startStepFunctionFn);
+    feedsDataTable.grantReadData(this.postUserFeedFn);
 
     transcodedVideosBucket.grantReadWrite(this.deleteMovieFn);
     transcodedVideosBucket.grantReadWrite(this.editMovieFn);
