@@ -138,6 +138,7 @@ function MovieDetails() {
 
   const handleDelete = async () => {
     try {
+      setLoading(true);
       const session = await getSession();
       await axios.delete(`${import.meta.env.VITE_API_URL}/movies/${id}`, {
         headers: {
@@ -153,6 +154,8 @@ function MovieDetails() {
       } else {
         alert("Failed to delete the movie.");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
