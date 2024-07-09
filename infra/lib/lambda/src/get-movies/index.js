@@ -21,6 +21,58 @@ exports.handler = async (event) => {
   const filterExpressions = [];
   const expressionAttributeValues = {};
 
+  if (title && description && actor && director && genre) {
+    console.log("Everything search activated");
+    const everythingSearch = [title, description, actor, director, genre].join("#");
+    console.log(everythingSearch);
+
+    const movieSingleSearchResponse = await dynamoDocClient.send(
+      new QueryCommand({
+        TableName: tableName,
+        ProjectionExpression: "MovieId, Title, Genres, CoverS3Url",
+        IndexName: "everythingSearch",
+        KeyConditionExpression: "EverythingSearch = :everythingSearch",
+        ExpressionAttributeValues: {
+          ":everythingSearch": everythingSearch.toLowerCase(),
+        },
+      })
+    );
+
+    console.log(movieSingleSearchResponse);
+
+    if (movieSingleSearchResponse.Items.length > 0) {
+      console.log("Everything search found!!!");
+
+      const populateCoverPromises = movieSingleSearchResponse.Items.map(async (item) => {
+        const s3CoverUrlKey = item.CoverS3Url.split(`https://${bucketName}.s3.amazonaws.com/`)[1];
+        const getCoverCommand = new GetObjectCommand({
+          Bucket: bucketName,
+          Key: s3CoverUrlKey,
+        });
+        const s3CoverSignedUrl = await getSignedUrl(s3Client, getCoverCommand, { expiresIn: 3600 });
+
+        return {
+          MovieId: item.MovieId,
+          Title: item.Title,
+          Genres: item.Genres,
+          CoverS3Url: s3CoverSignedUrl,
+        };
+      });
+
+      const body = await Promise.all(populateCoverPromises);
+      return {
+        statusCode: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Headers": "Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
+          "Access-Control-Allow-Methods": "GET,OPTIONS",
+          "Access-Control-Allow-Origin": "*",
+        },
+        body: JSON.stringify(body),
+      };
+    }
+  }
+
   if (actor) {
     filterExpressions.push("contains(Actors, :actor)");
     expressionAttributeValues[":actor"] = actor.toLowerCase();
