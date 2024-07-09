@@ -166,5 +166,9 @@ export class VideoTranscodingStack extends cdk.Stack {
     invokePipelineFn.addEventSource(new SqsEventSource(transcodingQueue));
     transcodingStatusTable.grantWriteData(createMetadataAndPlaylistFn);
     transcodingStatusTable.grantWriteData(finalizeFn);
+
+    new cdk.CfnOutput(this, "VideoDistributionURL", {
+      value: videoDistribution.domainName,
+    });
   }
 }
